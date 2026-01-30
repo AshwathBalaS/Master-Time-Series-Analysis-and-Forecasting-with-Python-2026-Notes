@@ -69,6 +69,60 @@ This Repository contains my "Master Time Series Analysis and Forecasting with Py
 
 **P) Python - Partial Auto-Correlation**
 
+**Q) Python - Building a Useful Function Script**
+
+**R) Can you predict stock prices?**
+
+**S) What did we learn in this section?**
+
+**T) CASE STUDY: Forecasting Gone Wrong**
+
+**V) Section 5: Time Series Analysis Practice**
+
+**A) Data Loading and Index**
+
+**B) Data Visualization for Time Series**
+
+**C) Exploratory Data Analysis for Time Series**
+
+**VI) Section 6: Exponential Smoothing & Holt-Winters**
+
+**A) Game Plan For Exponential Smoothing and Holt-Winters**
+
+**B) CASE STUDY BRIEFING: Customer Complaints**
+
+**C) Python - Exponential Smoothing Set Up**
+
+**D) Python - Exploratory Data Analysis**
+
+**E) Training and Test Set in Time Series**
+
+**F) Python - Training and Test Set**
+
+**G) Simple Exponential Smoothing**
+
+**H) Python - Simple Exponential Smoothing**
+
+**I) Double Exponential Smoothing**
+
+**J) Python - Double Exponential Smoothing**
+
+**K) Triple Exponential Smoothing aka Holt-Winters**
+
+**L) Python - Triple Exponential Smoothing aka Holt-Winters**
+
+**M) Measuring Errors for Time Series Forecasting**
+
+**N) Python - MAE, RMSE, MAPE**
+
+**O) Python - Predicting The Future**
+
+**P) Python - Daily Data**
+
+**Q) Python - Working on the Useful Code Script**
+
+**R) Holt-Winter Pros and Cons**
+
 
 
 
@@ -1224,10 +1278,426 @@ With that, we’ll stop here for now. There is still much more to explore when i
 
 # **M) Auto-Correlation**
 
+In this video, I’ll introduce a very important and interesting concept called autocorrelation.
 
+The basic idea behind autocorrelation is to understand whether information from the past can help us predict the future. To do this, we correlate the values of a time series with its own past, or lagged, values and observe how strongly they are related.
+
+Imagine two axes where we plot the observation 
+𝑦
+y at time 
+𝑡
+t against 
+𝑦
+y at time 
+𝑡
+−
+1
+t−1. This represents the relationship between the current value and the value from the immediately previous period. If the data points show a clear upward trend, this indicates a positive correlation. Suppose we compute this correlation and get a value of 0.8.
+
+Now we create a main graph where the correlation value is shown on the y-axis and the number of lags is shown on the x-axis. The point corresponding to lag 1 would be plotted at 0.8 on this graph.
+
+Next, we move to lag 2. Here, we correlate the time series with values lagged by two time units. Let’s imagine the correlation value for lag 2 is 0.6. We plot this value on the same graph as well.
+
+One key idea to understand is that as the lag increases, the correlation usually decreases. This is because the information comes from further in the past and is therefore less relevant for predicting the present. As a result, the correlation values tend to get smaller as the lag increases.
+
+If we continue this process for higher lags, the correlation values may become very small or even negative, but they generally move closer to zero. By analyzing this pattern, we can understand how far back in time we can go and still find useful information for prediction.
+
+Of course, this does not give us the complete picture by itself, but it is a very important piece of information when working with time series data.
+
+To summarize, an autocorrelation plot helps us determine whether there is useful information in the past values of a time series and how long that information remains relevant.
+
+Now let’s apply this concept and see how it works in practice. Until the next video.
 
 # **N) Python - Auto-correlation**
 
+We’re now going to work with autocorrelation using the statsmodels library, which is great because it not only computes autocorrelation but also plots it for us. Here, I’m following a common suggestion, which is to plot both the autocorrelation and the partial autocorrelation, although we still need to properly learn what partial autocorrelation is.
+
+The good thing is that this is very easy to do. In general, we don’t care much about the exact numerical values of the correlations, because we’re not going to directly use those numbers anywhere. What really matters is how the plot looks, what it tells us, and the intuition behind it. That’s what we’re going to focus on.
+
+Let me activate the environment first. I actually need to activate everything else as well. Alright, everything is activated now. I jumped to the bottom of the script. If you’re wondering why I needed to activate everything again, it’s because I’m re-recording this video. Sometimes recordings don’t go as planned, and I need to redo them to keep the content and the Python code as up to date as possible. Anyway, let’s move on.
+
+The first step is to plot the autocorrelation of the Bitcoin adjusted close price. I have a suggested snippet here, but I’m not going to use it immediately because I want to control the figure size. So I first define the figure using plt.figure and set the size. I’ll go with a width of 12 and a height of 6. Then I plot the autocorrelation for the adjusted close values.
+
+One important thing we still need to specify is the number of lags. Let’s set it to 100 and see what this gives us. Once we run it, we get the plot.
+
+What we see here is quite striking. The level of correlation in Bitcoin is absolutely massive. There is a very strong correlation across many lags, which is honestly quite uncanny. Now, if we want to be a bit more critical and properly assess this, it almost looks like a linear curve. That immediately raises an important question: is this actually relevant?
+
+In other words, if we look at lag 100, what information does lag 100 really contain that was not already present in lag 99? That’s the key question. What this plot is indicating is that all of these lags contain information, and possibly even relevant information. You could technically take lag 100 and still observe a strong correlation. But the real issue is uniqueness. What unique information does lag 100 bring that was not already captured by lag 99, lag 98, and so on?
+
+This is exactly where partial autocorrelation comes into play. I’m spoiling it a bit here, but that’s essentially what partial autocorrelation answers. It tells us the correlation at a specific lag after removing the effects of the previous lags. In other words, it helps us understand whether the correlation at lag 100 is truly new information, or whether it only exists because the correlation was already present at lag 99, which itself depended on lag 98, and so forth.
+
+In many cases, what we see at higher lags is not really new or relevant information. It’s just inherited from earlier lags. We’ll confirm this more clearly once we look at partial autocorrelation.
+
+Now let’s shift our focus to a different dataset. If we inspect the df_choco dataframe, we can see that it has only 60 entries. Because of that, it wouldn’t make sense to use 100 lags here. Instead, something like 20 lags is much more reasonable.
+
+So we now plot the autocorrelation function for the revenue KPI in df_choco, using 20 lags. We follow the same approach as before, just changing the data and the number of lags. Once we plot it, the result looks very different.
+
+Notice that we don’t see the same kind of linear decay here. Instead, the pattern goes down, up, down, up. Another very important thing to notice is the blue shaded area in the plot. This represents the confidence interval. As we move further into the past, this interval widens. That makes sense, because the further back we go, the fewer observations we have, and the more variability we expect.
+
+What this plot is telling us is very insightful. We can clearly see seasonality in the data. There is strong correlation at the most recent lags, which reflects the trend. But we also see notable spikes around lag 5 or 6, and again around lag 12. This suggests seasonal behavior at roughly six-month and twelve-month intervals.
+
+This aligns well with intuition. There is information repeating itself on a seasonal basis. For example, something meaningful is happening every six months and every twelve months. This gives us strong evidence that seasonality plays a significant role in this dataset.
+
+Again, the natural question arises: what is the value added by a specific lag? For instance, what does month three contribute that was not already present in month two or month one? This is exactly the kind of question that partial autocorrelation is designed to answer.
+
+Overall, this exercise highlights how important it is to understand our data deeply. Autocorrelation helps us see whether past values contain useful information and how far back that information remains relevant. In this case, it looks like information up to around 12 months in the past can help us predict the future.
+
 # **O) Partial Auto-Correlation**
 
+Now that we understand the autocorrelation, let’s move on to the partial autocorrelation, which is a very cool concept in the world of time series. Don’t let this scare you—it's not super complicated at all. It’s actually really handy, and I’m going to break it down for you in very simple terms. So let’s kick it off.
+
+What is this PACF, or partial autocorrelation function, all about? Imagine you’re trying to understand the relationship between your coffee consumption today and how much coffee you drank a few days ago. But here’s the twist: you want to know this relationship without the influence of all the days in between. That’s exactly what partial autocorrelation does. It tells you the direct relationship between your data points at different times, while removing the effects of the points in between.
+
+Now remember the autocorrelation function. That’s like looking at the total correlation between a time series and its lagged values, including both direct and indirect effects. It’s similar to asking, “How does my coffee consumption today relate to all the past days?”
+
+Partial autocorrelation, on the other hand, is more specific. It’s like asking, “How does my coffee consumption today relate specifically to three days ago?” while completely ignoring the days in between. So while autocorrelation gives you the overall picture, partial autocorrelation zooms in on specific, direct relationships.
+
+When you plot the PACF, you’ll usually see bars at each lag, just like you do with the autocorrelation plot. If a bar stands out significantly, it means there is a noteworthy direct relationship at that particular lag. If these bars drop off quickly, it suggests that only recent values have a direct effect on current values. If they tail off slowly or oscillate, it indicates that older values still have a direct influence.
+
+You might now wonder why PACF is needed when we already have ACF. The autocorrelation function starts the story by showing all correlations, but it can include noise from indirect correlations. The partial autocorrelation completes the story by isolating only the direct correlations, giving you a much clearer picture of how each point in time directly influences another.
+
 # **P) Python - Partial Auto-Correlation**
+
+Welcome back, and welcome to partial autocorrelation. Partial autocorrelation is very simple in terms of application. Just like before, we’re going to compute the PACF for Bitcoin adjusted close. There we go, and we’re going to do the exact same thing as we did earlier. Even Gemini catches on very quickly if you know what to do, and you can put it in comments and get this done very, very fast.
+
+The only difference between this code and the ACF code is this “P” here. That’s literally the only difference. Now, look at this chart. It’s quite different, right? If you look at it closely, it’s just so different compared to the autocorrelation plot.
+
+What this chart is telling us is that the only information that is actually relevant, the only information that is truly unique, comes from the day before. And this is kind of crazy when you think about it. You saw earlier that we had so much information, but basically all of that information was always connected to the information that happened just before it. There was no unique information beyond that. Of course, you do see some values here that go outside, but really, for Bitcoin—and please take this seriously—if you’re trying to predict Bitcoin, the only relevant information is what happened the day before. This is a very clear conclusion from this chart.
+
+Let me actually write it down. The only relevant information for the price of Bitcoin is what happened the day before. There we go.
+
+Now we can do the PACF for revenue in the data frame. Let me jump here using some shortcuts. Here we go, and here we are with the partial autocorrelation. In this case, we clearly see that there is information in the day before, but apparently there is also relevant information at two, three—so one, two—then four and five months in the past, and also around ten months in the past. Twelve months, apparently, is not so relevant.
+
+So if we count the lags—one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen—this means we’re looking at the previous month and the previous year. Apparently, we did not get a lot of unique information overall, but you do get unique information if you don’t just look one month back. If you look four or five months back, ten months back, and apparently thirteen months back as well, those lags were important.
+
+If you connect this partial autocorrelation chart to the autocorrelation chart, it becomes much more meaningful. From the partial autocorrelation, you can say, okay, these specific lags contain unique information. That’s how you can phrase it. For the autocorrelation, it’s more like saying, okay, I can use all this information from the past and still retain information. You kind of connect both ideas, and then you’re in good shape.
+
+You can still see some level of information around twelve or thirteen months here as well, but it becomes very, very small. If you really need to nitpick, if you need to pick just a few lags, you would go with these ones. These specific lags contain very unique information that you don’t find anywhere else.
+
+And that’s it for us. This is how you do partial autocorrelation. It’s very, very quick, and I’ll see you in the next video.
+
+# **Q) Python - Building a Useful Function Script**
+
+Welcome back for this last video. I want us to build a script that you can use whenever you’re working with some kind of time series analysis. Of course, it’s not perfect and it’s not a one-size-fits-all solution, but it works as a solid starting point. It gives you a building block so you can take whatever you’re doing and begin by analyzing the data. No matter which technique you later apply, exploratory data analysis, manipulation, and visualization are more or less the same and don’t really change that much.
+
+I’m going to take this script here and move it into the main one. Let me open it, and then I’ll start with the first cleanup. The idea is to keep what’s always relevant and remove what’s not. For the setup section, everything up to the path stays the same. The Python time series forecasting libraries remain unchanged. The Bitcoin price file becomes a generic “xxx.csv” so it can be reused. I’ll clear the selected outputs to keep things clean.
+
+For the time series index, I’m going to keep it because it’s important. Usually, the column is called “date,” so there’s no issue there. I’ll remove this part and instead use the version where we set the index directly and parse the dates at the same time. That’s the one I want to keep, because most of the time we set the index column and parse dates together. If I only want the actual date column, I can simply delete the index and parsed dates part.
+
+I’ll remove the remaining unnecessary pieces and keep things as clean as possible. The idea is to load the data and immediately put the date on the index. For exploratory data analysis, I’m not going to use rolling prices, so that part is out. For data visualization, I will keep it. I’ll plot the series without a title, which is usually better. I typically call my time series “y” because it’s easier to visualize, easier to work with, and I don’t have to rename it all the time. It also makes sense conceptually, since this is what we’re trying to predict. The extra parts here are removed.
+
+For data manipulation, we’re not going to focus on that here, so that section is gone as well. When it comes to seasonality, this part will stay. I’ll clean it up and leave out the extra data frame pieces and labels. If I want to add a label later, I can always do that. We’ll keep the monthly plot, and I should also add a quarterly plot. So I’ll include the quarter plot, show it, and keep the seasonal decomposition. The default multiplicative model is fine.
+
+Next, we add the autocorrelation. I’ll set the number of lags to 100, and if I ever need to change it, I can. Then I add the partial autocorrelation as well. Now we have both ACF and PACF in the script.
+
+It’s worth reinforcing that I’m trying to keep this course up to date. Even when future warnings appear, the goal is to maintain a clean and usable script. There may be discrepancies across different versions of libraries, and that’s expected. This script is meant to be a useful code template. If something behaves slightly differently in your environment, that’s normal.
+
+If you have any questions, let me know. I try to make sure everything works in one go, but keep in mind this is a course that’s close to 40 hours long. There are bound to be moments where things don’t connect perfectly. I really appreciate your patience. If anything confuses you, just ask—I’m here to help.
+
+As a final note, it’s a bit sad for me when people say they don’t understand something, not because I think I’m the best explainer in the world—I definitely don’t—but because often they don’t ask questions. If you have questions, let me know. I answer everyone seriously. Just post it in the Q&A, and I’ll be there to help you out. I’ll see you in the next video.
+
+# **R) Can you predict stock prices?**
+
+Have you ever been bombarded with stock price predictions? If so, then this video is for you.
+
+As we’ve seen, distinguishing between trend and seasonality in time series can seem straightforward at first. So why is forecasting still considered such a complex task? Why do organizations dedicate entire teams to it? The main challenge lies in modeling and interpreting errors. Forecasting is not just about fitting a model, but about understanding where it fails, why it fails, and how those errors can be explained and reduced.
+
+A big part of improving predictions comes from incorporating relevant factors or regressors. These can include specific events, temperature changes, snowfall, overall economic conditions, and even public sentiment. Each of these elements can significantly influence forecasting accuracy, depending on the problem you’re trying to solve.
+
+Another crucial aspect is the time horizon of the data. Suppose you have data spanning six or seven years. Do you really need all of it? Older data can introduce a lot of noise into your models because past conditions may no longer reflect what is happening today or what will happen in the future. This is why it’s essential to evaluate whether your data is still representative of future trends, and if it’s not, to make the conscious decision to exclude it from your analysis.
+
+This brings us directly to stock market prediction. We are constantly flooded with articles claiming extraordinary returns using different strategies and algorithms. But remember, everyone looks like a genius in a bull market. The real question is whether these approaches can consistently outperform professional investment firms. In most cases, that’s highly doubtful.
+
+Price movements can give the impression of a clear trend, but predicting when that trend will reverse is extremely difficult if there is no reliable pattern. Traditional forecasting models struggle in these situations, especially when sudden changes occur.
+
+This unpredictability became painfully clear during the Covid-19 pandemic in March 2020. The pandemic completely disrupted existing trends and seasonal patterns, making many forecasting models ineffective overnight. It was a powerful reminder that external, unprecedented events can drastically change market dynamics.
+
+In summary, forecasting—particularly with stock data—is a complex and nuanced task. It requires careful consideration of data relevance, thoughtful modeling of errors, and an awareness of external influences that can break even the most well-designed models.
+
+# **S) What did we learn in this section?**
+
+We have just finished the crossing line, and for this introduction to time series forecasting, it’s a great moment to pause and reflect on everything we’ve accomplished. It’s been quite a journey when you think about it.
+
+We started from the very basics, simply trying to understand what time series data actually is. At first, it can feel unfamiliar, almost like learning a new language. But now, it feels natural. We’ve gone from confusion to confidence, and we can clearly analyze how data behaves over time.
+
+Diving into Python was a major turning point. What may have felt intimidating in the beginning quickly became empowering. We learned how to slice and dice time series data with confidence, using Python not just as a tool, but as a reliable partner in solving real problems. Those libraries are no longer abstract concepts; they’re part of your everyday toolkit now.
+
+We also made big progress in data visualization. Instead of staring at raw numbers, we learned how to turn them into meaningful stories. The charts we create now aren’t just visuals, they communicate insights in a way that makes sense to anyone looking at them.
+
+Seasonality was another important concept we tackled. What once seemed tricky is now something we can recognize and interpret with ease. Whether it’s sales patterns or recurring trends, we know how to identify and reason about seasonal behavior in data.
+
+Autocorrelation marked another milestone. It’s one thing to look at individual data points, but understanding how values relate to each other across time is a whole new level. And you’ve reached that level by learning how past values influence the present.
+
+The discussion around predicting stock prices was especially eye-opening. It showed us the realities of forecasting and the complexity of financial markets. There’s no magic crystal ball, but there is careful analysis, critical thinking, and a lot of smart, hard work behind every meaningful prediction.
+
+So take a moment to appreciate how far you’ve come. You didn’t just learn concepts—you applied them, analyzed data, and visualized insights along the way. That’s real progress.
+
+# **T) CASE STUDY: Forecasting Gone Wrong**
+
+Hey everyone, and welcome. Today I want to talk about something pretty interesting: what happens when forecasts don’t quite hit the mark. We all try to predict the future in one way or another, whether it’s the stock market, fashion trends, or even just the weather. But sometimes things don’t go as planned, and that’s actually okay. When predictions go sideways, that’s often when we learn the most.
+
+Let’s look at some memorable forecast failures and what they can teach us. Take the rise and fall of fidget spinners. Remember those little spinning gadgets that suddenly seemed to be everywhere? One day nobody knew what they were, and the next day every kid in school or university had one. Retailers and manufacturers assumed they had struck gold and ramped up production aggressively. But the hype faded almost as quickly as it appeared, and suddenly stores were left with huge piles of unsold inventory. It was a classic case of confusing a short-lived craze with a long-term trend. The key lesson here is the importance of questioning whether a trend is truly here to stay or just a passing fad.
+
+Another famous example is Long-Term Capital Management, or LTCM. This hedge fund was once considered elite, staffed by brilliant minds using highly sophisticated mathematical models to predict market movements. For a while, it looked like they had cracked the code, generating massive returns. Then the Russian financial crisis hit in 1998, completely outside what their models anticipated. The markets behaved in ways their assumptions couldn’t handle, and the fund collapsed dramatically. It was a stark reminder that no matter how advanced a model is, there will always be events it cannot foresee. Markets are complex and unpredictable, and sometimes they move in ways no algorithm can capture.
+
+Then there’s Google Flu Trends, an ambitious attempt to predict flu outbreaks by analyzing what people searched for online. The idea was simple and clever: if more people are searching for flu symptoms, a flu outbreak might be underway. Initially, it looked like a breakthrough in using big data for public health. Over time, however, it became clear that the model was frequently overestimating flu cases, sometimes by a wide margin. Changes in user behavior and constant updates to Google’s own search algorithms distorted the signals. This case shows that big data and powerful algorithms still need careful calibration and constant reevaluation, especially when human behavior is involved.
+
+Another intriguing example is the Hindenburg Omen, a complex technical indicator designed to predict stock market crashes. Based on certain market conditions, such as the number of stocks reaching new highs and lows at the same time, it aims to warn of an impending collapse. While it has occasionally preceded market downturns, it has also triggered false alarms that caused unnecessary panic, and at other times it failed to signal real crashes. This highlights the danger of relying too heavily on a single indicator without considering broader context and supporting evidence.
+
+All of these stories point to the same underlying truth. The world is full of surprises, and no forecasting model, no matter how sophisticated, can account for everything. Whether we’re dealing with financial markets, public health, or consumer trends, uncertainty is always part of the equation. Forecasts are valuable tools, but they work best when paired with humility, critical thinking, and an understanding that the unknown will always play a role.
+
+# **V) Section 5: Time Series Analysis Practice**
+
+# **A) Data Loading and Index**
+
+Welcome to this practical activity!
+
+In this exercise, we’re going to work with Python, and I’ll demonstrate it using Colab. Of course, you can use any Python environment of your choice. Alternatively, if you have access, the Udemy workspace is also available.
+
+Here’s what we’re working on: we have the weekly sales of a department, and our goal is to explore this data. You’ll find the dataset in the folder I’ve shared, and it’s also preloaded in the Udemy workspace. You’ll see a starter file and Lab 1, which contains the solutions. We’ll begin with the starter file.
+
+First, connect to your drive. Make sure to adjust your directory path if it differs from mine. I’ve also prepared all the necessary libraries for you.
+
+We’ll complete three tasks in this lab. The purpose of this initial exercise is to prepare the dataset for time series analysis.
+
+Task 1: Load the department sales dataset into a DataFrame. Use:
+
+import pandas as pd
+
+
+df = pd.read_csv("department_iPhone_sales.csv", index_col="date", parse_dates=True)
+
+Here, we make sure the date column is used as the index, which is important for time series analysis.
+
+Task 2: Convert the index into a standard date format (YYYY-MM-DD), which makes it easier to work with. By default, Pandas may infer a different format, so we explicitly specify:
+
+df.index = pd.to_datetime(df.index, format="%d-%m-%Y")
+
+Now, the index shows the year, month, and day correctly.
+
+Task 3: Set the frequency of the data to weekly. Since our dataset is recorded weekly, we tell Python:
+
+df.index.freq = "W-FRI"
+
+We use W-FRI because the sales dates fall on Fridays. This ensures Python correctly interprets the weekly spacing.
+
+And that’s it! With these three steps, your dataset is now properly formatted for time series analysis: the dates are clean, indexed correctly, and the frequency is set.
+
+# **B) Data Visualization for Time Series**
+
+Let's do Lab Number Two. You can either continue on the starter Lab One file, which is the same, or I’ve also prepared the starter Lab Two just in case you are starting with this video.
+
+For these exercises, we are going to focus on data visualization. The first task, Task 1, is to plot the weekly sales using the weekly_sales column. Additionally, we’ll do a bit of formatting—like adding a title to the chart—to make it more readable.
+
+To do this, we can use:
+
+plt.plot(df['weekly_sales'])
+plt.title("Weekly Sales")
+plt.show()
+
+This is probably the easiest initial component. You’ll notice, however, that the x-axis may look a bit off or crowded. To fix this and improve the visualization, we can adjust the figure size:
+
+plt.figure(figsize=(10, 4))
+plt.plot(df['weekly_sales'])
+plt.title("Weekly Sales")
+plt.show()
+
+Now, we can clearly see the overall evolution of weekly sales. This completes Task 1, where we customized the chart with a proper size and a title.
+
+Looking at the chart, you might notice several spikes—spike, spike, spike—and it draws our curiosity. There’s a column called is_holiday, and the next task will leverage this.
+
+Task 2 involves adding a vertical line whenever is_holiday is set to True. Specifically, we want a vertical dashed red line on the chart.
+
+To implement this, we iterate through the DataFrame rows. For each row, if is_holiday is True, we use plt.axvline to draw the vertical line:
+
+for date, row in df.iterrows():
+    if row['is_holiday']:
+        plt.axvline(x=date, color='red', linestyle='--', linewidth=0.5)
+
+Here:
+
+color='red' makes the line red.
+
+linestyle='--' makes it dashed.
+
+linewidth=0.5 keeps it thin so it doesn’t dominate the chart.
+
+After plotting, you can see that many spikes in weekly sales appear to align with holidays. Some spikes, like those in May, don’t perfectly align with holidays, which indicates other factors may also contribute. Overall, the red dashed lines help highlight a seasonality component in the data related to holidays.
+
+With this, we have completed Lab Two, which had two tasks:
+
+A simple plot of weekly sales with a title and customized size.
+
+Enhancing the plot by adding vertical red dashed lines whenever there is a holiday, showing how holidays may impact sales.
+
+This visualization is a great way to connect time series spikes with external factors before diving deeper into analysis or forecasting.
+
+# **C) Exploratory Data Analysis for Time Series**
+
+Let's do Lab Number Three. You will also find a starter file for this lab. We have three tasks, and the focus here is more on exploratory data analysis, with an emphasis on autocorrelation and seasonal decomposition. Basically, we want to see what kind of information is already in our data from a trend and seasonality perspective.
+
+Task 1 is to plot the autocorrelation of the data with 60 lags. We can do this using the ACF function:
+
+from statsmodels.graphics.tsaplots import plot_acf
+plot_acf(df['weekly_sales'], lags=60)
+plt.show()
+
+Looking at the chart, the first lag has the most information. Lags one through six contain some information, and then there’s a noticeable spike at lag 52. This makes sense because it represents roughly one year before. Overall, the strongest signals are from recent weeks, while older lags have less relevance.
+
+Task 2 is to plot the partial autocorrelation. Unlike autocorrelation, which looks at total correlations, the partial autocorrelation isolates the unique information at each lag by removing the influence of earlier lags.
+
+from statsmodels.graphics.tsaplots import plot_pacf
+plot_pacf(df['weekly_sales'], lags=60)
+plt.show()
+
+Here, we notice a slightly different picture. One year ago doesn’t carry as much unique information, but there is strong unique information one week, two weeks, and seven weeks before. The remaining lags are less relevant from a statistical perspective. This helps identify the most meaningful time intervals in the data.
+
+Task 3 is seasonal decomposition, where we focus on a multiplicative model with a period of 52 weeks (one year):
+
+from statsmodels.tsa.seasonal import seasonal_decompose
+decomposition = seasonal_decompose(df['weekly_sales'], model='multiplicative', period=52)
+
+We can improve visualization by adjusting the figure size:
+
+fig = decomposition.plot()
+fig.set_size_inches(12, 8)
+plt.show()
+
+Looking at the decomposition:
+
+The trend initially goes down, then up, and stabilizes, but keep in mind the first and last six months don’t show a reliable trend due to the way seasonal decomposition works.
+
+The seasonality appears unusual, likely influenced by external factors like holidays.
+
+The residuals hover around one, with some spikes, reflecting irregular components in the data.
+
+While the seasonality is strong, it’s influenced by external elements, so it might appear a bit odd. Nevertheless, this gives us a clear breakdown of trend, seasonality, and residuals in the dataset.
+
+With this, we have completed Task 3 and the lab. I hope you enjoyed this exploration, and I’ll see you in the next video.
+
+# **VI) Section 6: Exponential Smoothing & Holt-Winters**
+
+# **A) Game Plan For Exponential Smoothing and Holt-Winters**
+
+I am very excited to walk you through the world of exponential smoothing and Holt-Winters. In this video, we'll kick off with the agenda that we'll cover throughout this section. I have a very fun case study lined up. Think of it as the goal we need to achieve. It's about customer complaints, and it’s basically as real as it gets. We'll use this case study to apply the skills we’ve learned in a way that mirrors what you would encounter in the business world.
+
+Next up, let's talk about Python. Whether you're new to it or already familiar, we'll be using it extensively. This is how we get hands-on experience. So please prepare yourself for some coding action—we’ll go deep and program everything we need to do.
+
+We won’t just stick to one type of exponential smoothing. Oh no! We’ll explore simple, double, and triple methods, and each smoothing method will get its own spotlight in our Python sessions. This is where the magic happens—where the theory meets practice.
+
+We also need to learn how to measure errors in time series forecasting. And because data comes in all shapes and sizes, we’ll learn how to handle weekly data, daily data, and more granular data. The more granular the data, the more complex it becomes, but this is a skill we need to master.
+
+Last but not least, we’ll wrap up this section with a discussion on the pros and cons of exponential smoothing and Holt-Winters. It’s important to understand what a technique can and cannot do.
+
+So, get ready to learn a lot and hopefully have some fun. By the end of this section, you’ll be able to handle Holt-Winters and exponential smoothing like a pro.
+
+# **B) CASE STUDY BRIEFING: Customer Complaints**
+
+So picture this. We have a challenge that we need to solve. Imagine there is a company called Telco Wave, a very big player in the telecom world. And they’re facing a real puzzle, a challenge. Their customer complaints are all over the place. Some weeks it’s smooth sailing, other weeks it’s total chaos. And guess what? They have asked us to figure it out.
+
+So it’s our job to predict these unpredictable swings. Why, you ask? To help Telco Wave become better at customer service and to showcase how we can use data to actually solve real problems.
+
+Here’s the problem statement. Telecom is really facing this issue because they are getting more and more complaints. They are literally scratching their heads over how many customer service reps they need for each week. If the prediction is wrong, resources are wasted, and customers end up unhappy. This isn’t just a numbers game—it’s about bringing order into chaos.
+
+Therefore, we need to craft a strategy. But before we dive into any complex solutions, we need to understand the basics. We need to get to know the data. What’s behind these fluctuations? What hidden patterns might we be missing? We need to dissect the whys behind these numbers. This is where data analysis comes in.
+
+Exploring the data is a big deal. If we understand it well, Telco Wave can shift from playing catch-up—wasting resources and frustrating customers—to being in control.
+
+By the end, the goal is to empower them to match their workforce perfectly with what the customers need. Fewer complaints will fall through the cracks, more customers will be satisfied, and the business will be healthier, which ultimately means more profits.
+
+# **C) Python - Exponential Smoothing Set Up**
+
+Let's kick off Exponential Smoothing, which is really one of those foundational forecasting models. In this video, we’re going to focus on setup. You are going to take the useful code templates that you built before, and in case you haven’t, you’ll find one here that’s final. You can start from there, of course, but do it with me.
+
+You’ll find one template there, or you can use the one that you built yourself. Then I’m going to do Control C and copy it into time series analysis → exponential smoothing and holt-winters, and let’s open it and see how far we can get in this video. The goal is to either completely do the setup or at least get very close to it. I also don’t want to have a super long video.
+
+I’m going to call the file holt-winters. We’ll start by mounting the drive. This will prompt you to give permission to connect to Google Drive. Once that’s done, we can proceed.
+
+While this is connecting, I want to introduce the dataset. It’s about weekly customer complaints, and the business scenario is simple. Imagine you work in an e-commerce company—or really, any company with customer support—and you need to figure out how many customer support people you need. Most customer supports work with short contracts. Big companies often hire agencies to provide a certain number of people for a week or month. To plan properly, you need to know the expected number of complaints so you can allocate the right workforce. This is where time series analysis and exponential smoothing comes into play.
+
+Next, we copy the path for the dataset and add it to our script. For now, we won’t import any extra libraries; we’ll do that later as needed. The dataset is called weekly customer complaints. It has a few columns, but we will focus on complaints for now. We cannot use independent variables with Holt-Winters or any other exponential smoothing model, so the complaints column is our main focus. The time variable is called week.
+
+After running the initial setup, we have week as the index and complaints as the main column. I like to rename the time series variable to y. This is done by renaming the column: data_frame.rename(columns={'complaints': 'y'}). Now the series is ready for analysis.
+
+Next, we attempt to plot the time series. Initially, we might encounter a “no numeric data to plot” error. This happens because the complaints column contains commas and is recognized as an object rather than a numeric type. To fix this, we remove the commas and convert the column to an integer: data_frame['y'] = data_frame['y'].str.replace(',', '').astype(int). Now the column is properly numeric, and we can plot it.
+
+After plotting, we see that complaints increase over time, with higher spikes and an upward trend. This suggests multiplicative seasonality—the seasonality grows with the level of the series. While the trend is apparent, the spikes indicate specific events or fluctuations. To fully understand the seasonality, we will need to perform seasonal decomposition.
+
+This completes the setup for our exponential smoothing analysis. In the next video, we will continue exploring the data and applying the smoothing methods.
+
+# **D) Python - Exploratory Data Analysis**
+
+Welcome back. Let's continue here. First, we need to understand our seasonality. If we just run the model as-is, we're going to get an error. This is because our data is weekly, but we are trying to generate a monthly plot. Therefore, we need to resample the data to a monthly frequency. The suggestion is to use M, though this may show a future warning. To properly handle this, we should use month end. Once we do that, we have our seasonal data.
+
+Looking at the monthly data, we can observe that there are noticeable bottoms in February and March, as well as in August and September. Peaks are visible around November and a bit in December. This gives us a better understanding of our data. Overall, Q4 (October to December) appears to be the strongest, while Q2 is moderate, and Q1 and Q3 are the weakest quarters.
+
+We can also analyze seasonality by quarter. Similar to before, we need to resample the data, this time using quarter end and calculating the mean. The results confirm that Q4 is the strongest quarter, followed by Q2, then Q3, and finally Q1 as the weakest quarter.
+
+Next, we move on to seasonal decomposition. Since we have weekly data, the period is set to 52, corresponding to the 52 weeks in a year. First, we try an additive decomposition. The seasonal cycles are visible but not extremely smooth; there are noticeable ups and downs. The seasonal component fluctuates by around 100–200 units. The residuals also indicate some variation, especially in March. The trend component appears somewhat S-shaped.
+
+From observing the data, it looks like a multiplicative seasonality might be more appropriate. This is because the seasonal spikes seem to increase as the trend grows, making the amplitude of the cycles larger over time. So we run a multiplicative decomposition. The trend remains largely the same, and the seasonal cycles do not change dramatically, but the multiplicative effect aligns with the increasing amplitude pattern.
+
+As we continue exploring and measuring the models, we will determine which approach—additive or multiplicative—performs better and yields the best results.
+
+Moving on, we examine autocorrelation and partial autocorrelation. By plotting the autocorrelation, we notice that there is significant information in the first 25 periods. There is also a noticeable spike around 52 weeks, representing one year in the past. For the partial autocorrelation, we see strong signals from the previous month, the last week, two weeks prior, and so on. This pattern continues with relevance for about 16 weeks, and then we again observe a signal around 52 weeks. Overall, the recent past and one complete seasonal cycle from the past year seem most informative.
+
+From this analysis, we can conclude that a model incorporating seasonality is needed. Specifically, a Holt-Winters model would be suitable, and this is something we will explore in the upcoming sections.
+
+Finally, let's briefly focus on the time series frequency. To check the frequency of the time series, we can inspect DataFrame.index. This will extract key information about the index, including length, name, and frequency (initially set to None). We can then change the frequency as needed. For example, our weekly data starts on a Monday in January 2018. By setting the weekly frequency to W-MON, we can confirm the change by checking DataFrame.index again, which should now reflect W-MON.
+
+# **E) Training and Test Set in Time Series**
+
+Welcome back. Let me introduce a very important topic in time series: splitting the data into a training set and a test set. This concept is simple and straightforward, but extremely powerful.
+
+Imagine that you have a dataset represented by a blue rectangle. In a typical scenario, you might randomly split it, leaving 80% for training and 20% for testing. The main idea is to build a model using the training data and then evaluate it on the test data. This provides an unbiased way to assess the model’s performance.
+
+However, time series is a very different beast. Unlike regular datasets, information on a given day is meaningless without the context of surrounding days. Moreover, in time series, we usually aim to predict the future. So, when splitting time series data, the practice is to remove the last periods. For example, you might remove the last observation, which then becomes part of the test set. The remaining data—represented here as yellow balls—becomes the training set. Importantly, the training data is not shuffled; it retains its chronological order. The light blue portion represents the test set.
+
+Another important point is that the test set should reflect the number of periods you expect the model to predict in practice. For instance, if you are building a model to forecast the next four weeks, you should evaluate it using four-week periods. Similarly, if your forecasting horizon is three months, your test set should span three months.
+
+Lastly, for the training data, it is recommended to include at least two full periods of data. For weekly data, this means having at least two full years, and ideally three, to capture clear seasonal and trend patterns. The goal is to provide enough data to identify robust patterns, which ultimately leads to reliable forecasts.
+
+# **F) Python - Training and Test Set**
+
+Welcome back. Let's talk about training and test sets. The first thing we need to understand is our goal. Our goal here is to predict the next 13 weeks. It’s important to note that we always measure and assess our model based on the business goal.
+
+To introduce this concept, we will split the data into a training set and a test set. In this case, our period is 13 weeks. The training set will consist of all data up until the last 13 weeks—everything except the last 13 periods. The test set will then consist of everything starting from the last 13 weeks.
+
+If we examine the training set, we still have all the data, which is fine. However, for practical purposes—such as using double or triple exponential smoothing—we often only work with the target variable, Y. So we subset the data to include only the columns we need and remove everything else that isn’t required.
+
+There are multiple ways to subset and split your data. One approach is simply:
+
+train = df[:-periods]   # all data except the last 'periods'
+test = df[-periods:]    # the last 'periods' of data
+
+Another way (which I had prepared for a different setup) could be using index positions:
+
+train, test = df.iloc[: -periods], df.iloc[-periods:]
+
+The key takeaway is not necessarily the exact method, but that you understand the concept and purpose of splitting the data. Once you manage this, you’re doing it correctly.
+
+# **G) Simple Exponential Smoothing**
+
+
+
+# **H) Python - Simple Exponential Smoothing**
+
+# **I) Double Exponential Smoothing**
+
+# **J) Python - Double Exponential Smoothing**
+
+# **K) Triple Exponential Smoothing aka Holt-Winters**
+
+# **L) Python - Triple Exponential Smoothing aka Holt-Winters**
+
+# **M) Measuring Errors for Time Series Forecasting**
+
+# **N) Python - MAE, RMSE, MAPE**
+
+# **O) Python - Predicting The Future**
+
+# **P) Python - Daily Data**
+
+# **Q) Python - Working on the Useful Code Script**
+
+# **R) Holt-Winter Pros and Cons**
