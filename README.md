@@ -1678,26 +1678,533 @@ The key takeaway is not necessarily the exact method, but that you understand th
 
 # **G) Simple Exponential Smoothing**
 
+What is this all about?
 
+Imagine you are checking weekly sales figures or weekly complaint counts. Some weeks are very busy, while others are quiet. What you are really trying to find is a steady rhythm in these numbers—a sense of the underlying level without getting distracted by short-term noise.
+
+That is exactly where simple exponential smoothing comes in.
+
+This method is not just a simple average. Instead, it gives more importance to what happened most recently. In other words, it “listens” more closely to recent data points while still respecting the past. This idea is built directly into the formula.
+
+Let’s break that formula down conceptually.
+
+The next forecast is calculated as the current level, plus alpha multiplied by the difference between the most recent actual value and the current level.
+
+First, the current level.
+This represents our baseline or starting point. It reflects where we believe the series stands based on everything we have seen so far.
+
+Next, the recent actual value.
+This is the latest observation—yesterday’s sales or last week’s numbers. It tells us what actually just happened.
+
+Finally, alpha.
+Alpha is the tuning parameter. When alpha is close to 1, we place a lot of weight on the most recent observation. When alpha is close to 0, we trust the historical level more and adjust very slowly.
+
+Now let’s put this into a concrete example.
+
+Suppose our current level is 100 cups sold. That is our baseline. Yesterday, however, we actually sold 120 cups. Let’s say alpha is 0.2.
+
+With this setup, our forecast does not suddenly jump to 120. Instead, it moves up slightly, acknowledging that sales were higher than expected, but without overreacting to a single day’s spike.
+
+Applying the formula gives us:
+100 plus 0.2 times (120 minus 100), which results in a forecast of 104.
+
+The values such as the current level and recent actual are computed by the model as it processes the data. Alpha, on the other hand, is typically chosen by the practitioner. For now, we won’t focus deeply on how to select alpha. The goal here is to understand the structure of time series forecasting. Later in the course, we will explore parameter tuning and how different alpha values affect results.
+
+Now let’s think about how this applies to real data.
+
+When we apply simple exponential smoothing to weekly sales data, the goal is to look past spikes—those weeks where sales suddenly surge or drop sharply. This method helps smooth out those fluctuations and gives us a broad sense of direction.
+
+It is especially useful when you want a high-level view of where things are heading, rather than reacting to every short-term change.
+
+To wrap things up, simple exponential smoothing is a very solid tool in a forecasting toolkit—but it is not a fortune teller. It does not capture strong trends or seasonal patterns. The equation itself is simple, and as a result, the outcome is also simple.
+
+That simplicity is exactly why it is called simple exponential smoothing.
+
+It helps smooth chaotic data, reduce noise, and highlight the underlying level of a time series.
+
+Next, we’ll see how this works in Python. From there, we’ll build up step by step—from simple exponential smoothing to double and then triple smoothing in the following videos.
 
 # **H) Python - Simple Exponential Smoothing**
 
+Here is the same lecture rewritten in clean, normal output, lecture-style prose, with the meaning preserved and the flow clarified—no restructuring of intent, just clarity.
+
+Alright, this is the video you’ve been waiting for—the point where we actually start doing some modeling.
+
+To begin, we need to import a couple of functions. I’m going to import them upfront because as we move from simple to double and then to triple exponential smoothing, we’ll be using different functions. All of these live inside the statsmodels library, specifically under the time series analysis module and the Holt-Winters section.
+
+From there, we import both ExponentialSmoothing and SimpleExpSmoothing.
+
+Once that’s done, we’re ready to work with simple exponential smoothing. This function is very straightforward. If you look at the documentation, you’ll notice that it mainly requires the endogenous variable—that is, your time series data.
+
+There is also an option to specify an initial level. By default, this is set to None, which means the model will infer it automatically. Conceptually, the initial level is just the first value of the time series. In our case, that happens to be 1750. It’s important to remember that while the initial level starts there, the level itself is not constant. It adapts and evolves throughout the time series.
+
+All of the other parameters are optional, and for now, we won’t use them. We’ll focus only on passing in our time series.
+
+So we apply simple exponential smoothing to our training data and then fit the model. That’s it—the model is now trained.
+
+Once the model is fitted, we can inspect a summary of the results. Printing the summary gives us details such as the initial level and the smoothing parameter. You’ll see that the initial level is 1750, as expected. Again, keep in mind that this is only the starting point. The level itself is continuously updated as the model processes the data.
+
+At this stage, it’s important not to overthink these coefficients. Exponential smoothing models are not designed to be highly interpretable. They are internal mechanisms that serve a specific purpose. The intuition is what matters: we use past values to predict the future, and we give more weight to recent observations.
+
+For example, if the smoothing level is around 0.51, that simply means the model is weighting recent information slightly more than older information. It doesn’t carry deeper business meaning, and that’s perfectly fine.
+
+Now let’s move on to forecasting.
+
+We generate predictions by asking the fitted model to forecast a number of periods equal to the size of our test set. When we do this, you’ll notice something interesting: all the forecasted values are the same.
+
+This is not a bug. This is exactly how simple exponential smoothing works.
+
+Because the model only estimates a level—and no trend or seasonality—the forecast is flat. Each future value is based on the last estimated level. Since that level does not change once forecasting begins, all predicted values are identical.
+
+You might be tempted to manually recreate the calculation using the last training value, the smoothing parameter, and the initial level. However, that won’t work correctly because the initial level is not the same as the final level used internally by the model. The true level is updated at every time step, and that internal value is what drives the forecast.
+
+Next, let’s visualize the results.
+
+We create a plot and set a reasonable figure size. Then we plot the training data, the test data, and the forecasted values. Finally, we add a title and a legend and display the plot.
+
+When we zoom in on the results, the outcome becomes very clear. This is a terrible forecasting model.
+
+And that’s okay.
+
+Simple exponential smoothing is doing exactly what it is designed to do. It produces a flat forecast because it assumes no trend and no seasonality. Historically, this was one of the earliest forecasting models ever created.
+
+Things will improve significantly when we move on to double exponential smoothing, which introduces a trend component, and then to triple exponential smoothing, which adds seasonality.
+
+So trust the process. We are building this step by step.
+
+If you have questions—especially about the level parameter—don’t worry too much about it. From a practical standpoint, it’s not something you need to interpret deeply. What matters is knowing how to fit the model and how to generate forecasts.
+
+Remember: the flat forecast is expected, and it comes directly from the simplicity of the equation—a weighted previous value plus a level term.
+
+That’s it for this video.
+
+Until the next one—have fun.
+
 # **I) Double Exponential Smoothing**
+
+Let’s dive into double exponential smoothing.
+
+You might notice the two stars next to the name and wonder what exactly makes it “double.” The answer lies in what the model is smoothing.
+
+With simple exponential smoothing, we focused only on smoothing the data itself—essentially filtering out short-term noise. Double exponential smoothing adds a second layer. In addition to smoothing the level, it also models the trend in the data.
+
+This means we’re no longer just averaging out highs and lows. We’re also capturing whether our sales or metrics are generally increasing or decreasing over time.
+
+If we break down the mathematics conceptually, double exponential smoothing is built on two equations.
+
+The first equation smooths the level. This part is very similar to what we saw with simple exponential smoothing. It represents our updated baseline and incorporates the most recent actual observation.
+
+The second equation smooths the trend. Here, we measure how much the level changes from one period to the next. This change represents the direction and strength of the trend.
+
+Because of this second equation, we introduce an additional parameter: beta.
+
+Now let’s look at the components involved.
+
+The smoothed level is our evolving baseline. It updates over time by incorporating recent actual values.
+
+The smoothed trend captures how fast and in which direction the level is changing. It tells us whether the series is generally moving upward or downward.
+
+Then we have alpha and beta, which act as tuning levers.
+
+Alpha controls how much weight we give to recent observations compared to the existing level and trend. A higher alpha makes the model react more quickly to recent changes.
+
+Beta controls how much weight we give to changes in the trend itself. A higher beta means the model adapts more quickly when the trend accelerates or slows down.
+
+Let’s put this into context with an example.
+
+Imagine your sales have been increasing overall, but with noticeable weekly ups and downs. Double exponential smoothing helps separate short-term fluctuations from the underlying upward movement. It allows us to see whether that growth is driven by a genuine trend rather than random variation.
+
+As always, a word of caution.
+
+While double exponential smoothing is excellent at capturing trends, it still does not account for seasonality. Regular patterns such as monthly or yearly cycles are not handled here. That’s something we will address next with triple exponential smoothing.
+
+To wrap things up, double exponential smoothing smooths both the current values and the trend. It helps us understand whether we are “catching a wave” and, more importantly, which direction that wave is moving.
+
+That’s enough theory for now.
+
+Next, we’ll see how to implement double exponential smoothing in Python.
 
 # **J) Python - Double Exponential Smoothing**
 
+Now we’re going to work with double exponential smoothing in practice. We’ll build the model, generate predictions, and then visualize the results to see how well it performs.
+
+Let’s get started.
+
+We’ll use double exponential smoothing from statsmodels. To do that, we rely on the ExponentialSmoothing class. If you look at the documentation, you’ll see that the key input is the endogenous variable, which is simply our time series data.
+
+We begin by building the model. We’ll call it something like model_double. The core input is our training data, which represents the observed time series.
+
+What makes this double exponential smoothing is the inclusion of a trend component. This is where we explicitly tell the model to account for upward or downward movement over time.
+
+For the trend type, we need to specify how the trend behaves. The most common options are additive and multiplicative.
+
+An additive trend is typically used when the data follows a roughly linear pattern, where changes are fairly constant over time. A multiplicative trend is more appropriate when changes grow or shrink proportionally, such as exponential growth or decay.
+
+In this case, the data appears fairly linear, so we use an additive trend.
+
+We also explicitly set seasonality to none. That’s because we are not yet modeling seasonality—this will come later when we move to triple exponential smoothing (also known as Holt-Winters).
+
+Once the model is defined, we fit it to the training data using .fit().
+
+At this point, you can inspect the model summary if you want. However, in practice, the summary is usually not very insightful. The smoothing level and smoothing trend parameters don’t give us much actionable information. Exponential smoothing models are designed more for forecasting accuracy than interpretability, so it’s often fine to skip the summary altogether.
+
+After fitting the model, we generate forecasts. We forecast the same number of periods as the length of the test set. This gives us a prediction series that we can directly compare against the actual values.
+
+To really understand how the model behaves, visualization is essential.
+
+We plot three things:
+
+The training data
+
+The test data
+
+The forecast produced by the double exponential smoothing model
+
+Once plotted, the behavior becomes much clearer.
+
+What we see is that the model captures the overall trend quite well. As the trend rises and then stabilizes, the forecast reflects that movement. The predictions are smoother and more realistic than what we saw with simple exponential smoothing.
+
+However, there is still an important limitation.
+
+The model struggles with large spikes and dips in the data. These fluctuations are caused by seasonality, which this model does not yet handle. Double exponential smoothing accounts for level and trend, but not repeating seasonal patterns.
+
+This explains why the forecast looks stable but fails to react to sharp periodic changes.
+
+That missing piece—seasonality—is exactly what we’ll address next when we move to triple exponential smoothing. Once we add that third component, the model’s performance will improve significantly.
+
 # **K) Triple Exponential Smoothing aka Holt-Winters**
+
+Here is the same content rewritten into clear, structured, normal output, with smooth flow and no loss of meaning.
+
+Let’s talk about triple exponential smoothing, more commonly known as the Holt–Winters method.
+
+You can think of this as the big sibling of simple and double exponential smoothing. While simple smoothing handles level and double smoothing handles level plus trend, triple exponential smoothing is designed for data that includes trend and seasonality.
+
+This is especially useful for patterns like customer complaints, sales, or demand data where we observe strong and repeating seasonal cycles. Ignoring seasonality in those cases leads to poor forecasts, which is exactly what we saw when using double exponential smoothing.
+
+So how does Holt–Winters work?
+
+In triple exponential smoothing, the time series is decomposed into three components:
+
+Level
+This is the baseline value of the series. It represents where the data is centered at any point in time and is the same concept we introduced with simple exponential smoothing.
+
+Trend
+This captures whether the data is generally increasing or decreasing over time. This component was added in double exponential smoothing.
+
+Seasonality
+This represents repeating patterns that occur at regular intervals, such as daily, weekly, monthly, or yearly cycles. This is what makes the method “triple.”
+
+In other words:
+
+Simple exponential smoothing → level
+
+Double exponential smoothing → level + trend
+
+Triple exponential smoothing → level + trend + seasonality
+
+The Holt–Winters method uses three equations, one for each component. While we won’t go through the full mathematical equations here—since they become more complex—the intuition is straightforward.
+
+First, the method updates the level, similar to simple exponential smoothing.
+Next, it updates the trend, measuring how the level changes over time.
+Finally, it adjusts for seasonality, accounting for recurring cycles in the data.
+
+Just like the previous methods, Holt–Winters relies on smoothing parameters:
+
+Alpha (α) controls the level
+
+Beta (β) controls the trend
+
+Gamma (γ) controls the seasonality
+
+Each parameter determines how much weight is given to recent observations versus past information. These parameters can be tuned to improve model performance, but we’ll postpone parameter tuning until later in the course. For now, the focus is on understanding the structure and intuition behind the method.
+
+From a practical standpoint, Holt–Winters becomes essential whenever your exploratory data analysis reveals strong seasonal patterns. If you see deep and regular cycles in your time series, double exponential smoothing will not be sufficient.
+
+Common real-world examples include:
+
+Forecasting electricity demand with daily or seasonal patterns
+
+Predicting retail sales that spike during holidays
+
+Modeling customer complaints that follow weekly or yearly cycles
+
+In all these cases, incorporating seasonality is critical for accurate forecasting.
+
+To conclude, Holt–Winters is a powerful and robust tool for modeling complex time series. By accounting for level, trend, and seasonality, it allows us to generate far more realistic and reliable forecasts.
+
+Next, we’ll apply this method and see just how easy it is to implement in practice.
 
 # **L) Python - Triple Exponential Smoothing aka Holt-Winters**
 
+Now we’re going to work with triple exponential smoothing, also known as the Holt–Winters method. This technique is named after the two researchers who developed it: Holt and Winters.
+
+At this point, we’re extending everything we’ve learned so far. We’ve already seen simple exponential smoothing (level), double exponential smoothing (level and trend), and now we’re adding the final piece: seasonality.
+
+Let’s start by building the Holt–Winters model.
+
+We define our model and specify the trend as additive. This makes sense because the overall movement in our data follows a fairly linear direction over time.
+
+For seasonality, we choose a multiplicative structure. The reason for this is clear when we look at the data: as the trend increases, the seasonal peaks also become larger. This tells us that the seasonal effect grows proportionally with the level of the series, which is exactly what multiplicative seasonality is designed to capture.
+
+Next, we specify the seasonal period. Since our data is weekly and there are 52 weeks in a year, we set the seasonal period to 52.
+
+Once we fit the model, we immediately notice that the complexity increases. We now have smoothing parameters for:
+
+The level
+
+The trend
+
+The seasonality
+
+In addition, the model estimates initial seasonal values for each season. This added complexity is expected, because we are now modeling much richer behavior in the data.
+
+After fitting the Holt–Winters model, we generate forecasts for the same number of periods as our test set.
+
+To evaluate how well the model performs, we visualize the results by plotting:
+
+The training data
+
+The test data
+
+The Holt–Winters forecast
+
+When we focus on a single year—such as 2022—the improvement becomes very clear.
+
+The model now captures not only the overall trend but also the seasonal cycles. Those recurring peaks and dips that were completely missed by simple and double exponential smoothing are now clearly reflected in the forecast.
+
+This confirms what we suspected earlier: the missing piece was seasonality. By adding it, the model’s performance improves dramatically, even though the change in implementation is relatively simple.
+
+The takeaway here is powerful. Incorporating seasonality can significantly improve forecasting accuracy when seasonal patterns are present in the data.
+
+In the next step, we’ll move on to error measurement—how to quantify forecast performance and evaluate these models properly using Python.
+
 # **M) Measuring Errors for Time Series Forecasting**
+
+Now let’s talk about how to measure accuracy and errors in time series forecasting.
+
+I’ll be honest—this may not be the most exciting topic, but it is one of the most important. No matter how sophisticated your model is, if you can’t measure its error, you can’t judge whether it’s actually useful.
+
+The core idea behind error measurement is always the same, whether you’re working with regression or time series forecasting.
+
+You have:
+
+A model, which produces predictions (often visualized as a line)
+
+Actual values, which represent what truly happened
+
+The error is simply the difference between the actual values and the predictions. This difference is often referred to as the delta.
+
+What changes is how we measure and summarize these differences.
+
+Mean Absolute Error (MAE)
+
+The first key metric is the mean absolute error.
+
+Here, we calculate the difference between the actual value and the prediction, take the absolute value, and then average those values across all observations.
+
+The absolute value is critical. It ensures that positive and negative errors do not cancel each other out.
+
+For example:
+
+If one error is +100 and another is −100, the average error would be zero
+
+But the mean absolute error would still be 100
+
+This makes MAE very interpretable. If the MAE is 2, it means that, on average, your predictions are off by about 2 units.
+
+Root Mean Squared Error (RMSE)
+
+The second major metric is the root mean squared error.
+
+This metric also starts by computing the difference between actual and predicted values, but instead of taking the absolute value, it squares the differences, averages them, and then takes the square root.
+
+Squaring the errors has an important effect:
+
+Large errors are penalized much more heavily than small ones
+
+This makes RMSE particularly useful when outliers matter and you want to strongly penalize large mistakes.
+
+The downside is that RMSE is less interpretable than MAE. Once you start squaring and taking square roots, the final number doesn’t translate as intuitively into “average error.”
+
+Comparing MAE and RMSE
+
+Both metrics are widely used, and each has advantages.
+
+MAE is easier to interpret and treats all errors equally
+
+RMSE punishes large errors more strongly and is better when extreme mistakes are costly
+
+In practice, it’s common to calculate both. However, when selecting or fine-tuning a model, RMSE is often preferred as the primary optimization metric because of its sensitivity to large errors.
+
+Mean Absolute Percentage Error (MAPE)
+
+The third metric is mean absolute percentage error, often abbreviated as MAPE.
+
+Instead of measuring error in absolute units, MAPE expresses the error as a percentage.
+
+This makes it very easy to interpret. For example, a MAPE of 10% means your predictions are off by about 10% on average.
+
+However, MAPE has an important limitation.
+
+It gives equal weight to all percentage errors, regardless of scale. For example:
+
+Predicting 100 with an error of 10 results in a 10% error
+
+Predicting 10 with an error of 1 also results in a 10% error
+
+In many real-world scenarios, being off by 10 units on a large value is more significant than being off by 1 unit on a small value. MAE and RMSE reflect this difference, but MAPE does not.
+
+Because of this, MAPE can sometimes be misleading, especially when values vary widely in magnitude.
+
+What Is the Ideal Error?
+
+This is one of the most common questions—and the answer is simple: there is no universal ideal error.
+
+The acceptable level of error depends entirely on:
+
+The business context
+
+The use case
+
+The tolerance of stakeholders
+
+What matters most is improvement over time. As you use better data, better features, and better models, your error should decrease.
+
+Determining whether an error is “good enough” is ultimately a business decision and should be discussed with stakeholders and senior decision-makers.
 
 # **N) Python - MAE, RMSE, MAPE**
 
+In this video, we’re going to do a very important task: analyzing our outcomes. Specifically, we’re going to measure the errors produced by our time series forecasting model.
+
+To do this, we need a few specific functions. From sklearn.metrics, we’ll import the metrics required to evaluate our predictions. These include the root mean squared error (RMSE), the mean absolute error (MAE), and the mean absolute percentage error (MAPE).
+
+Initially, there may be some confusion because earlier versions of sklearn did not include a direct function for RMSE. In those cases, people used the mean squared error and then applied a square root manually. However, now RMSE exists directly, so we can use it without additional tricks. Throughout the course, you may still see some references to mean squared error because it was commonly used before RMSE was added.
+
+The key idea behind all these metrics is the same: we compare y_true (what actually happened) with y_pred (what our model predicted). This structure is always the same across all sklearn metrics. No matter which error metric you use, you pass in the actual values first and the predicted values second.
+
+Once the functions are imported, we calculate and print RMSE, MAE, and MAPE using our test data and predictions. When we do this for our current model, we get results such as an MAE of around 366, an RMSE of around 424, and a MAPE of about 8 to 8.5%.
+
+At this point, it’s useful to control how many digits we display. In practice, whether RMSE is 424.5 or 430 doesn’t really matter much. What matters is the scale of the error, not tiny decimal differences. So we usually limit the number of decimal places, especially for readability.
+
+The same idea applies to MAE. For MAPE, since it represents a percentage, it makes sense to multiply it by 100 and display it as a percentage. We can also limit it to one decimal place, which is more than enough. For example, reporting a MAPE of 8.5% is much clearer and more useful than showing many decimal places.
+
+Once this setup is done, we can start experimenting with different model configurations. For instance, we might switch the seasonality from multiplicative to additive and observe how the metrics change. When we do this, the results turn out to be much worse—MAPE jumps to around 12.7%, MAE increases to about 867, and RMSE to around 622. This clearly indicates that additive seasonality performs poorly for this dataset.
+
+We can also experiment with different trend configurations, such as using a multiplicative trend. In this case, we might see a runtime warning during internal calculations, indicating numerical issues. However, despite the warning, the resulting error metrics may actually improve. This highlights an important point: we should be results-driven. If a model produces better evaluation metrics, it may still be worth considering, even if there are warnings, as long as the results are stable and sensible.
+
+That said, these results are based on a single test set. Later on, we’ll cover cross-validation, where we measure errors across multiple test sets to ensure the model generalizes well.
+
+The final step in this video is to build a reusable function that assesses the model and visualizes the results. This function takes the training data, test data, predictions, and an optional chart title. The title is not mandatory, allowing the function to be reused easily in different contexts.
+
+Inside this function, we plot the training data, test data, and forecasted values on the same chart. We then add a title (if provided), a legend, and display the plot. After that, we calculate RMSE, MAE, and MAPE using the same metrics as before and print the results.
+
+Once the function is defined, we can apply it directly by passing in the train set, test set, and predictions. This gives us both a visual comparison and numerical evaluation in one step. If we want to zoom in on a specific time range—such as starting from 2022—we can adjust the inputs accordingly. When we do this, we see very strong results, confirming that the model is performing well.
+
+And that’s it for this video. This is how you evaluate a time series forecasting model, both visually and quantitatively. You now have a reusable function that you can apply to future models and datasets.
+
 # **O) Python - Predicting The Future**
+
+Sure 🙂
+Here is the full explanation rewritten end to end, organized into clear multiple paragraphs, keeping all details intact and improving readability—without removing or adding meaning.
+
+Welcome back. Let’s now move on to predicting the future.
+
+At this stage, the idea is simple. Once you are satisfied with your modeling—once you’ve evaluated the errors, explored different configurations, and decided that the model is “good enough”—you move forward and use it to forecast future values. Throughout this course, we’ll continue to explore how models behave under different scenarios, but for now, we’ll take a straightforward approach.
+
+The question we ask ourselves is: Are we satisfied with this model?
+If the answer is yes, then we proceed to forecasting.
+
+This step is meant to be easy. Since we’ve already compared models and visually inspected performance, we’re going to build a Holt-Winters model. The reason we choose Holt-Winters is simple: visually and quantitatively, it performed the best.
+
+We build the Holt-Winters model using the complete dataset. We start by inspecting our DataFrame—just taking a quick look at the first few rows using .head() rather than displaying everything. From this DataFrame, we extract the target variable y and feed it directly into the model.
+
+At this point, we choose between additive and multiplicative components. Based on our earlier analysis, multiplicative seasonality is already top of mind. There’s no need to overthink this here, especially since parameter tuning will be covered extensively later in the course.
+
+To keep things simple, we copy the parameters we already identified as good and plug them into the model. Once the model is fit, we generate predictions and preview the first few forecasted values to confirm that everything looks reasonable.
+
+Initially, it might seem like the predictions haven’t changed, which can be confusing. But this turns out to be a simple oversight—the model parameters were not actually changed. After rerunning everything correctly, it becomes clear that using additive seasonality results in a significant deterioration of performance, with MAPE jumping to around 12.7%.
+
+This reinforces our earlier conclusion: multiplicative seasonality is the correct choice. It also aligns with what we observed visually—the seasonality in the data is clearly multiplicative.
+
+Once the model is finalized, we proceed to forecasting. We generate a forecast for 13 periods ahead. This number is not random; it matches the length of the test set we used earlier. This alignment makes business sense—if we tested on 13 weeks, then predicting 13 future weeks is a logical next step.
+
+After generating the forecast, we preview the first few values and then plot the training data alongside the forecast. Using plt.plot, we plot the historical y values and then overlay the forecast. This gives us a clear visual representation of how the model projects future behavior.
+
+To make this reusable, we wrap the plotting logic into a function. We define a function called plot_future, which takes three inputs: the historical y values, the forecast, and an optional chart title (defaulting to None). Inside the function, we plot the data, apply the title if provided, and display the chart.
+
+We then call this function using our DataFrame’s y, the forecasted values, and a title such as “Holt-Winters”. Just like before, if we want to zoom into a specific time range—say, from 2022 onward—we can apply .loc[2022:].
+
+At first, this zooming doesn’t work as expected, which reveals a small bug in the function. The issue is that the function parameters were not fully dynamic. After correcting this and passing y properly, everything works exactly as intended.
+
+In the end, it turns out that the model was right all along—the issue was simply in the function definition.
+
+With that, we’re done. We’ve successfully predicted the future using our Holt-Winters model, and we’ve seen that doing so is actually very straightforward once the model is finalized.
+
+Next, we’re going to shift focus to daily data, which is one of the most common and most challenging types of time series data. Daily data comes with its own quirks and considerations. To explore this properly, we’ll work with a Bitcoin dataset and see how forecasting works in that context.
 
 # **P) Python - Daily Data**
 
+We’ll start by loading the Bitcoin price dataset. To do this, we use pandas.read_csv and load the file named Bitcoin_price.csv. While loading the data, we set the index column to date and enable parse_dates=True. This ensures that the date column is properly recognized as a datetime index, which is exactly what we want for time series analysis.
+
+From the dataset, we only need one KPI. Although there are many available, we’ll focus on the adjusted close price. This allows us to zoom in on exactly what we need without unnecessary columns. We store this series in a variable called daily_data. For convenience, we can also rename the series so it’s easier to work with going forward. If desired, all of this could even be done in a single line of code.
+
+Once the data is loaded, it’s always good practice to do a quick preview to confirm everything looks correct. After that, we check the index. One important thing to verify with daily data is whether the frequency is properly set. Often, the frequency is missing, even if the dates are continuous. To ensure completeness and avoid issues later, we explicitly set the index frequency to daily. After doing this, the data is exactly in the format we want.
+
+Next, we move into model assessment. We decide to set aside the last 30 days as our test set. We define periods = 30, then split the data accordingly. The training data includes everything except the last 30 observations, and the test data consists of those final 30 days.
+
+At first, an error appears indicating “too many indexers.” This happens because we’re working with a Series rather than a DataFrame. Once we adjust the slicing accordingly, everything works as expected. We quickly verify the training and test data and confirm that the test set starts on December 1st, which is exactly what we want.
+
+With the data split correctly, we proceed to build a Holt-Winters model for daily data. This is where an important discussion comes in. Daily data often contains multiple seasonal cycles. However, exponential smoothing—specifically Holt-Winters—only allows for one seasonal cycle, so we must choose carefully.
+
+At this point, we need to decide what seasonal period makes the most sense. Should it be 365 days for yearly seasonality, or 7 days for weekly seasonality? In many cases, weekly (intra-week) seasonality is stronger and more important, so it’s common to start with a seasonal period of 7. Yearly seasonality can also be meaningful, but only if it’s very clearly defined. Ideally, we’d capture both—but Holt-Winters doesn’t allow that. More advanced models will, and we’ll explore those later.
+
+We start by fitting the model to the daily data. During fitting, we see a convergence warning. This warning essentially tells us that the model is struggling to fit the data well. We can experiment by changing the trend type, for example trying a multiplicative trend, but we still see warnings. This isn’t entirely surprising—cryptocurrency data is extremely volatile and inherently difficult to predict.
+
+Despite this, we proceed to generate predictions using the Holt-Winters model. Even here, the convergence warning persists. This reinforces an important reality: crypto prices are noisy, volatile, and very challenging for traditional forecasting models.
+
+Next, we assess the model using our reusable model assessment function. We pass in the training data, test data, and the daily predictions. We also zoom in on the test period to better visualize the results.
+
+Interestingly, the MAPE comes out at around 4.7%, which looks quite good at first glance. However, when it comes to stock or crypto prices, even small errors can be problematic. Trading involves taxes, transaction fees, slippage, and opportunity cost. In practice, errors often need to be closer to 1–2% to be truly useful.
+
+This is a good moment for an important caution. If someone claims they can reliably predict the stock or crypto market, you should be extremely skeptical. Markets are influenced by countless unpredictable factors, and no model can consistently forecast them with high accuracy.
+
+Visually, the results look okay. We see the test data alongside the forecast, and the model does a reasonable job of following the general movement. When we zoom further into the period starting from late November 2023, the performance still appears acceptable.
+
+However, from a practical standpoint, this is where things become tricky. You might see the forecast indicating an increase, decide to buy, and then wait several days only to find that the price never reaches the predicted level. By the time the forecast turns downward, you’ve already missed opportunities or incurred losses. This highlights just how difficult real-world trading decisions are.
+
+To further experiment, we change the seasonal period to 7 days and refit the model. Immediately, the results look very different. The MAPE increases to around 5.2%, and the forecast line changes significantly. This suggests that there isn’t a strong weekly seasonal cycle in the data, which makes sense—traditional stock data does not have a weekly cycle, and Bitcoin’s weekly behavior is debatable at best.
+
+This experiment highlights an important takeaway: changing the seasonal period can drastically alter the model’s behavior. When using Holt-Winters, it’s crucial to experiment and let the data guide your decisions rather than relying on assumptions.
+
+As we move forward, we’ll explore more advanced models that allow for multiple seasonalities and greater flexibility. That’s where things get really exciting. If this already feels interesting, the upcoming models will open up even more possibilities.
+
 # **Q) Python - Working on the Useful Code Script**
 
+Welcome back! To wrap up this video, let’s focus on building on our template. We’ll go to our main template file, specifically the useful code template, and start enhancing it. One important addition we can make is including extra libraries. I’ll add everything initially and then remove what’s unnecessary. For example, I’ll remove the Holt-Winters-specific libraries, since they are very model-specific. Everything else stays, and that gives us a clean, reusable template.
+
+Next, we ensure proper renaming and organization. This includes adding placeholders like XXX for parts that may need future adjustments. Frequency handling is another key part—at some point we worked with time series frequency, so it’s useful to include that as a function in the template. This allows you to change the frequency dynamically, rename your time series to Y, set the index when importing data, and easily plot the series. These improvements make the template more flexible and user-friendly.
+
+We also aim to improve the plotting and documentation. By passing the plotting and template sections through an AI or a documentation improvement step, the template becomes cleaner, easier to read, and more professional. The goal is to have a ready-to-use template that you can adapt for various projects while keeping the code organized and comprehensible.
+
+Next, we include useful functions like model_assessment. Adding these directly into the template ensures that you can evaluate models, visualize train/test/forecast splits, and calculate error metrics quickly, without rewriting the code each time. One limitation I noticed in Colab is that building a simple library of reusable functions isn’t as smooth as in Jupyter or other environments. In Jupyter, you can build a lightweight library over time and import it easily. Colab doesn’t make this as seamless yet, but including functions in a template is a practical workaround.
+
+We also keep the plot future function in the template. This allows for easy visualization of forecasts whenever we want to predict future data. By having both model_assessment and plot_future in the template, you now have a foundation for end-to-end time series analysis: importing data, preprocessing, building models, assessing them, and forecasting.
+
+Finally, we save this as useful_code_template_final. This final version of the template is clean, reusable, and ready for use whenever you start a new time series project. It’s flexible enough to adapt as your workflow evolves, and over time you can continue to improve it. I hope you had fun building this with me, and I’m looking forward to seeing you in the next video!
+
 # **R) Holt-Winter Pros and Cons**
+
+Hey everyone! In this video, I’m going to walk you through the pros and cons of the Holt-Winters method, breaking it down into key advantages as well as its limitations.
+
+As a general introduction, Holt-Winters is a favorite in the forecasting world. If you have a problem that isn’t overly complex but exhibits trend and seasonality, Holt-Winters does a very good job. Its first advantage is that it is simple to implement. The method is straightforward—you don’t need a PhD to get it up and running—which makes it accessible for many people. I also find it quite intuitive: the model’s logic, which revolves around the current level, the trend, and the seasonality, resonates easily.
+
+The parameters we discussed—alpha, beta, and gamma—exist in the model, but for a simple implementation, we often don’t even need to tune them. This simplicity makes the model highly adaptable to changes. Because the method emphasizes recent past observations, it naturally adjusts to shifts in trends and patterns, making it responsive to new data.
+
+However, there are some limitations to be aware of. First, Holt-Winters has only one seasonal component. For daily data, for example, you might need to choose between weekly or yearly seasonality, but it cannot account for both at the same time. This limitation is shared with older methods, including models from the ARIMA family, which can struggle with complex time series.
+
+Another limitation is that Holt-Winters cannot incorporate external regressors. Factors such as weather, market conditions, or major events like Covid cannot be used to refine forecasts. The method relies entirely on historical time series data, which may not always be sufficient for accurate prediction in real-world scenarios. When multiple seasonalities or external drivers are important, Holt-Winters can fall short.
+
+In conclusion, Holt-Winters stands out as a reliable and quick-to-use forecasting method. You can put it in place easily and quickly gauge how predictable your data is. That said, it’s important to recognize that it may not always be a perfect fit. For complex scenarios with multiple seasonalities or external influences, you may need more advanced models.
+
+That wraps up this section. Until the next video, have fun exploring time series forecasting!
