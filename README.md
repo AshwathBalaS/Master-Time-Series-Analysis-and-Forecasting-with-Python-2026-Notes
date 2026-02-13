@@ -123,6 +123,69 @@ This Repository contains my "Master Time Series Analysis and Forecasting with Py
 
 **R) Holt-Winter Pros and Cons**
 
+**VII) Section 7: HOLT-WINTERS CAPSTONE PROJECT: Air miles**
+
+**A) Capstone Project Presentation**
+
+**B) Python Solutions: Task 1 and Task 2**
+
+**C) Python Solutions: Task 3 and 4**
+
+**D) Python Solutions: Task 5 and 6**
+
+**VIII) Section 8: ARIMA, SARIMA and SARIMAX**
+
+**A) Game Plan for ARIMA, SARIMA and SARIMAX**
+
+**B) CASE STUDY BRIEFING: Predicting Daily Revenues**
+
+**C) Python - Setting Up ARIMA**
+
+**D) ARIMA**
+
+**E) Auto-Regressive**
+
+**F) Integrated**
+
+**G) Python - Stationarity**
+
+**H) Moving Average**
+
+**I) Python - ARIMA**
+
+**J) ARIMA in Action**
+
+**K) SARIMA**
+
+**L) Python - SARIMA**
+
+**M) SARIMA in Action**
+
+**N) SARIMAX**
+
+**O) Python - SARIMAX**
+
+**P) SARIMAX in Action**
+
+**Q) Cross-Validation for Time Series**
+
+**R) Python - Cross-Validation**
+
+**S) Parameter Tuning**
+
+**T) Python - Setting the Parameters**
+
+**U) Python - Parameter Tuning**
+
+**V) Python - Parameter Tuning Results**
+
+**W) Q&A Highlight: Handling Future Data in Forecasting**
+
+**X) Python - Predicting The Future Set Up**
+
+**Y) Python - Predicting The Future**
+
+**Z) SARIMAX Pros and Cons**
 
 
 
@@ -2208,3 +2271,391 @@ Another limitation is that Holt-Winters cannot incorporate external regressors. 
 In conclusion, Holt-Winters stands out as a reliable and quick-to-use forecasting method. You can put it in place easily and quickly gauge how predictable your data is. That said, it’s important to recognize that it may not always be a perfect fit. For complex scenarios with multiple seasonalities or external influences, you may need more advanced models.
 
 That wraps up this section. Until the next video, have fun exploring time series forecasting!
+
+# **VII) Section 7: HOLT-WINTERS CAPSTONE PROJECT: Air miles**
+
+# **A) Capstone Project Presentation**
+
+Welcome to this capstone project.
+
+In this video, I’m going to walk you through the six tasks that you need to complete. To take on this challenge, you essentially have two options for your working environment. You can either use your own setup—something like Google Colab, which is what I’ll be using—or you can use the Udemy workspace that’s provided. The Udemy workspace is mainly there so you can review and work through the tasks themselves, but all the necessary information is also explained here.
+Alright, let’s get started.
+
+The challenge you’ll be working on is centered around air miles data. It’s a very straightforward dataset that contains the number of air miles accumulated per month over a period of roughly ten years. There are six main tasks that you need to complete as part of this project. Along with that, you also have access to starter code, which is provided in the workspace. This starter code is also available to you outside the workspace, and it’s essentially the same in both places.
+If you decide to use Google Colab, the main extra step you’ll need to take is setting up the environment. If you’re using another setup, that may not be necessary. In any case, you’ll find the required libraries, the dataset itself, and a few initial code snippets that are meant to help you get started. All of this is also preconfigured in the Udemy workspace, along with the dataset.
+Now, let’s go through the tasks one by one.
+The first task is to set the data frequency. This is clearly indicated in the instructions. You need to specify the frequency as monthly start. Completing this correctly is your first task.
+
+After that, the second task is to visualize the data. The main purpose here is to really become familiar with the dataset—think of this as exploratory data analysis. In my own solution, I’ll be doing this step by step. For your part, you can keep it simple if you want, such as basic plots. You can also go further and include seasonal decomposition, autocorrelation and partial autocorrelation plots, monthly plots, quarterly plots, or a combination of these. I would recommend doing as many as possible, because each of these visualizations provides complementary insights into the data.
+
+The third task is very straightforward. You need to split the data so that the last 12 months are used as the test set, and all the remaining data is used for training. The idea behind this is to have an unbiased way to evaluate the model. Typically, the test set should consist of the most recent observations, because that’s where, in real-world scenarios, we most want our forecasts to be accurate.
+
+Task number four is where you build the model. Here, you’ll create a Holt-Winters model. You’ll need to specify the type of seasonality—whether it’s additive or multiplicative—set the seasonal period, and then fit the model to the training data.
+
+Task number five is about forecasting. Using the fitted model, you’ll predict the next 12 months of air miles. You’re also encouraged to visualize the forecasted values along with the historical data, if you’d like, to better understand how the model is behaving.
+
+Finally, the sixth and last task is model evaluation. Here, you assess how well your model performed. You can use mean absolute error, or you can use the three commonly used metrics: root mean squared error, mean absolute error, and mean absolute percentage error. You may also choose to visualize the errors, but the key objective is to measure the model’s error and clearly present it to the user.
+
+So, to summarize, there are six tasks in total. You’ll find the solutions for these tasks in the task folder, with separate code files for task one through task six. There is also an overall script that brings everything together.
+
+And that’s it. I hope everything is clear. If you have any questions, feel free to ask them in the next video. In the next session, I’ll start from the starter code and solve the capstone project step by step with you. I’ll see you in the next video.
+
+# **B) Python Solutions: Task 1 and Task 2**
+
+All right, let’s solve this together.
+
+I went ahead and ran the initial setup. I set the directory in my Google Colab environment, and inside it we can find our data file, air.csv. I also set the index to be the date column, enabled date parsing, and specified dayfirst=True. What we now have is monthly data ranging roughly from 1996 to 2005, with about 113 entries in total. I then renamed the main series to Y.
+
+Now let’s take a look at the tasks.
+
+The first task is to set the data frequency and use MS (monthly start). Let’s give this a try. For task one, we set the index to monthly frequency using MS. That’s the very first step. I apply this directly on the DataFrame index, and once that’s done, everything looks good and ready to go.
+
+With task one completed, we can move on to task two, which is data visualization and exploratory data analysis. The goal here is really to understand the data deeply.
+
+The first visualization is a simple time series plot. We plot dataframe.Y and display it. After adjusting the figure size to make it clearer, we can immediately see a few important patterns. There’s a clear upward trend over time, and the data also appears to be strongly seasonal.
+
+If we look closely, there’s a noticeable dip around 2001. This aligns with the September 2001 terrorist attacks, which understandably reduced people’s willingness to fly. This real-world event is clearly reflected in the data.
+
+Next, we build a monthly plot. We plot the monthly seasonality of dataframe.Y and set the y-axis label to “Monthly Air Miles.” From this visualization, the seasonality becomes very clear. Air miles are highest roughly between March and August, while the lowest values appear between September and February.
+
+To further confirm this pattern, we move on to a quarterly plot. We resample the data by quarter and then plot it. Initially, we run into a small issue because resampling requires an aggregation function, so we apply a sum. Once that’s fixed, the plot works as expected. From this view, Q1 shows the lowest values, Q4 is slightly higher, and Q3 has the highest seasonal peak.
+
+Next, I like to perform seasonal decomposition. Since the data shows that as the trend increases, the magnitude of the seasonal fluctuations also increases, it suggests that a multiplicative model is more appropriate than an additive one. We perform seasonal decomposition with a period of 12 and set the model to multiplicative.
+
+When we plot the decomposition, we can clearly see the upward trend, a dip around 2001, and then a recovery afterward. The seasonal component fluctuates roughly between 0.9 and 1.1, which means about plus or minus 10 percent seasonality. The residuals are centered around 1, which indicates a very reasonable and clean decomposition. Overall, this looks like a good fit for the data.
+
+There are two more plots I want to include here. The first is the autocorrelation plot (ACF). When we plot the ACF for dataframe.Y, we see strong peaks around lag 12, as well as at multiples of that lag. This clearly indicates strong seasonality. We also see that most correlations die off quickly, which suggests that there isn’t an extremely strong long-term trend component.
+
+Finally, we look at the partial autocorrelation plot (PACF). Here, we see significant information around lags of 6–7 months and again around 12–13 months. This also aligns very well with the seasonal nature of the data and further confirms our earlier observations.
+
+With that, we’re done with task one and task two. In the next step, we’ll move on to task three, which is creating the training and test sets. I’ll see you in the next video.
+
+# **C) Python Solutions: Task 3 and 4**
+
+The next step is to move on to task three, which is creating the training and test sets.
+
+For this task, we’re going to define the test set as the last 12 months of data, and the training set as everything that comes before that.
+
+Let’s get started by setting up the test set. We take the DataFrame and slice it so that everything up to index -12 becomes the training data, and from -12 to the end becomes the test data.
+
+This approach works quite well and is very clean. Once this split is done, task three is effectively completed, because that is all the task requires.
+
+Next, we move on to task number four, which is to build the Holt-Winters model.
+
+In this task, we build the Holt-Winters model using the time series data from the training period only. It’s important to note here that Holt-Winters does not allow external regressors, so we are working purely with the time series itself.
+
+Now let’s build the Holt-Winters model. We create the model using exponential smoothing and pass in dataframe.Y as the input series.
+
+For the seasonality, we initially consider a multiplicative form because earlier analysis suggested multiplicative seasonality. However, when we look at the trend more closely, it appears to be fairly linear.
+
+Since linear trends typically work well with additive seasonality, we decide to go with additive seasonality instead.
+
+After setting up these parameters, we fit the model by calling .fit(). Once this runs successfully, the model is built.
+
+At this point, task four is complete. We’ll stop here for now and come back in the next session to wrap things up with tasks five and six. I’ll see you then.
+
+# **D) Python Solutions: Task 5 and 6**
+
+Task five is focused on forecasting.
+
+In this step, we are going to generate predictions using the model we built earlier. Since task six is about accuracy assessment, we first need forecasts to compare against the test data. Specifically, we are going to predict the next 12 periods using the trained model.
+
+We start by taking the fitted Holt-Winters model and calling the forecast method. To keep things clean and flexible, the number of steps is set automatically based on the length of the test dataset. This ensures the forecast aligns perfectly with the test period. We then store these predictions and label them clearly as Holt-Winters predictions.
+
+At this point, we have our forecast values, which means we are ready to move on to task six: accuracy assessment.
+
+For evaluating the model, we compute error metrics. You can absolutely use pre-built metric functions, and they work quite well. Over time, though, I tend to rely less on them. The reason is that in environments like Colab, especially when working alongside large language models, natural-language-driven exploration often feels more intuitive and flexible.
+
+We assess the model using MAPE and RMSE as our primary metrics. After computing them, we display the results to the user. The MAPE turns out to be around 0.03, which corresponds to roughly a 3% error. That’s an extremely small error and indicates that the model is performing very well.
+
+Next, we visualize the results. We plot the training data, the test data, and the model’s predictions on the same graph. When we look at the plot, we can clearly see that the predicted values are very close to the actual test values. This visual confirmation reinforces what the error metrics already told us.
+
+You’re welcome to customize this plot further—styling, colors, labels, and so on—but even in its basic form, it communicates the model’s performance quite effectively.
+
+Now, let’s do one final bonus step: forecasting the future. After all, this is really the main reason we build forecasting models in the first place.
+
+To do this, we rebuild the Holt-Winters model using the complete dataset, not just the training portion. We fit the model on all available data and then forecast the next 12 months into the future. These become our future predictions.
+
+Finally, we visualize the full historical data together with the future forecasts. This gives us a clear picture of how the model expects the series to evolve going forward.
+
+This wraps up how we assess the model and how we generate future forecasts. Feel free to experiment with the model settings we defined earlier in task four—such as trend and seasonality types—and see how they impact accuracy. Exploring these variations is something we’ll dive into more deeply later in the course.
+
+For now, the key takeaway from this project isn’t just the Holt-Winters model itself. It’s the full workflow: setting the correct frequency, performing solid exploratory data analysis, splitting the data properly, and evaluating results thoughtfully. These building blocks are the real foundation.
+
+And with that, we’re done with the project. If you have any questions, let me know, and I’ll see you in the next video.
+
+# **VIII) Section 8: ARIMA, SARIMA and SARIMAX**
+
+# **A) Game Plan for ARIMA, SARIMA and SARIMAX**
+
+In this section, we’re going to learn some very important foundational models in time series analysis: ARIMA, SARIMA, and related variants. These are models you absolutely need to understand. Alongside them, we’ll also master several core concepts that form the foundation of time series forecasting. Everything we’ve learned so far leads into this part of the journey.
+
+This phase of time series analysis is really about strengthening your forecasting skills before we move on to more complex models. If you want to truly understand ARIMA and its extensions, you’re definitely in the right place. ARIMA stands for Autoregressive Integrated Moving Average, which is quite a mouthful. On top of that, we also have SARIMA and ARMAX, and we’re going to learn all of them, model by model.
+
+We’ll initially put most of our focus on ARIMA, because it contains the majority of the core concepts you need to understand time series modeling. Once you truly understand ARIMA, moving on to SARIMA and ARMAX becomes much easier. For more advanced time series forecasting, especially when seasonality and external factors are involved, we’ll rely more heavily on SARIMAX. But again, if ARIMA makes sense to you, the rest will feel very natural.
+
+It’s really important that by the end of the ARIMA section, you feel confident with it. If you don’t, come to me and I’ll help you. Getting ARIMA right makes everything that follows much simpler and more intuitive.
+
+Of course, we won’t rely on ARIMA alone. ARIMA is the simplest of these models, and as we’ll see, it has limitations. In real life, most data is seasonal. A classic example is ice cream consumption—you don’t eat ice cream all year long. That’s the perfect illustration of why we need seasonal models like SARIMA. On top of that, SARIMAX allows us to incorporate external factors, which are often crucial.
+
+To make this concrete, imagine I live in Berlin. It’s summer while I’m recording this, but it’s raining. Do I want ice cream? Absolutely not. Even though it’s summer, the external factor—rain—changes my behavior. That’s exactly why models with exogenous variables are so powerful.
+
+Throughout this section, we’ll apply these models to real-world data. We’ll explore each model carefully, understand when to use which one, and learn how to choose the best model—typically the one with the highest accuracy. We’ll also spend time tuning our models using techniques like cross-validation and parameter optimization. We’ll really go into the details here.
+
+There’s one more important thing I want to point out. This is probably the third or fourth iteration of this SARIMAX section. The course was launched a few years ago, and I’ve continuously updated it. This is actually one of the biggest updates so far. Previously, I was using the PMDARIMA library quite heavily. Unfortunately, its last update was in 2023, and parts of it no longer work properly, especially in Colab environments.
+
+Because of that, we’re moving away from PMDARIMA. If at any point in this section something looks odd or broken, please let me know. I do my best to keep everything up to date, but I’m not perfect. I’ve remade almost all of the Python-related videos from scratch, and I’ve updated the others where it made sense. Some parts remain unchanged simply because ARIMA itself dates back to the 1960s, and the core ideas haven’t really changed.
+
+Going forward, we’ll be using statsmodels, which we’ve already used earlier for things like seasonal decomposition and plotting. It’s a very strong and reliable library for time series analysis. While the older library had some convenient extra features, moving on is part of the natural evolution of the course—and that’s perfectly fine.
+
+I’m genuinely excited about this section. We’re going to explore these models in depth, really push our understanding, and make sure you’re set up for success. Most importantly, I want you to succeed, and I’ll be here to help you every step of the way.
+
+If you have any questions, let me know, and I’ll see you in the next video.
+
+# **B) CASE STUDY BRIEFING: Predicting Daily Revenues**
+
+In this video, I’ll introduce you to the case study for this section.
+
+Imagine this scenario: you are the owner of a chocolate retail shop, and your goal is to predict your daily revenue. You might ask why this is so important. The answer is simple—understanding and managing cash flow is critical for any business. If you know how much you are likely to earn, you can plan in advance how much stock you need and how many people should be working in the store.
+
+When you picture yourself running this shop, it becomes clear why forecasting matters. Every single day requires planning. Forecasting allows you to prepare for what’s coming, so your shop can stay one step ahead instead of reacting at the last minute. By predicting daily revenue—whether it’s for the next day or the next 30 days—you can make much smarter decisions.
+
+This directly leads to fewer unsold chocolates and better staffing decisions. You don’t want excess inventory sitting on the shelves, and you also don’t want employees standing around without work. Idle staff means wasted money, which is a loss for the company. Accurate forecasts help ensure that people are working when they are actually needed.
+
+As a result, inventory management also improves. You order the right amount of chocolate at the right time, reducing waste and improving efficiency. Overall, this means the business runs more smoothly—and in this case, a bit more sweetly as well.
+
+So what is your role in this case study? You are acting as an analyst or data scientist. Your goal is to analyze past sales data, identify patterns, and forecast future sales. You can also take special events into account, such as weekends or holidays. For example, Valentine’s Day is a huge event for chocolate sales, and ignoring it would lead to poor forecasts.
+
+This case study is especially exciting because it clearly shows how data can influence real business decisions. We’re not just applying algorithms for the sake of it. We’re learning about consumer behavior, understanding seasonality, and finding the right balance between demand and supply.
+
+By the end of this case study, you’ll see firsthand how to forecast the future using ARIMA, SARIMA, SARIMAX, and external regressors. You’ll understand how these models can be applied in a real-world scenario, in a way that closely mirrors what you would do in a day-to-day job as a data professional.
+
+Most importantly, you’ll see just how relevant and impactful this skill is. Forecasting isn’t just theoretical—it can directly affect business performance and decision-making.
+
+That’s it for the introduction. I hope this motivates you. Let’s get started, and I’ll see you in the next video. Have fun!
+
+# **C) Python - Setting Up ARIMA**
+
+Welcome to this first tutorial on ARIMA.
+
+Inside the Time Series Analysis section, you’ll find a folder dedicated to ARIMA, SARIMA, and SARIMAX. In that folder, you’ll also find a starter file. This is a very simple setup that I prepared for you, containing some of the functions we’ve already built and used earlier.
+
+One of the first things you’ll notice is that we connect to the drive. This is something you may need to adjust depending on your setup. You’ll need to mount your drive and possibly change the folder path, but by now you should already be comfortable doing that.
+
+Let’s briefly review the functions and libraries used here. We import pandas and matplotlib, and we also bring in several plotting and modeling utilities from statsmodels. Some of these, like seasonal decomposition, we’ve already used. Others are commented out for now and will be activated later when we need them, such as SARIMAX. We also see imports like ParameterGrid, which we haven’t used yet, and NumPy, which is a standard dependency you’ll see often.
+
+After running the setup, we load the chocolate sales dataset. The index column is the date column, which is why it’s set as the index. We also enable date parsing. However, there’s an important additional detail here: the date format. Because the dates in the CSV file are day-first, we explicitly set dayfirst=True. This ensures the dates are interpreted correctly.
+
+It’s very important to always double-check the date format. If the date is parsed incorrectly, everything downstream—seasonality, trends, forecasts—will be wrong. In this dataset, the original date format could easily be misinterpreted as month-first, so correcting this is a crucial step.
+
+The dataset contains revenue, discount rate, and coupon rate. These are fairly straightforward. The discount rate refers to the visible discount applied to a product, while the coupon or voucher rate is applied later, typically at checkout. These are different mechanisms and often influence customer behavior in different ways.
+
+To make this more concrete, think of an online store like Amazon. A discount might be displayed directly on the product page, such as “15% off,” while a coupon might apply an additional percentage reduction during checkout. These two concepts are handled differently and can have different impacts on sales.
+
+Some preprocessing has already been done in the dataset. For example, the revenue column originally contains commas, which causes it to be read as an object rather than a numeric type. To fix this, we remove the commas from the strings and then convert the values to floats. Once that’s done, the revenue column becomes numeric, which is exactly what we want.
+
+Next, we set the data frequency to daily and rename the main target variable to Y. Setting the correct frequency is always important in time series analysis. We also briefly review the possible frequencies that could be used, depending on the dataset.
+
+Now we move into exploratory data analysis. When we visualize the data, we can see that revenue is generally growing over time. There are also clear spikes at certain times of the year, which strongly suggests seasonality. These spikes repeat year after year, reinforcing the idea that seasonal effects are present.
+
+Looking at the monthly plot, we can clearly see the seasonal ups and downs. Revenue tends to be higher in the second quarter, lower in the first and third quarters, and then rises again in the fourth quarter—especially in November, which shows a very strong seasonal spike.
+
+The quarterly plot confirms this observation. Q1 and Q3 are relatively similar, Q2 acts as a transition, and Q4 consistently shows higher values. This kind of confirmation across multiple plots is exactly what we want during EDA.
+
+We then perform seasonal decomposition using a multiplicative model. The reason for choosing multiplicative seasonality is the presence of large spikes—the size of the seasonal effect grows with the level of the series. The trend component shows steady growth that eventually stabilizes, while the seasonal component exhibits strong recurring spikes. The residuals still contain some large values, indicating that there is room for improvement in the model.
+
+Next, we look at the autocorrelation function. This clearly shows strong seasonal behavior, with spikes at regular intervals such as 7, 14, and 21 days. These repeating patterns confirm that the data is deeply seasonal and that a seasonal component will be essential in our modeling.
+
+The partial autocorrelation plot provides even more insight. We see strong relationships with values from one day ago, two days ago, five days ago, seven days ago, and even up to two weeks back. This again highlights the strong seasonal and short-term dependencies in the data.
+
+At this stage, we may start guessing initial parameters for our models, such as autoregressive and seasonal terms. However, it’s important to stress that visualization is just the starting point. These guesses are not final decisions.
+
+The key takeaway is that while visualization helps us build intuition, our final parameter choices should be driven by data and metrics, not just visual inspection. As we progress through the tutorial, we’ll move away from guessing and toward data-driven decisions. This brings clarity, confidence, and a much stronger foundation for our models.
+
+We’ll stop here for now. There’s a lot more to learn, and the next steps will be both detailed and fun. I’ll see you in the next video.
+
+# **D) ARIMA**
+
+In this video, we are going to cover the ARIMA concepts, and don’t worry if it feels a bit complicated at first. I’ll break everything down in a very simple and intuitive way so you can follow along comfortably.
+
+ARIMA stands for Autoregressive Integrated Moving Average, and it is one of the most popular models in the forecasting world. The reason for its popularity is that it is relatively easy to apply, and the intuition behind it is also straightforward once you understand the basics.
+
+Apart from ARIMA, there is also an extended version that deals with seasonality. This additional layer makes the model extremely useful for data that follows seasonal patterns, such as monthly sales, yearly demand, or weekly traffic. On top of that, ARIMA can also be enhanced by including external factors, known as exogenous regressors, which allow us to incorporate outside influences into our forecasts.
+
+Although all of this might sound complex at first, the good news is that ARIMA is actually very easy to work with in practice. For this particular video, however, we will focus only on the core ARIMA model.
+
+ARIMA has three main components.
+
+The first component is Autoregressive. This part is essentially about looking at the past to predict the future. In other words, we use previous values of the time series to forecast what comes next. If past values have a strong influence on future values, this component captures that relationship.
+
+The second component is Integrated, and this is where stationarity comes into play. A stationary time series is one where the mean, variance, and covariance remain constant over time. Simply put, stationarity means the data follows a consistent pattern that can be predicted. The integrated part of ARIMA helps us transform non-stationary data into stationary data, usually through differencing. We will cover this topic in detail, and in the practice videos, we will place special emphasis on stationarity and the integrated component.
+
+The third and final component is the Moving Average, and this part is quite clever. Instead of only using past values, the model also looks at past errors. Yes, the mistakes the model made in earlier time steps are treated as valuable information and are used to improve future predictions.
+
+From a more mathematical perspective, an ARIMA model is typically written as an equation. In this equation, y(t) represents the value of the time series at time t, which is what we are trying to forecast. The alpha term is the constant or intercept, acting as a baseline starting point. Then we have coefficients for the autoregressive part, which indicate how much influence previous values such as y(t−1) have on the current forecast. We also include coefficients for the moving average part, which determine how much influence past errors should have.
+
+Finally, there is the error term, which represents everything that is not explained by the constant, the autoregressive terms, or the moving average terms.
+
+Even though this may seem mathematically heavy, the core idea is actually simple. A forecast at time t is made up of a baseline value, plus information from the most recent past values, plus information from the most recent errors.
+
+In the next videos, we will zoom in on each of these components individually and build a strong intuition around them.
+
+# **E) Auto-Regressive**
+
+After we have a good grasp of ARIMA, let’s zoom in on each of its components, starting with the Autoregressive part, or AR for short.
+
+In many ways, the autoregressive component is the heartbeat of ARIMA. Understanding it properly is absolutely crucial if you want to understand ARIMA as a whole. So let’s break it down step by step and see what it’s really about.
+
+The core idea behind autoregression is very simple: the past influences the present. Imagine you are trying to predict how much coffee you’ll drink tomorrow. A very reasonable place to start would be to look at how much coffee you drank over the past few days. If you drank a lot yesterday and the day before, chances are you’ll drink a similar amount tomorrow. This intuition is exactly what the AR component captures.
+
+In technical terms, the AR component looks at past values of the time series and uses them to predict the next value. In our coffee example, past daily coffee consumption helps us forecast tomorrow’s consumption.
+
+From a more mechanical perspective, the autoregressive model works using lags. A lag is simply a previous data point in the time series. You can think of a lag as a step backward in time. A lag of 1 means we are looking at yesterday’s value to predict today. A lag of 2 means we are looking at the value from the day before yesterday, and so on.
+
+Within the ARIMA framework, the autoregressive part is represented by the P in the model notation. The value of P tells us how many lagged values of the series we are going to use. For example, if we choose an ARIMA model with P = 2, it means we are using the last two observations—lag 1 and lag 2—to predict the future.
+
+In this case, the model would look something like this: today’s coffee consumption is equal to a constant term (often called alpha) plus a coefficient multiplied by yesterday’s consumption, plus another coefficient multiplied by the consumption from the day before yesterday, and so on. The number of coefficients depends on how many lags we include. With two lags, we have two different coefficients—one for yesterday and one for the day before yesterday.
+
+The constant term, alpha, acts as a baseline level, while the coefficients determine how strongly each past value influences the current prediction. These coefficients are usually denoted by symbols such as φ (phi), δ (delta), or ω (omega), depending on notation, but the idea is always the same: they measure the influence of past values on the present.
+
+Autoregression is fundamental to time series modeling because time series data is all about patterns over time. In many real-world problems—such as coffee consumption habits or daily chocolate revenue predictions—the past contains valuable information about the future. If a problem had no autoregressive component at all, it would mean that the past provides no useful signal for prediction, which rarely makes sense in time series analysis.
+
+If you’re wondering whether autoregression has something to do with autocorrelation, the answer is yes. They are closely related. Autocorrelation tells us how strongly current values are related to past values, while autoregressive models explicitly use that relationship inside the ARIMA framework. In a sense, they describe the same underlying information from two different perspectives.
+
+So, in a nutshell, the autoregressive component uses lagged values of the time series to help predict the future. That’s the essence of AR.
+
+Next, we’ll move on to the Integrated part and see what that’s all about
+
+# **F) Integrated**
+
+Let’s now move on to the second component of the ARIMA model: Integrated.
+This part plays a key role in making our predictions as accurate and reliable as possible.
+
+So what does Integrated actually mean, and how does it relate to stationarity?
+
+A good way to think about a stationary time series is to imagine a reliable train moving at a steady pace. Its speed doesn’t suddenly change, and neither do its characteristics. In statistical terms, a stationary time series has a constant mean, constant variance, and constant covariance over time. In simple words, it doesn’t swing wildly. Its patterns are stable, and that stability makes it much easier to predict what will happen next.
+
+The challenge is that, in practice, most time series data is not stationary. This is where the concept of differencing comes in.
+
+If our data is not steady—for example, if it has a clear upward or downward trend, like we often see with financial data such as Bitcoin prices—we need to apply differencing. Differencing helps smooth out the data. What we do is subtract one day’s value from the previous day’s value. The result is a new series that is much more stable and, therefore, more predictable.
+
+We’ll explore this visually in the practical tutorial, where I’ll show you what a raw time series looks like and how it changes after differencing is applied. For now, it’s enough to understand the idea: differencing removes trends and stabilizes the data.
+
+Now let’s connect this back to ARIMA.
+The Integrated component tells us how many times we need to difference the data to make it stationary. If we difference the data once and that’s enough to stabilize it, then the model has an I value of 1. In other words, we would be working with an ARIMA model where I = 1.
+
+To build intuition, imagine four different time series:
+
+The first has a fairly stable pattern over time. This one would be considered stationary.
+
+The second steadily grows over time. This means its mean changes, so it is not stationary.
+
+The third shows fluctuations with changing amplitudes—think of seasonal sales that peak and dip at different levels each year. Since the variance changes, this series is also not stationary.
+
+The fourth has cycles of different lengths and irregular ups and downs. Because there is no consistent structure, this series is not stationary either.
+
+In real-world scenarios, this becomes tricky because most real-world data is not stationary. Financial data, revenue data, sales data, and almost anything that represents a flow over time usually changes its behavior. These series don’t follow a clean, stable pattern that’s easy to predict.
+
+That’s exactly why differencing is so important in ARIMA. It transforms messy, time-varying data into something more manageable—something we can actually model and forecast.
+
+A natural question at this point is: How do we know if our data is stationary?
+There is a formal statistical test for this called the Augmented Dickey–Fuller (ADF) test. It allows us to check whether the mean, variance, and covariance are constant over time. In the next video, we’ll walk through this test and I’ll show you how to automate the process so you don’t have to rely on guesswork.
+
+From experience, a practical mindset is to assume that most time series are not stationary and to rely on differencing as a tool to reveal usable patterns. This idea of differencing is quite unique to ARIMA—most other models don’t explicitly include it as a built-in concept.
+
+The good news is that this process is largely automated in practice, so you don’t need to overthink it. We’ll see how straightforward it actually is when we apply it step by step.
+
+Let’s put all of this into practice in the next video.
+
+# **G) Python - Stationarity**
+
+We are now going to look at stationarity, which is a core concept behind the Integrated (I) part of ARIMA. This is something we need to understand and inspect, just like all the other parameters. However, it’s important to be very clear about one thing from the start: we are not going to make final modeling decisions based on a single chart or a single test. Instead, we look at the problem globally.
+
+I want to show you how stationarity works and why it matters. It’s an important topic in time series analysis overall, but in practice, it’s usually not the final deciding factor. In the beginning, we may use it as guidance because it gives us useful information, but later on, what really matters is that we test many combinations of parameters and let the data and metrics decide. That’s ultimately how ARIMA modeling works.
+
+So let’s focus on stationarity. As mentioned earlier, we imported the ADF test, which is our statistical test for stationarity. This test comes from statsmodels, and we apply it directly to our target time series.
+
+We run the ADF test on DataFrame.y, and the output gives us several values. At first glance, it may look overwhelming, but we are going to focus on just one thing: the p-value. The p-value is what allows us to test a hypothesis and make an inference about our data.
+
+To understand the p-value, we need to talk briefly about hypotheses. Every statistical test has:
+
+a null hypothesis (the status quo), and
+
+an alternative hypothesis (what we want to check against the status quo).
+
+For the Augmented Dickey–Fuller test, the null hypothesis is that the time series has a unit root, which means it is not stationary. The alternative hypothesis is that there is no unit root, meaning the series is stationary.
+
+This is where things can feel a bit counterintuitive. We are testing for stationarity, but the null hypothesis actually assumes non-stationarity. So interpretation is crucial:
+
+If the p-value is greater than 0.05, we fail to reject the null hypothesis → the time series is not stationary.
+
+If the p-value is less than or equal to 0.05, we reject the null hypothesis → the time series is stationary.
+
+In our case, the p-value is around 0.1, which is greater than 0.05. That means our original time series is not stationary.
+
+Now let’s look at what happens under the hood when we treat a time series as non-stationary in ARIMA. The model applies differencing. Practically, this means subtracting the previous value from the current value.
+
+So we create a new series:
+y_diff = DataFrame.y.diff()
+
+This operation takes today’s value and subtracts yesterday’s value. Since the first observation has no previous value, we drop the resulting NaN. If you manually check the math between two consecutive values, you’ll see that it matches exactly—this is just simple subtraction.
+
+Once we have the differenced series, we run the ADF test again on y_diff. This time, the p-value becomes very small, close to zero. That tells us that the differenced series is stationary.
+
+So what does this mean for us?
+
+It means that our original time series is not stationary—which is completely normal. In fact, most real-world time series are not stationary. They usually have trends, seasonality, or both. If you just look at our data visually, you can already see a trend and seasonal patterns. Both of these violate the assumptions of stationarity.
+
+Stationarity depends on three things:
+
+constant mean
+
+constant variance
+
+constant covariance
+
+If a time series has a trend or seasonality, these conditions are almost always violated. So it is very fair—and very realistic—to assume non-stationarity in most cases.
+
+That’s exactly why ARIMA includes the Integrated component. Differencing allows us to transform complex, real-world data into a form that is more stable and easier to model.
+
+We’ll stop here for this video. There is still a lot more to learn, and things will become even clearer as we move forward and start combining all these pieces together.
+
+# **H) Moving Average**
+
+
+
+# **I) Python - ARIMA**
+
+# **J) ARIMA in Action**
+
+# **K) SARIMA**
+
+# **L) Python - SARIMA**
+
+# **M) SARIMA in Action**
+
+# **N) SARIMAX**
+
+# **O) Python - SARIMAX**
+
+# **P) SARIMAX in Action**
+
+# **Q) Cross-Validation for Time Series**
+
+# **R) Python - Cross-Validation**
+
+# **S) Parameter Tuning**
+
+# **T) Python - Setting the Parameters**
+
+# **U) Python - Parameter Tuning**
+
+# **V) Python - Parameter Tuning Results**
+
+# **W) Q&A Highlight: Handling Future Data in Forecasting**
+
+# **X) Python - Predicting The Future Set Up**
+
+# **Y) Python - Predicting The Future**
+
+# **Z) SARIMAX Pros and Cons**
