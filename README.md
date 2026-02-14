@@ -2622,40 +2622,588 @@ We’ll stop here for this video. There is still a lot more to learn, and things
 
 # **H) Moving Average**
 
+Now it’s time to cover the final piece of the ARIMA puzzle: the moving average (MA) component. I’ll explain this in a simple, intuitive way, using the same coffee example we used earlier when discussing the autoregressive part.
 
+Imagine you’re trying to predict how much coffee you’ll need tomorrow. One obvious approach is to look at how much coffee you drank yesterday or the day before. That’s exactly what the autoregressive (AR) component does—it learns from past values. But there’s another smart thing we can do, and this is where the moving average comes in.
+
+Instead of only looking at past coffee consumption, what if you also considered the mistakes you made in your earlier predictions? For example, maybe yesterday you predicted you’d need three cups of coffee, but in reality, you only drank one. That difference between what you predicted and what actually happened is an error. The moving average component learns from these “whoopsies.”
+
+In simple terms, the MA part looks at the errors from previous predictions and uses them to improve future forecasts. It’s like saying, “I thought I needed three cups yesterday, but I only had one—let me remember that when guessing today.” This helps the model adjust its predictions more intelligently.
+
+One of the main reasons we need the moving average component is to smooth out random fluctuations in the data. Real-world data often has sudden bumps or noise that don’t represent long-term behavior. The MA helps prevent the model from overreacting to those random changes and making drastic decisions based on very recent events.
+
+At the same time, the moving average is great for quick adjustments. If there’s a sudden drop or unexpected change, the MA component adapts quickly because it directly accounts for recent prediction errors. It doesn’t just rely on past values—it also learns from past mistakes.
+
+So, in a nutshell, the moving average adds a layer of wisdom to the forecasting process. It teaches the model not only to learn from what has happened before, but also from where it went wrong. That balance makes predictions smoother, smarter, and more responsive.
 
 # **I) Python - ARIMA**
 
+Okay, now it’s time to move on to ARIMA. In our functions, you’re going to find SARIMAX, and we’ll be using this to build our ARIMA model. Sorry, SARIMAX, for everything—but the reason we use it is because SARIMAX can also be used to build a plain ARIMA model. And just to be complete, there’s also ARIMAX, which is ARIMA with external regressors but without seasonality. That setup is quite unique and not something you see very often in real-world time series, but it’s good to be aware of it.
+
+As always, the first thing we do is assess our data properly. That means splitting it into training and testing sets. Here, we’ll keep the last 30 days as our test data. Everything before that becomes the training set. Once we do this split, we can quickly preview the test data to make sure everything looks correct. So far, everything looks fine.
+
+At some point in the future, when we include variables like discount rate and coupon rate, we’ll need to deal with the fact that they’re stored as objects—probably percentages. We already saw that when checking the dataset info earlier. But that’s a future problem, and for now, we’ll ignore it.
+
+Next, we create the ARIMA model itself. Since this is a non-seasonal ARIMA, the seasonal order will be set to (0, 0, 0, 0). That means no seasonal autoregressive terms, no seasonal differencing, and no seasonal moving average terms. For now, we keep it simple.
+
+For the main ARIMA order, we use (1, 1, 1) for p, d, and q. The differencing term d is set to 1 because we already saw that the data is not stationary. It’s important to highlight that choosing these values is often a bit of a guessing game, especially in the beginning. Personally, I like to look at PACF values, and here I’m choosing to look back three days for the autoregressive component. That’s why we include three lags when thinking about the AR structure.
+
+Once the model is defined, we immediately fit it using .fit() and then print the model summary. While this is running, a quick reminder that documentation is always important—the SARIMAX documentation link is already included at the top of the script.
+
+The model fits very quickly, in about two seconds. In the summary, you’ll see the endogenous variable, which is our main time series, and the exogenous variables, which would be things like discount rate or coupon rate if we had added them. You’ll also see the order and seasonal order listed. There are many other parameters shown, but from an application perspective, most of them aren’t critical, and honestly, I’ve never really needed to use them.
+
+There’s also the disp parameter in the fit method. If you ever see a lot of convergence warnings and your model isn’t behaving well, you can set disp=False to suppress those messages. It’s just a boolean flag. For us, though, everything looks fine, so we don’t need to worry about it.
+
+Looking at the coefficients, we can see three autoregressive terms, corresponding to the three past days we’re using, and one moving average term. The moving average coefficient is around -0.9. I’ll explain what this means visually in a moment with a simple drawing, even though I’m terrible at drawing. The idea is just to make the intuition clearer.
+
+Before we move to the drawing, let’s generate predictions. We use the model’s forecast method and set the number of steps equal to the length of the test set, which is 30 days. Since the test data length is already a number, we don’t need to do anything fancy here—just generate 30 predictions.
+
+When we look at the predicted values, something interesting happens. The predictions start increasing—141, 149, 151, 52, 54, 55, 56, 57—and then they flatten out. Eventually, they stabilize at a fixed value. This happens because ARIMA is a simple model that only looks at the last three days and the average error from the previous day. Over time, it converges to a steady level and stops changing much.
+
+Now let’s visualize the forecast and assess the model. When we compare predictions with actual values, the results are not great. To make it easier to see, we focus only on the year 2022. Even then, the error is quite large—around 24%, which translates to roughly 7 million units. That’s a significant error, and visually, the fit looks pretty bad.
+
+If we zoom in on the forecast, we clearly see the plateau effect. Because the model only looks at the last three days, repeated forecasting causes it to settle at a constant level. This behavior is exactly why ARIMA is considered an introductory model. It’s great for learning the fundamentals, but it has clear limitations when applied to complex real-world data.
+
+This is why we’re using ARIMA mainly as a stepping stone. It helps us understand how autoregression, differencing, and moving averages work together. In the next step, we’ll draw this out visually to really see how it behaves, and then we’ll build on it with more advanced models.
+
 # **J) ARIMA in Action**
+
+Okay, welcome back. Let’s now look at ARIMA in practice. I went ahead and made a few drawings to help visualize what’s actually going on under the hood. I’ll be the first to admit that I’m really bad at drawing, but I genuinely hope this still helps make the idea clearer.
+
+In the drawing, we start with our time series, and I’ve shown four periods here. The model itself is using three previous periods, which matches the way we configured it earlier. You can see coefficients like 0.35, 0.02, and 0.12—these represent the weights applied to the previous values in the time series. Let me zoom in a bit so it’s easier to see what’s happening.
+
+So here’s the idea. We have values from the time series at t-1, t-2, and t-3. These past values are multiplied by their respective coefficients and combined together. At the same time, we also consider the forecasting errors. I’ve drawn the actual time series in one color and the forecasting errors in another to distinguish them.
+
+To predict the value at time t, we combine all of this information. That includes the values from the previous three periods and the forecasting error from t-1. The ARIMA prediction is essentially a mixture of past observations and past mistakes. On top of that, there is also a constant term that is always applied as part of the ARIMA equation. Overall, it’s a very straightforward structure once you see it visually.
+
+I also added another part to the drawing to show that this process is iterative. If the current point is time t, then naturally the previous points become t-1, t-2, and t-3. This keeps rolling forward as time progresses. That’s why this is often called a rolling approach—we’re always moving forward one step at a time, using the most recent information available.
+
+At the same time, we again bring in the forecasting error from the most recent step. So when we predict a future value, we’re always using the last three observed periods and the most recent error. This repeats continuously as the model generates forecasts further into the future.
+
+Even though the drawing isn’t perfect, the key takeaway is that t is always influenced by three previous periods, because that’s how the model was defined: (3, 1, 1). The 1 for differencing means the model internally differences the data to make it stationary, and then it reverts that differencing when producing the final forecast.
+
+Now, when we move fully into forecasting mode—where the model starts predicting future values based on its own previous forecasts—the amount of information available becomes limited. There are no external variables influencing the predictions, and eventually the model starts predicting based on predictions. Because of that, the forecasts converge toward a certain level and stay there.
+
+That behavior explains why we saw the plateau earlier. The model simply doesn’t have enough new information to keep adjusting, so it stabilizes. This is completely expected for a basic ARIMA setup and is one of the reasons why it’s mainly used as an introductory model.
+
+We’ll keep building on this idea when we move to SARIMA, where seasonality adds more structure and usefulness. For now, this visualization should help solidify how ARIMA actually works behind the scenes.
 
 # **K) SARIMA**
 
+Alright, let’s do this. Now we’re going to talk about SARIMA, which naturally builds on ARIMA. If you already understand how ARIMA works, then SARIMA is actually going to feel quite easy, because all we’re really doing is adding a seasonal component on top of what we already know.
+
+The reason this matters is that most real-world data is seasonal. What we do at 10 a.m. is very different from what we do at 10 p.m. What happens in February is not the same as what happens in August. Behavior changes over time in predictable patterns, and because of that, incorporating seasonality becomes extremely important if we want better forecasting results. SARIMA takes us one level deeper and helps us capture those repeating patterns.
+
+The overall purpose here is simple: ARIMA alone is not enough to represent the real world. Even SARIMA is not perfect, but it’s definitely a step in the right direction. When time series methods were originally developed, computational power was very limited. A lot of calculations were done by hand, or with very basic computers and calculators. Given those constraints, these models were designed to be practical and interpretable, and they still make sense today.
+
+Seasonality is everywhere. You don’t eat ice cream all year round, and that example is often used as the poster child for why SARIMA exists. Certain behaviors repeat at regular intervals, and SARIMA is designed specifically to capture that structure.
+
+In terms of components, we already know the lowercase p, d, q from ARIMA. SARIMA adds uppercase P, D, Q, along with m, which represents the seasonal period. One drawback of SARIMA is that it only allows for one seasonal component. In the real world, we often have multiple seasonalities—within a day, across days of the week, across months, and across years. SARIMA can’t handle all of those at once, but it still captures a major part of the structure.
+
+These components work in a fairly straightforward way. For example, earlier we used (3, 1, 1) for the non-seasonal part—three previous days, one level of differencing, and one moving average term. For the seasonal part, we might look at what happened one week ago. In that case, we could set the seasonal autoregressive term P = 1. If we want to look at the forecasting error from one week ago, we would set the seasonal moving average term Q = 1. We can also apply differencing specifically to the seasonal component using D.
+
+The value m represents the number of periods in a season. For example, if the seasonality is weekly with daily data, then m = 7. As we move on to more advanced models later, we’ll see ways to handle multiple seasonalities more effectively, but SARIMA is a solid foundation.
+
+Under the hood, what SARIMA is really doing is splitting the data into seasonal and non-seasonal components. This should sound familiar from when we talked about seasonal decomposition. Once the data is separated, the AR and MA components are applied to each part appropriately.
+
+One major reason SARIMA works better than ARIMA is that it stabilizes the data. ARIMA often struggles with regular ups and downs caused by seasonality. From ARIMA’s perspective, those fluctuations look confusing, so it tries to adapt without fully understanding what’s going on. By removing or explicitly modeling seasonality, SARIMA gives us much cleaner data, making it easier to understand how much information truly comes from the previous days or weeks.
+
+At the same time, we also care about the errors from previous seasons. Are the errors consistently positive or negative week over week? That’s where the moving average component plays a role again. In the end, SARIMA is about balancing information from past values and past errors, both in seasonal and non-seasonal terms.
+
+If you remember Holt-Winters, we also had trend and seasonality components there. Even just adding seasonality alone can explain a large portion of what’s happening in many time series. That’s why SARIMA often performs much better than plain ARIMA.
+
+On the slide, you’ll see references to data with predictable fluctuations. That idea applies to almost all time series forecasting methods—many principles are shared across models.
+
+And that’s it for the theory. Next, we’ll look at SARIMA in practice, just like we did with ARIMA, and see whether we can actually improve our results.
+
 # **L) Python - SARIMA**
+
+Alright, let’s do SARIMA. Here we go. At this stage, we’re simply going to build the model and start with some initial parameter choices. We’ll stick with the non-seasonal order (3, 1, 1) and then add a seasonal order. Since we’re working with daily data, a natural starting point is 7 days, and we’ll also experiment with 365 days to see how the model behaves and whether there are any noticeable differences.
+
+Before finalizing the seasonal order, let’s take another look at the PACF. We can still see meaningful information one week and even two weeks back. Based on that, we’ll use a seasonal autoregressive order of 2. Once again, it’s important to emphasize that a lot of this is based on intuition and exploratory analysis. Another thing to keep in mind is that the lower the parameter values, the less computationally expensive the model becomes. That’s why we’ll keep the seasonal differencing at zero for now. We already have differencing happening in the non-seasonal part, so this should be sufficient as a starting point.
+
+With that in mind, we go ahead and define the SARIMA model. Everything is organized, and we run the model. Initially, something looks odd in the output, but that turns out to be a simple mistake—we were still referencing the ARIMA model instead of the SARIMA one. Once that’s corrected and the proper SARIMA model is used, everything behaves as expected.
+
+Now we can clearly see the components in the model output. We have the non-seasonal autoregressive terms L1, L2, and L3, along with the moving average term. On top of that, we also see the seasonal autoregressive terms, specifically L7 and L14, which correspond to one week and two weeks back. We also include the seasonal moving average error at L7. When we check statistical significance, everything appears to be significant, which is a good sign—it tells us that the model is capturing meaningful information.
+
+The next step, as always, is to look at predictions. We generate forecasts using the SARIMA model for the same number of days as our test set. Instead of focusing on the raw prediction values, we move straight to model assessment and visualization. To make the plot easier to interpret, we again focus only on the year 2022.
+
+Visually, we can now see some ups and downs, which indicates that the model is capturing at least a small seasonal pattern. However, the improvement isn’t as strong as we might have hoped. In fact, the error metric comes out to around 25.9, which is actually worse than what we had before. Even though the curve looks slightly better toward the end, it’s still off overall.
+
+This highlights an important point: not every model works well on the first try. The time period chosen here is especially difficult—think Black Friday and similar events. Those spikes are hard to model without additional information. Just because the model underperforms in one segment doesn’t mean it’s useless. In fact, this is a perfect example of why we need external variables to help explain what’s going on.
+
+One thing we can always try is changing the seasonal period to 365. We can even experiment with two years if we want. However, we need to be very careful here. The further back we go, the heavier the computational load becomes. From a computational perspective, this quickly becomes tricky.
+
+We try running the model with a seasonal period of 365. At first, there are no immediate errors, which seems promising. But as time goes on, the model becomes extremely slow. This is expected—long seasonal periods combined with higher-order models are computationally expensive. The hope is that once we add external variables, the model will improve, even if it still doesn’t perform perfectly. At the very least, we’d expect to see improvements in our evaluation metrics.
+
+At this point, the model is still running. After letting it run for a long time—long enough to go for lunch, cook, eat, relax, stop it, and try again—it becomes clear that the 365-day seasonal setup simply isn’t working for this dataset and parameter combination. It could be the dataset itself, the model complexity, or simply not a good day for this experiment.
+
+A natural question here is whether using a GPU would help. Unfortunately, it wouldn’t. SARIMA is a CPU-only process, and there’s no way to accelerate it using a GPU at the moment. So the only real option is to interrupt the process and restart.
+
+In the end, we revert back to using a seasonal period of 7, which is the standard choice for daily data and works reliably. That’s what we’ll stick with moving forward.
+
+And that’s it for this video. If you tried this yourself and managed to get the 365-day seasonality working, I’d genuinely love to hear about it—what you changed, what worked, and what made the difference. It’s very possible that for a dataset this large and with these parameters, a yearly seasonal component is simply too demanding from a programming and computational perspective.
+
+The key takeaway is this: the more orders and seasonal components we add, the harder the problem becomes. That’s something you should always keep in mind when working with SARIMA.
 
 # **M) SARIMA in Action**
 
+Okay, welcome back. Let’s recap what we were looking at last time and then build on it step by step.
+
+Previously, we focused on the ARIMA forecast. That forecast was a combination of several elements. First, we had the integrated part, which comes from differencing the data to make it stationary. Then we had the forecasting error from time t–1, multiplied by its coefficient. On top of that, we included the autoregressive component, which uses the values from the last three periods—t–1, t–2, and t–3—each weighted by their own coefficients. All of this together makes up the ARIMA side of the model.
+
+If we try to write this conceptually, that’s essentially what ARIMA is doing. It combines recent past values, recent errors, and the differenced structure of the data to produce a forecast.
+
+Now, when we move from ARIMA to SARIMA, we are simply adding more structure to this same framework. The final forecast is still one single value, but it now becomes a combination of more elements. The ARIMA components remain exactly the same, but we add seasonal information on top of them.
+
+So, in the final SARIMA forecast, we are combining four main pieces. First, we still have the ARIMA part, which includes the forecasting error at t–1. Second, we still use the time series values at t–1, t–2, and t–3. Third, we now add the seasonal autoregressive terms, which in our case come from t–7 and t–14. You can see those clearly reflected in the table, where the seasonal lags are 7 and 14. Finally, we also include the seasonal forecasting error, specifically the error from t–7.
+
+All of these elements are combined together to produce the final forecast. It’s important to highlight that although we talk about the integrated part, differencing itself doesn’t have a coefficient. It’s simply a transformation applied during modeling and then reversed when we generate forecasts.
+
+In addition to all of this, we also have the sigma term, which acts like an intercept or baseline. You can think of it as the starting level of the forecast, and then all the coefficients from the AR, MA, and seasonal components adjust that baseline up or down.
+
+At this stage, we don’t yet know whether this is the best possible combination of parameters. That’s something we’ll explore later in the section through experimentation and tuning. For now, we’re using this setup to clearly understand how the model is structured.
+
+The main takeaway from this drawing is that SARIMA is actually a very simple and logical framework. We look a little bit into the recent past, we look further back into the seasonal past, and then we combine everything together into a single forecast. That’s really all there is to it conceptually.
+
+There’s still a lot more to learn, but this foundation is crucial. I’ll see you in the next video.
+
 # **N) SARIMAX**
+
+In this video, we’re going to go one level up and talk about SARIMAX. So what exactly is it? Quite simply, it’s SARIMA plus exogenous variables. That’s where the “X” comes from. Conceptually, SARIMAX is just SARIMA with the ability to include external factors that influence the time series.
+
+Even though the idea sounds simple, it’s extremely powerful. Imagine you’re trying to predict ice cream sales. With SARIMA, you’re already considering past sales and seasonal patterns—things like weekly or yearly cycles. But what about temperature? A very hot day could suddenly cause a spike in ice cream sales that SARIMA alone would struggle to explain.
+
+This is where SARIMAX really shines. It allows you to include exogenous variables, such as temperature, directly into the model. That’s the real “X factor”—pun intended. These variables help explain changes in the time series that don’t come purely from its own past behavior.
+
+In the ice cream example, exogenous variables could include weather conditions, holidays, promotions, or even nearby events. SARIMAX takes these into account, giving you a more complete and realistic view of what actually drives the data.
+
+From a modeling perspective, we’re not adding brand-new internal components like we did when moving from ARIMA to SARIMA. Instead, we’re augmenting SARIMA with these external inputs. The model analyzes how these exogenous variables have historically influenced the main time series and uses that information to improve future forecasts.
+
+One of the biggest advantages of SARIMAX is higher accuracy, especially when external events clearly impact the data. If those outside factors matter—and often they do—SARIMAX can significantly outperform models that only rely on past values and seasonality.
+
+Another major benefit is greater insight. Not only can we make better predictions, but we can also study how different external factors influence our data. This helps with understanding, decision-making, and even business strategy.
+
+Of course, there are downsides as well. The biggest one is complexity. Adding exogenous variables means we need more data, and that data needs to be reliable. We also need to think carefully about data availability, because SARIMAX requires both historical exogenous data and future values of those same variables in order to make forecasts.
+
+In short, using SARIMAX effectively comes down to careful variable selection. We don’t want to make the model unnecessarily complex. As always, if a simpler approach works well, it’s usually the better choice. The key is to experiment—add external factors thoughtfully and see whether they actually improve accuracy.
 
 # **O) Python - SARIMAX**
 
+Alright, welcome back. We’re done with SARIMA, and now it’s time to move on to SARIMAX. This is the next step, and it’s also the one we’re really going to explore in more depth.
+
+If we take a look at our dataset—starting with a quick dataframe.head()—we can see that we now have two additional variables: discount rate and coupon rate. Both of these are currently stored as objects, which is not ideal for modeling. The reason is simple: these values include percentage symbols, and the model expects numerical input.
+
+So the first thing we do is clean this up. We remove the percentage symbol from both the discount rate and the coupon rate columns and then convert them to floats. I’m being very explicit here so we can avoid confusion and get some shortcuts later. Once this transformation is done, the columns are properly converted, and everything looks good.
+
+Next, we split the regressor data into training and testing sets. Just like before, the training regressors will go into the model, and the test regressors will be used during forecasting. This split has to align perfectly with how we split the target variable, otherwise the model won’t work correctly.
+
+To do this cleanly, we select only the discount rate and coupon rate columns and then split them using the same logic as before. The training regressors go up to minus the test days, and the test regressors run from the last test days to the end. We double-check the dates to make sure everything lines up correctly—training ends on October 31st, and predictions start on November 1st. That confirms the split is correct.
+
+With the regressors ready, we can now build the SARIMAX model. We pass in the training target variable along with the training regressors as exog. We keep the same configuration as before: non-seasonal order (3, 1, 1) and seasonal order (2, 0, 1, 7). The documentation reminds us that the exogenous input must be shaped as the number of observations by the number of regressors, which is exactly what we have.
+
+We fit the model and print the summary. This takes a few seconds to run. Once it’s done, we can immediately see what’s new compared to SARIMA. The key difference is that we now have coefficients for discount rate and coupon rate. That’s exactly what we expect—these are the new external variables influencing the forecast.
+
+With that, the modeling part is essentially complete. The next step is prediction. We generate forecasts using the SARIMAX model, specifying the number of steps equal to the test days and passing in the test regressors as exogenous inputs. Once that’s done, we move straight to model assessment and visualization.
+
+The results show a clear improvement. The error drops to 21.7%, and the MAE is around 630, which is definitely better than what we had before. So adding regressors helped—this is a win.
+
+That said, we’re still missing something important. We do capture weekly seasonality, but we’re missing yearly effects—things like Christmas, Thanksgiving, and Black Friday. These events have a big impact on the data, and they’re not explicitly represented in the model right now. If we were building this from scratch in a real project, we would likely add additional variables to represent those events.
+
+The key takeaway from this section is not feature engineering. We’ll do plenty of that later. The real focus here is on understanding the frameworks. From this point onward, we’re going to spend a lot of time on cross-validation, parameter tuning, and reusing the same modeling patterns again and again.
+
+If we truly understand these frameworks now, everything that comes later—especially more advanced models—will be much easier to grasp.
+
+So yes, we improved the model by adding regressors, which is great. But there’s still room for improvement, and that’s exactly what we’ll continue working on next.
+
 # **P) SARIMAX in Action**
+
+In this final video of the section, we take everything we have built so far and bring it together into one complete picture. At this point, we already have our ARIMA and SARIMA components clearly defined, and now we focus on how they combine with external variables to form the final forecasting model.
+
+First, we start with the ARIMA (non-seasonal) part of the model. This captures short-term patterns in the data. In this case, it includes:
+
+A moving average (MA) component of one period
+
+An autoregressive (AR) component of three periods
+
+This means the model looks at recent errors and values from the last few time steps to explain current behavior.
+
+Next, we include the seasonal ARIMA (SARIMA) part, which handles repeating seasonal patterns. Here, the model:
+
+Uses the error from the previous seasonal period, such as one week ago
+
+Uses seasonal autoregressive terms, for example at time steps t − 7 and t − 14
+
+These components help the model capture weekly seasonality and recurring trends that repeat over time.
+
+Now comes the key extension: exogenous variables. In this example, we add two external factors:
+
+Discount
+
+Coupon
+
+These variables are applied at the same time step t, meaning they directly influence the forecast for that specific point in time. While only two are shown here for simplicity, in practice you can include more external variables if they are relevant and available.
+
+When everything is combined, the final forecast is built from multiple elements:
+
+Non-seasonal AR and MA components
+
+Seasonal AR and MA components
+
+Exogenous variables (discount and coupon)
+
+A baseline intercept term (α)
+
+Although we might initially count six major components, the true number is higher because seasonal and non-seasonal parts each contain multiple lag terms. All these elements are weighted and combined according to the model’s equation to produce the final prediction.
+
+It’s important to note that this example represents a basic SARIMAX setup. We are deliberately not introducing feature engineering yet. Feature engineering would involve transforming variables, adding lagged versions of discounts or coupons, encoding promotions differently, or creating interaction effects. That level of complexity is intentionally avoided in this section.
+
+The main focus here is on understanding the fundamentals. Before adding more features, it’s crucial to master:
+
+Cross-validation for time series
+
+Parameter tuning
+
+Evaluating whether additional complexity actually improves accuracy
+
+As always, simpler models are often better if they perform well. External variables should be added carefully and tested incrementally to confirm that they genuinely improve the forecast.
+
+That wraps up this section. If you have any questions or face any issues, feel free to ask. In the next video, we’ll move on to cross-validation and parameter tuning, which are the most important skills to master at this stage.
 
 # **Q) Cross-Validation for Time Series**
 
+Cross-validation is a fundamental concept in time series forecasting because it adds credibility and robustness to our models. The core idea is to repeatedly test the model under different conditions, such as different periods of the year, to ensure that it performs consistently and reliably.
+
+Instead of relying on a single train–test split, we create multiple training and testing scenarios. In time series forecasting, this is especially important because data is ordered in time, and patterns such as trends and seasonality can change throughout the year. A model might perform well in one seasonal period and poorly in another, which does not necessarily mean the model is bad overall.
+
+To address this, we evaluate the model across different seasonal segments. By doing so, we can test whether the model generalizes well across the full range of seasonal behaviors rather than just a specific time window.
+
+When we zoom in on cross-validation for time series, there are two main approaches.
+
+The first approach is called rolling forecast cross-validation. In this method, after each evaluation, we add the test set to the training set before making the next prediction. Over time, the training data grows larger and larger. This approach reflects real-world forecasting scenarios, where all past data is available and should be used to improve future predictions.
+
+The second approach is known as sliding forecast cross-validation. Here, the size of the training set remains constant. Each time we move forward, we add new test data to the training set but remove the same amount of the oldest data. As a result, the training window slides forward in time while maintaining a fixed length.
+
+Between the two, the general preference is often for the rolling forecast approach. The reasoning is simple: if historical data is valuable enough to be used for evaluation, then it should also be valuable for training the final forecasting model. If certain data is not useful, then it probably should not be included at all, even during experimentation.
+
+Rolling forecasts ensure that all available information contributes to both model assessment and future predictions. Sliding forecasts can be useful in cases where very old data is no longer relevant, but this should be a deliberate and well-justified choice.
+
+To summarize, cross-validation is a simple yet powerful concept for building reliable forecasting models.
+
+Rolling cross-validation continuously expands the training set by incorporating past test data.
+
+Sliding cross-validation keeps the training window fixed by adding new data and discarding the oldest observations.
+
+In the next video, we’ll see how this cross-validation strategy is applied directly to our forecasting model. Have fun, and feel free to ask if you have any questions!
+
 # **R) Python - Cross-Validation**
+
+Alright, let’s move on to cross-validation and see how it actually works in practice.
+
+For this, we are going to use time series cross-validation, specifically the TimeSeriesSplit approach. I already have the module ready, and we’ll include it directly in our workflow. This method is designed specifically for time-dependent data, where maintaining the order of observations is critical.
+
+We’ll start by clearly defining the cross-validation configuration. This keeps the code clean and avoids unnecessary noise later on. The non-seasonal order remains (3, 0, 1) and the seasonal order stays (2, 0, 1, 7). We also define the number of splits as five. This means the model will be trained and tested five separate times across different temporal segments of the data.
+
+Next, we import TimeSeriesSplit from sklearn.model_selection. We initialize it with:
+
+n_splits = 5, meaning five cross-validation runs
+
+test_size = number_of_test_days
+
+The choice of test size is very intentional. Our forecasting use case always focuses on 30-day forecasts, so our test window is consistently set to 30 days. This is a crucial difference from traditional machine learning, where people often use fixed ratios like 80/20. In forecasting, we must evaluate the model in the same horizon we plan to use it in production.
+
+The max_train_size parameter is left as None, which means we are using a rolling forecast strategy. The training data grows with each split instead of being restricted to a fixed window.
+
+Before running the model, we inspect how the time series splits actually look. When we print the train and test indices for each split, we see that only indices are shown. To interpret this correctly, we check the total length of the dataset, which is 1,795 observations. Since indexing starts at zero, the final index is 1,794.
+
+Each split consistently takes the last 30 observations as the test set, then shifts backward in time for earlier splits. For example:
+
+One split tests days 60–30
+
+Another tests days 90–60
+
+Another tests days 120–90
+and so on. This confirms that our cross-validation setup is behaving exactly as expected.
+
+Now we move on to actually performing the cross-validation loop.
+
+We begin by initializing an empty list to store cross-validation scores. Inside the loop, for each train-test split:
+
+We retrieve the corresponding indices
+
+We isolate the correct training and testing data
+
+We extract the exogenous regressors (discount rate and coupon rate)
+
+We build the SARIMAX model using the defined orders
+
+We generate forecasts for the test period
+
+We evaluate predictions using:
+
+RMSE (Root Mean Squared Error)
+
+MAE (Mean Absolute Error)
+
+MAPE (Mean Absolute Percentage Error)
+
+Each metric is stored for later aggregation. This loop is essentially the same modeling logic we used before, but now it’s wrapped in a systematic evaluation framework.
+
+At this point, it’s important to acknowledge the warnings that appear during model fitting. These warnings are not errors—they simply indicate that from a statistical standpoint, the model may not be perfectly specified for some splits. This does not automatically mean the model is unusable. From a business perspective, performance may still be acceptable, and the final decision should always be based on the actual error metrics.
+
+Once the loop finishes running, we aggregate all results into a DataFrame. This allows us to inspect how the errors vary across different splits. In our case, the MAPE values range roughly between 6% and 24%, showing noticeable variability depending on the time period being forecasted.
+
+This variability is expected in real-world time series. Ideally, we would like more stability, but performance always depends on the underlying volatility of the data.
+
+Finally, we compute and print the average errors across all splits:
+
+Average RMSE
+
+Average MAE
+
+Average MAPE (around 18%)
+
+There is clearly room for improvement. However, that is not the purpose of this stage.
+
+The key takeaway here is that we now understand:
+
+How the model behaves across multiple time periods
+
+What level of error we can expect for this specific configuration
+
+That cross-validation provides a much more reliable assessment than a single train-test split
+
+At this point, we know exactly where we stand with this set of variables and parameter choices. The natural next step is parameter tuning, where we systematically search for better configurations.
 
 # **S) Parameter Tuning**
 
+Parameter tuning is what takes a forecasting model from good to great.
+
+It’s true that the programming involved can feel a bit challenging at first, but the good news is that once you understand the structure, you’ll be working with a reusable template. This makes the process much easier to replicate across models and projects.
+
+Let’s start with the most important question: why do we need parameter tuning?
+
+Modern analytics gives us an incredible amount of flexibility. We can customize models, adjust assumptions, and fine-tune how they behave. However, this flexibility also means that there is no single “default” configuration that works best for every problem. To get the highest possible accuracy, we must actively search for the optimal set of parameters for each model and each dataset.
+
+From a process perspective, parameter tuning follows a very logical sequence.
+First, we define a range of possible parameter values.
+Next, we run the model using each of these combinations.
+Then, we measure the model’s accuracy and store the resulting error.
+
+At its core, this is nothing fundamentally new. It’s exactly what we’ve already been doing—but now we do it systematically, repeatedly, and in an automated way.
+
+To make this concrete, imagine we are tuning the autoregressive component of a model. We might test lags of 1, 2, and 3. For each lag value:
+
+We fit the model
+
+We compute the error
+
+We store the result
+
+Once all combinations are evaluated, we simply select the parameter value that produced the lowest error. For example, if lag 1 performs best, then lag 1 becomes our optimal autoregressive parameter.
+
+From an intuition standpoint, this process is very straightforward.
+We explore different combinations, compare their performance, and keep the one that works best for our specific forecasting problem.
+
+To summarize, parameter tuning is about finding the optimal configuration of a model that maximizes forecasting accuracy. It transforms model development from guesswork into a disciplined, data-driven process.
+
+In the next step, we’ll implement this entire concept in Python, using the structure we’ve already built.
+
 # **T) Python - Setting the Parameters**
+
+Okay, parameter tuning. This part is going to be split into three videos. In the first video, we are going to focus purely on the configurations. The goal here is not to run anything yet, but to get everything properly set up so that parameter tuning can run smoothly later.
+
+In video two, we will actually run the parameter tuning. This step takes a few minutes to execute, which is why we are not going to try a large number of configurations. You will already have the full structure in place, so scaling it up later will be easy. For now, we are going to work with eight configurations. You could easily run 512 configurations if you want, but eight is more than enough for us to clearly understand the flow.
+
+Then, in video three, we will look at the results and interpret them. That is the overall purpose of this section and how it is structured.
+
+Now let’s get started.
+
+First, let me quickly check the imports. Everything looks good. One important thing we need here is the parameter grid. This parameter grid is what is going to automatically create all the combinations for us. I’m going to run this import, and once that’s done, we can kick things off.
+
+Next, we define the parameter options. The parameter grid is honestly one of those pieces of code that you’ll end up using forever. We use it so often that it becomes second nature.
+
+We start by defining the non-seasonal parameters. For p, I’m going to use values 1 and 3. Three is the value we’ve been using so far. For d, we’ll stick with 1. For q, we’ll test 0 and 1.
+
+Then we move on to the seasonal parameters. For uppercase P, we’ll use 1 and 2. For uppercase D, we’ll use 0. And finally, for uppercase Q, we’ll use 1, just one value.
+
+Once all of these are defined, we bring everything together by applying the parameter grid. This creates all the possible combinations based on the values we specified. At this point, you can convert the grid to a list and inspect all the combinations if you want. Personally, what I usually do is just check the length of the grid.
+
+When we do that here, we see that the total number of combinations is eight. So we’re going to run eight different configurations. I always like to stay on the lower side at the beginning because it’s much faster. Cross-validation itself can take a couple of minutes per run. So eight configurations means we can expect something like 10 to 12 minutes overall, give or take.
+
+Now, regarding the setup, we actually don’t need to redefine everything because we’re going to reuse the same setup we already have. The number of splits is already defined, and the test size is also defined. That said, one thing I like to do is to explicitly include the time series split here again. Yes, this is technically a repetition, but I personally prefer having everything visible in one place.
+
+In fact, I like to include as much as possible here. That way, if you want to change something later—like increasing the number of splits—you can do it easily without hunting through the notebook.
+
+It’s also important to understand that cross-validation is realistically an in-between step. In practice, you could skip explicit modeling and cross-validation and go straight to parameter tuning, because parameter tuning is really the last step before forecasting the future. However, since we’re doing this step by step for learning purposes, this is how I prefer to structure it.
+
+Finally, just to have something ready for the next step, we initialize an RMSE list. We’re going to track only one KPI, and that’s more than enough to make a decision. There’s no need to overcomplicate things at this stage.
+
+And that’s it for now. Everything is ready.
+
+In the next video, we’re going to actually perform the parameter tuning.
 
 # **U) Python - Parameter Tuning**
 
+The way we kick this off is by iterating over the parameters. That’s always step one. So we start with a loop over the parameter grid. For each set of parameters in the grid, we are going to evaluate how well the model performs.
+
+So essentially, we loop through the grid, and for each parameter combination, we initialize a few things. We create an empty list for the fold errors, and we also prepare an empty list that will later store the average error for that parameter configuration.
+
+Once that’s set up, we move into the next loop, which is the cross-validation loop. For each train index and test index coming from the time series split, we isolate the training data and the test data. This gives us the specific slice of the time series that we are working with for that fold.
+
+After that, we isolate the exogenous regressors. We create the training regressors and the testing regressors, making sure they align perfectly with the train and test indices. This step is crucial because the model needs the correct regressors for both fitting and forecasting.
+
+Now comes the modeling part. We build the SARIMAX model using the current parameter combination. From the parameter grid, we extract p, d, and q, along with the seasonal parameters, where the seasonal period is set to seven. We then fit the model.
+
+At this stage, we are not interested in the summary output. We don’t inspect coefficients or diagnostics here. That exploratory phase is already done. In parameter tuning, the focus is purely on output, output, output—we care only about the error metrics.
+
+Once the model is fitted, we generate predictions for the test period. With those predictions, we calculate the RMSE by comparing the predicted values with the actual test values. We triple-check that the test target and predictions are correctly aligned.
+
+That RMSE value is then appended to the list of fold errors. This process repeats for every fold in the time series split. Each fold contributes one RMSE value to the list.
+
+After all splits are completed for that specific parameter combination, we calculate the mean RMSE across all folds. This gives us a single performance score for that parameter set. We then append this average RMSE to our results list.
+
+To summarize the flow clearly:
+We start with an empty list → loop through each parameter combination → create a fresh list for fold-level errors → loop through each train-test split → isolate data and regressors → build the model → make predictions → compute RMSE → store it → repeat until all folds are done → compute the mean RMSE → store the result.
+
+This structure is consistent regardless of the model you use. Whether it’s ARIMA, SARIMA, or SARIMAX, the flow remains the same.
+
+At this point, everything looks good. The logic is sound, the structure is clean, and the code is running. If this finishes within about ten seconds, then everything is good to go. Otherwise, just give it a bit more time.
+
+Either way, once this is done, we’ll move on to the next video, where we connect this logic to the final results and analyze them.
+
 # **V) Python - Parameter Tuning Results**
+
+Alrighty, so it actually took just about five minutes to run, which is quite good. It was way faster than I expected, so that’s definitely positive news. Let’s now check the output and see what we got.
+
+The way this works is that we aggregate the RMSE values together with the parameter grid and then transform everything into a DataFrame. So first, we transform the grid into a DataFrame, which makes things much easier to inspect and work with. After that, we add the RMSE results as a column.
+
+Instead of just looking at the head of the DataFrame, it’s much nicer to view the full table. One of the great things about working in Colab is that you can turn this into an interactive table. You can click around and immediately see which configuration performs best.
+
+Looking at the results, the best configuration turns out to be with parameters corresponding to something like 1-1-0-2-1-0. That’s actually not very far off from what we were using before. Previously, we were using 3-1-1-2-1-0, so this is a reassuring result. It shows that parameter tuning is refining the model rather than completely changing it.
+
+What’s even better is that we clearly see an improvement. The RMSE went from around 4.5 million down to about 4.3 million. And this improvement came from just eight iterations, which is quite encouraging. It shows how effective parameter tuning can be, even with a small search space.
+
+Next, we extract the best parameters. There are a couple of ways to do this. One option is to convert values and items into a dictionary, which works fine. However, a cleaner approach is to keep everything as a DataFrame and use .loc to filter the row with the minimum RMSE. This keeps the structure consistent and makes the result easier to reuse.
+
+Once we have the best parameters, we can also store them externally if we want. For example, we can save them to a CSV file like best_sarimax_params.csv. This is useful if you want to reuse the results later without rerunning the tuning process.
+
+At this point, we are in a very good position to move forward. The next step is to start thinking about predicting the future using this optimized model. Now that parameter tuning is done, the process becomes fairly straightforward.
+
+From here on, the main focus will be on understanding and preparing the future regressors. You can already see them in the dataset. Although there are some suggested ideas—like using lagged versions of regressors—we are not going to apply those just yet, because they were not part of the modeling step so far.
+
+That said, lagging a feature by one time step is a very powerful form of feature engineering. For example, instead of only using today’s discount rate, you could also include yesterday’s discount rate as an additional input. This is almost like applying an autoregressive concept to the exogenous variables themselves.
+
+We’ll focus on these ideas in the next step. The next video is really about setting everything up properly so that we can use our tuned model to predict the future.
 
 # **W) Q&A Highlight: Handling Future Data in Forecasting**
 
+I created this video because this is probably the number one question I get: how do I deal with future data when my model needs values that I may not know yet? The reality is that many forecasting models require information about the future in order to work properly. This could include upcoming events, planned promotions, or even weather estimates. The goal of this video is to walk through each of these aspects, explain the overall process, and share my experience as a real-world forecaster from when I worked at an e-commerce company—what we actually did, what worked, and what questions we had to ask.
+
+The first and most important question is: why do we need future data at all? The answer is simple. Models like SARIMAX, Prophet, and LSTM require exogenous variables for future dates if those same variables were used to explain the past. In other words, if you use a variable to explain historical behavior, you must also provide that variable for the future in order to make predictions. These inputs could be marketing campaigns, holidays, major events like Easter, Black Friday, or Thanksgiving, and similar calendar-driven effects.
+
+You also have planned promotions, which are slightly different. These are not necessarily external factors, but internally driven events such as birthday sales, flash sales, or major discount campaigns. On top of that, there are clearly external variables like weather forecasts or economic indicators. The key point here is that without these future values, the model cannot produce a meaningful forecast. It would be like asking the model to predict demand without telling it the conditions that actually shape customer behavior.
+
+So the next natural question is: how do we actually get this future data? In practice, the answer is collaboration. In real-world forecasting, you work closely with other teams and rely on their plans and forecasts. Finance teams are a great starting point because they almost always have budgets, expense plans, and revenue targets. In larger companies—especially publicly traded ones—these forecasts exist for the rest of the quarter, the semester, and often the entire year. As a forecaster, you depend heavily on this information.
+
+Marketing teams are equally important. They know when campaigns will run, when promotions will happen, how long they will last, and what discount levels will be applied. These things do not happen randomly; they are carefully planned both operationally and financially. Marketing and finance teams are usually tightly connected, so this information is often already aligned.
+
+Sales teams also play a key role. They understand targets, growth plans, and what actions are expected to drive sales. Other teams may also be relevant depending on the business, but the bottom line is clear: collaborate. These teams already have the data you need. For example, if marketing plans a major holiday sale, they will know the exact dates, duration, expected discount rates, advertising intensity, and more. Go to them—this information already exists.
+
+From an operational standpoint, creating the future dataset can feel challenging, but it follows a clear process. First, identify the regressors you need, such as temperature, discount rate, or holiday flags. Next, define the future time range you want to forecast. Are you predicting seven days, 30 days, 60 days, or even 365 days? Based on this, you create a future date range.
+
+Then you fill in values for each regressor. For fixed regressors—like holidays or campaign dates—this is straightforward. These are often binary values that indicate whether an event happens or not. Dynamic regressors are trickier. Weather forecasts, for example, require external APIs and come with uncertainty. Economic indicators behave similarly. After filling everything in, you must carefully check for consistency, because it is very easy to make mistakes when manually preparing data.
+
+Your target time series itself, of course, does not have future values. That’s exactly what you are trying to predict.
+
+Another important aspect is forecasting horizons, which vary widely depending on the use case. Daily or weekly forecasts are common when fast reactions are needed, such as for demand planning or short-term promotions. Monthly forecasts are often used for financial planning and budgeting. Quarterly forecasts are critical for scheduling, reporting, and even stock market expectations—companies constantly report performance quarter by quarter. Yearly forecasts support long-term strategic planning, such as capacity planning, hiring, warehouse expansion, and investment decisions.
+
+Regardless of the horizon, the approach to preparing future data stays the same. You extend the dataset to cover the full forecast period. If you want to forecast one full year at a daily level, your future regressors dataset must contain one row per day for that entire year. The same logic applies for weekly or monthly granularity.
+
+At this point, a very reasonable question arises: what if these regressors are important for explaining the past, but I simply don’t have them for the future? This does happen, and it can feel tricky—but there are solutions.
+
+One solution is N-BEATS. This model can work using only the historical target series, and optionally past regressors if they are available. In fact, N-BEATS was originally designed to work without any regressors at all. It is a very powerful model, and we cover it in the course. If this setup fits your situation, I strongly encourage you to explore it.
+
+Another option is the Temporal Fusion Transformer (TFT). You can think of it as N-BEATS on steroids. We also cover this model in the course. TFT can handle static variables, past inputs, and future inputs—but crucially, it can also work when future regressors are missing. The main difference between the two is that with N-BEATS, you cannot include future regressors at all, whereas with TFT you can choose whether to include them or not. Both scenarios are supported.
+
+If you don’t have future regressors, I strongly recommend trying these models and going through their respective sections. The deep learning foundations are mainly covered in the LSTM section, and the theoretical explanations for N-BEATS and TFT are included where they are introduced.
+
+To conclude, forecasting often depends on future values of exogenous variables. When you can plan those future regressors with help from other teams, models like SARIMAX or Prophet work very well. When you cannot, models like N-BEATS and TFT really shine. The guiding principle is simple: if a variable is useful to explain the past, it is probably relevant for the future—but you need a plan for how to obtain or handle it.
+
+Know your forecasting horizon, identify the key regressors, collaborate with the right stakeholders, and build a future dataset that mirrors your training setup. Follow these steps, and you’ll be well on your way to mastering time series forecasting.
+
 # **X) Python - Predicting The Future Set Up**
+
+Alright, we’ve done quite a few transformations and written a fair amount of code so far. Let’s get started right away with the next logical step.
+
+The first thing we’re going to do is isolate X and Y. This is always the foundation. Our Y is very straightforward—it’s simply the target variable from our dataframe. Our X consists of the discount rate and the coupon rate, which we’ve already prepared earlier in the process.
+
+Next, we need to fetch the best parameters. This is the next stage in the workflow. In principle, we could recompute them here, but since we already have them available in the same session, we’ll keep things simple and reuse them. The parameter p will be set equal to the previously identified best parameters.
+
+One important thing to keep in mind here is that if we inspect best_params_p, we’ll notice that it’s a float stored as a NumPy type. What we want to do is transform this value into an integer—so, for example, turning 1.0 into 1. As a best practice, we explicitly apply this conversion. In the past, I’ve run into issues when this step wasn’t made explicit, so it’s always better to be very clear about what’s happening. This way, we know exactly what value we’re passing forward.
+
+Once this is done, we move on to loading the future regressors. We load them into a dataframe—let’s call it future_reg—and take a quick look at the first few rows. You’ll notice that revenue is not present, which makes sense because this is the variable we’re trying to predict. Instead, we only have future values for the discount rate and coupon rate, and they’re currently in a slightly different format, which we’ll need to handle.
+
+You may also notice that lag variables are present. For this particular session, we’re not going to use them, even though they’re already prepared. They were created for a different section of the workflow, but we’ll simply ignore them here.
+
+Now, if we look closely at the date column, we can see that something isn’t quite right. The format isn’t ideal. To fix this, we explicitly specify dayfirst=True and enable date parsing. Once we do that, the dates are properly interpreted and everything looks correct. At this point, we’re good to proceed.
+
+The next step is to isolate the future discount rate and future coupon rate. These values are currently divided by 100, which comes from how the data was sourced. This kind of issue is actually very common in real-world projects, since different data sources often use different units or conventions. To standardize things, we multiply both variables by 100 so that they match the scale used in the historical data.
+
+We assign this transformed data to a new variable—X_future. After applying the multiplication, we verify the result and confirm that the units now match the format used earlier in the modeling process. This ensures consistency between training data and future inputs, which is absolutely critical for reliable forecasting.
+
+At this point, we’ve completed everything we need for this video. In the next one, we’ll build the model, generate predictions, and then visualize the results.
 
 # **Y) Python - Predicting The Future**
 
+If you take a moment to reflect on everything we’ve done so far, it’s actually quite impressive. We started from the basics and went all the way through SARIMA, ARIMA, SARIMAX, cross-validation, and step-by-step parameter tuning. It was a lot of work, but now we’ve reached the point where everything finally comes together.
+
+Now it’s time to build our fully tuned SARIMAX model.
+
+We start by defining the model using our prepared inputs: the target variable Y, the exogenous variables X, and the tuned parameters p and q. Once the model is specified, we fit it and then print the model summary.
+
+At this point—fingers crossed—it should work, and realistically, there’s no reason why it shouldn’t.
+
+Once the model is fitted, we look at the summary output. The results look really solid. You’ll see the coefficients listed, but it’s important to understand that the raw coefficient values themselves don’t mean much in isolation. Interpretation is always relative.
+
+For example, both the discount rate and the coupon rate are expressed as percentages. When we compare their coefficients, we can see that the coupon rate has roughly twice the magnitude of the discount rate. This suggests that coupons are more effective at driving the target outcome than discounts. That’s exactly how you would interpret these coefficients in practice.
+
+Another good example is the autoregressive terms. If you look at the coefficients associated with different lags—say lag 7 versus lag 14—you would typically expect the more recent lag to have a higher coefficient. Higher coefficients generally imply higher relevance, and that intuition aligns well with how time series data behaves.
+
+Next, we move on to making future predictions.
+
+We generate forecasts for the next 30 steps and pass in the future exogenous variables using X_future. At this point, we double-check the dimensions and notice something interesting: the future dataset actually contains 31 rows, while we’re predicting 30 steps.
+
+This is a good observation. In principle, we could have aligned this perfectly by setting the test window to 31 instead of 30. In our case, we’ve been working month over month, so this small mismatch isn’t a problem, but it’s a useful reminder.
+
+A more robust and dynamic approach is to always tie the number of prediction steps directly to the length of the test set or the future exogenous data. That way, these mismatches never happen.
+
+Finally, we visualize the results.
+
+We use the built-in plotting functionality to display the historical data alongside the future predictions. We include the year 2022 in the plot so we can clearly see where the forecast begins and how the model projects forward.
+
+Once the plot appears, everything looks exactly as expected. The future predictions are smoothly aligned with the historical data, and the forecast behaves in a realistic and interpretable way.
+
+And with that, we’re done.
+
+This is the full end-to-end process: from raw data, to transformations, to parameter tuning, to building a tuned model, to generating and visualizing future forecasts. This is how you build a truly strong forecasting solution.
+
+I hope you enjoyed this journey as much as I did. As always, if you have any questions, let me know—I’m here to help. Looking forward to seeing you in the next video.
+
 # **Z) SARIMAX Pros and Cons**
+
+First and foremost, congratulations on completing this section.
+
+I know this was a long one, and we went through quite a lot of steps when it comes to the actual modeling implementation. That said, from my perspective, this is actually a big advantage. Thanks to the pmdarima library, we were able to move relatively quickly despite the complexity. Having ready-made functions for tasks like cross-validation and parameter tuning makes these models far more accessible, especially for beginners.
+
+Now that we’ve built a general structure for Holt-Winters and SARIMAX, we also have a reusable mental framework. You won’t always be able to apply it exactly as we did here, but the underlying logic is solid. And once you understand that logic, adapting it to new datasets becomes much easier.
+
+Even though SARIMAX is considered an older methodology, it can still deliver very strong results—as you’ve clearly seen. That said, it does come with some limitations. One important drawback is that SARIMAX does not always perform well on very long time series. To be fair, this is true for many forecasting models, so it’s not a deal-breaker.
+
+Another key point is that when a forecasting model relies heavily on autoregressive terms, it usually performs best in the short term. Think of forecasts for the next few days or weeks. As you extend the horizon further into the future, the predictions tend to become less stable and less reliable.
+
+When it comes to regressors, SARIMAX uses a simple linear regression framework. This means that if your data suffers from multicollinearity or contains strong non-linear relationships, the model may struggle to capture those effects properly.
+
+Finally, SARIMAX does not support multiple seasonalities. You saw that while we could model weekly seasonality, it would have been ideal to also include yearly seasonality. This limitation is shared with Holt-Winters as well. However, as we move forward into more modern time series techniques, this will no longer be an issue.
+
+All things considered, SARIMAX is still a great model. It’s easy to apply, relatively intuitive, and remains one of those must-know forecasting tools that every data scientist and analyst should have in their toolkit.
