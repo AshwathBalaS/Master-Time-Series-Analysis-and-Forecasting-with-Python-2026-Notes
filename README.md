@@ -187,6 +187,10 @@ This Repository contains my "Master Time Series Analysis and Forecasting with Py
 
 **Z) SARIMAX Pros and Cons**
 
+**IX) Section 9: PART 2: MODERN TIME SERIES FORECASTING**
+
+**A) Modern Time Series Forecasting Overview**
+
 
 
 # **I) Time Series Analysis and Forecasting with Python**
@@ -3207,3 +3211,29 @@ When it comes to regressors, SARIMAX uses a simple linear regression framework. 
 Finally, SARIMAX does not support multiple seasonalities. You saw that while we could model weekly seasonality, it would have been ideal to also include yearly seasonality. This limitation is shared with Holt-Winters as well. However, as we move forward into more modern time series techniques, this will no longer be an issue.
 
 All things considered, SARIMAX is still a great model. It’s easy to apply, relatively intuitive, and remains one of those must-know forecasting tools that every data scientist and analyst should have in their toolkit.
+
+# **IX) Section 9: PART 2: MODERN TIME SERIES FORECASTING**
+
+# **A) Modern Time Series Forecasting Overview**
+
+Welcome to the modern era of time series forecasting.
+
+Ever feel like you're stuck in the slow lane of the data? Not anymore. This is where you shift into overdrive and start predicting the future like a pro, ready to make your data work harder than Jeff Bezos in his garage days. Let's get started.
+
+Ever wonder how big players like Meta and LinkedIn stay ahead of the game? They use cutting-edge tools like Prophet and Silver Kite. And guess what? So will you. Let's turn that plain vanilla approach into something as irresistible as double choc fudge with extra sprinkles.
+
+We'll kick things off with Facebook Prophet. Now, this bad boy is a beast at handling real-world data. You'll go from zero to hero. Setting up the Python environment and building the Prophet models makes managing seasonality and holidays look easy.
+
+And to keep things spicy, we'll dive into a case study on bike sharing. Now let's get technical. Holidays can mess your data, but don't worry. You've got dynamic holidays covered. You learn how to incorporate this into your models and keep your forecasts sharp.
+
+Plus, you'll get the lowdown on Prophet model parameters, learning how to tweak them for peak performance. But this is just the beginning. Next, we unleash LinkedIn's Silver Kite. This tool is like Prophet on steroids. You'll see how it stacks up and when to use it.
+
+We'll set up Silver Kite, load and prep data, and dive into its unique features. Ever wonder how to handle different types of seasonality or manage change points and lag regressors? Silver Kite's got you covered.
+
+Seasonality is a big deal in time series forecasting. You'll master handling different types of seasonality with Silver Kite and explore how it manages change points and lagged regressors. These features will make your models rock solid.
+
+We'll also cover fitting data using ridge regression and gradient boosting. Learn to boost your model's performance with feature sampling and custom elements. Cross-validation is key to accuracy, and you'll practice this with both Prophet and Silver Kite.
+
+Kite parameter tuning can make or break your model. I'll guide you through setting it up and executing parameter tuning in Python, ensuring your models are spot on. You'll see the tuning results and visualize your forecasts, making it easier to impress your boss and crush your goals.
+
+By the end of this part, you'll be crushing time series analysis like a young, balding Jeff Bezos. See you in the next video.
