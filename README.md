@@ -191,6 +191,63 @@ This Repository contains my "Master Time Series Analysis and Forecasting with Py
 
 **A) Modern Time Series Forecasting Overview**
 
+**X) Section 10: (Facebook) Prophet**
+
+**A) Game Plan for Facebook Prophet**
+
+**B) Structural Time Series and Prophet**
+
+**C) CASE STUDY BRIEFING: Bike Sharing**
+
+**D) Python - Directory and Libraries**
+
+**E) Python - Preparing Data**
+
+**F) Python - Exploratory Data Analysis**
+
+**G) Dynamic Holidays**
+
+**H) Python - Holidays**
+
+**I) Prophet Model Parameters**
+
+**J) Python - Prophet Model**
+
+**K) Python - Regressor Coefficients with ChatGPT**
+
+**L) Python - Cross-Validation**
+
+**M) Python - Performance Metrics**
+
+**N) Python - Fixing 2012-10-29 with ChatGPT**
+
+**O) Python - Feature Engineering**
+
+**P) Python - Parameter Tuning Set Up**
+
+**Q) Python - Parameter Tuning**
+
+**R) Python - Parameter Tuning Outcome**
+
+**S) Python - Predicting The Future Set Up**
+
+**T) Python - Tuned Prophet Model**
+
+**U) Python - Forecasting**
+
+**V) Python - Prophet Data Visualization with ChatGPT**
+
+**W) Prophet Pros and Cons**
+
+**XI) Section 11: Capstone Project: Prophet**
+
+**A) Project Introduction**
+
+**B) Python - Challenge Solutions Part 1**
+
+**C) Python - Challenge Solutions Part 2**
+
+**D) Python - Challenge Solutions Part 3**
 
 
 # **I) Time Series Analysis and Forecasting with Python**
@@ -3237,3 +3294,619 @@ We'll also cover fitting data using ridge regression and gradient boosting. Lear
 Kite parameter tuning can make or break your model. I'll guide you through setting it up and executing parameter tuning in Python, ensuring your models are spot on. You'll see the tuning results and visualize your forecasts, making it easier to impress your boss and crush your goals.
 
 By the end of this part, you'll be crushing time series analysis like a young, balding Jeff Bezos. See you in the next video.
+
+# **X) Section 10: (Facebook) Prophet**
+
+# **A) Game Plan for Facebook Prophet**
+
+Alrighty, let's get started into the heart of forecasting with Prophet and Python. And we are going to do all of this with a very cool case study which is on bike sharing. Our adventure will begin by taking a close look at this data set, and we'll build and build and build. Imagine being able to predict the bike rental demand in any weather, season, or city event. And this is where we're headed.
+
+And you know what is the best part? Yeah, I have not told you you'll learn all of this by doing so. You'll get hands-on experience that really sticks. So then, what I'll also do is guide you through setting up the workspace. We'll sort out all the directories and libraries, and then we'll put our data scientist hat on. We'll prep the data, clean it, and start asking questions that only EDA, or exploratory data analysis, can actually answer.
+
+With our bike rentals data, we will explore what factors affect bike rentals more. So what is it? Weather? Is it holidays? We will find that out. And speaking of holidays, you'll learn how to factor those in when the city is either bustling with activities or really quiet as a mouse. This step is really crucial because it shows you how real-world events twist and turn data trends.
+
+Next, we'll dive into the heart of the section and also forecasting, which is the Prophet model. We'll customize models, understand what makes them tick, and really tweak them to perfection. You'll learn not just how to use the model, but to bend it to your own will, making forecasts that are really as accurate as they are insightful.
+
+But one thing is that data is not always straightforward. So we need to tackle anomalies, rework our approach for special days, and refine our forecasts. This is where your analytical skills are sharpened. You'll learn how to spot and smooth out bumps in the data.
+
+Because we are not just dabbling but mastering, you'll dive into feature engineering and parameter tuning. These are your tools for turning a good model into a great one. We'll push our forecast from kind of right to spot-on.
+
+Finally, with our model tuned and ready, you'll step into the future. We'll predict trends, demands, and really the pulse of our bike-sharing rentals with confidence. And on top of predicting, we'll also visualize it. We'll share our insights in a way that people can understand, in ways that turn heads and win nods.
+
+Throughout this journey, you'll not just learn—you'll do. And that's the most important thing: practice, practice, practice. Each step is a step you can take to go from a normal, kind of banal time series forecasting model to a really great one. And that's the goal, really.
+
+So we have learned quite a bit in this course, and it's time to go pro. Until the next video, have fun.
+
+# **B) Structural Time Series and Prophet**
+
+Do you remember the specifics of time series? In very simple terms, it is data that occurs in consecutive periods—for instance, days, weeks, or months—to understand, study, and predict time series. There are loads of concepts and some algorithms that were developed. The most common framework that is currently applied, and also my favorite, is the structural time series.
+
+Now, what does it mean? Let's visualize. Imagine that this is our time series. A structural time series is a decomposition into, at least—and “at least” is a keyword—a trend, which is the growth of the data; seasonality, which are the cycles; the exogenous regressors, which are extra things that affect our time series; and then everything else that cannot be explained, which is the error term.
+
+If we look at the trend, it's usually a line and represents the general direction of the data. It doesn't always have to go up, but it’s not something that fluctuates every day. We also have the seasonality, which are the cyclical patterns in our data. For instance, the consumption of ice cream is cyclical since it peaks in specific periods—specifically, the warmer months of the year. When it's colder, people don’t eat ice cream as much.
+
+Then, we have exogenous events. These are external to our time series but can affect it. Think about the weather, economic sentiment, or even sales events, which can really impact the time series. The secret to a good forecast is really determining this exogenous impact—what they are and figuring out what makes them go up and down with the time series. That being said, even with the best regressors, one thing we need to accept is that the error is part of the prediction. It’s impossible to have 100% accuracy. If you have an error of 5%, you’re doing amazing already. Trying to achieve 100% is not only impossible but can result in overfitting, meaning your model won’t perform well in the real world.
+
+To recap, a time series is the decomposition into trend, seasonality, exogenous impacts, and the error term, which is basically what cannot be explained by the first three. This decomposition can be further split, allowing different types of seasonalities. Mathematically, we can represent it as an equation: the time series 
+𝑦
+𝑡
+y
+t
+	​
+
+ at time 
+𝑡
+t equals the trend at time 
+𝑡
+t plus the seasonality at time 
+𝑡
+t, plus the exogenous regressors, and finally, the error term.
+
+After understanding structural time series, Prophet becomes very easy. But first, let’s start with some curiosities. The first one, which you may have guessed, is that Prophet was developed by Facebook, now called Meta, in 2016. The mathematics behind it are based on Stan, which is used in causal inference. I won’t go into the details of Stan—it’s complex and beyond the scope of this course—but if you’re curious, there are plenty of YouTube resources available. And, as a fun aside, there’s a famous Eminem song called Stan.
+
+Another revolutionary feature at the time was dynamic holidays. They’re very cool, and I have a dedicated video explaining how to model events in a way that’s not complex but easy to apply. Prophet also has intuitive parameters that are easy to grasp and a built-in cross-validation system, making parameter tuning simple even for beginners in Python.
+
+To sum it up, Prophet brings a lot to the table. Whenever I start a new time series forecasting project, I use a pre-built Prophet script. I make a few tweaks, understand my time series data, get a baseline accuracy, and then refine it further. I’m really excited to show this to you.
+
+Mechanically, Prophet shares many similarities with structural time series. The equation is a bit longer: 
+𝑦
+𝑡
+y
+t
+	​
+
+ is the time series at time 
+𝑡
+t, with trend, seasonality, holidays or event impact, exogenous regressors, and the error term. Holidays and events are especially crucial because they occur at irregular intervals—Thanksgiving doesn’t happen on the same day every year, and Easter even varies in month. Prophet allows us to model these efficiently, making forecasting much easier.
+
+We still have seasonality, trend, and regressors, as we know from previous sections. But Prophet lets us go further with practical modeling, programming, and hands-on tutorials. There’s a lot to unpack, but step by step, we’ll practice and get started. Until the next video, have fun.
+
+# **C) CASE STUDY BRIEFING: Bike Sharing**
+
+Before we get started, I want to have more of a formal lecture on the case study because it’s going to be a long one, and hopefully, you find it very cool. But just to make sure that you have a complete understanding, let me give this brief introduction with the help of some slides.
+
+The dataset is all about bike sharing and bike demand. This is where we are going to focus, try to understand it, analyze it, and ultimately predict demand. The dataset was built by Professor Hadi Forney from the University of Porto, Portugal. It takes us to the streets of Washington DC in the USA and is a detailed version of the bike-sharing data collected during 2011 and 2012.
+
+I find this dataset extremely juicy—not just because it gives us all this rental information, but because it really makes us understand what drives rental demand. We are going to focus on factors like temperature, whether it was raining or sunny, and even the day of the week. All of these factors have a strong effect on demand.
+
+Why am I really geeking out over this dataset? It’s packed with information—everything you could imagine. This is a proper dataset. If I were working to predict demand, this would be the kind of dataset I would try to build. Its level of detail makes it perfect for forecasting with Prophet, where we’ll see how all of these variables actually affect bike rentals.
+
+So, what is our plan for this data? We will explore forecasting demand and understanding how city events impact rentals. We’ll even do some research online if we have questions. This helps us get a “big picture” view—not just Python programming, but really understanding, exploring, and putting on our detective hat to mimic a real-life project that any company would face.
+
+In a nutshell, we’re going one step further with this dataset. We have the data and the documentation—please have a look at it. It’s very important to know what is happening because anyone can just create a Prophet model. But moving from step A—understanding the problem—to each step of analysis, while constantly assessing, evaluating, and questioning, is what takes you from being a mediocre data analyst or data scientist to a great one.
+
+And that’s exactly what I want to do with you. Until the next video, have fun.
+
+# **D) Python - Directory and Libraries**
+
+Welcome to this practice tutorial. Please navigate to the folder: first go to Modern Time Series Forecasting, then to Prophet, and click on New → More → Google Colaboratory. For this video, we are going to focus on loading the data and preparing the script.
+
+Let me also get our main script where we have all the core components, just to speed things up. This useful code template will be here for us to use and modify to ensure efficiency. While it opens, let me give a brief overview of this section. It’s going to be long, and the goal is to go from start to finish, trying things, sometimes failing, in a way that closely mirrors a real-world project.
+
+First, let’s get our libraries and the initial part of the code. We will organize what we need and what we don’t. Let’s give our script a name—Prophet—and this will be your template. At this stage, we don’t need everything yet. First, we’ll mount the drive and change the working directory. Follow the usual Google Drive connection steps and continue.
+
+As a quick overview, Prophet differs from ARIMA and exponential smoothing because its library has a lot of built-in functionality. Not everything from our template will be needed or work directly. Let’s get the path: drive → My Drive → Python Time Series Forecasting → Modern Prophet. Copy the path and we’re ready.
+
+The libraries we need are mostly numpy, pandas, matplotlib. We don’t need sklearn because Prophet already has built-in metrics like RMSE and MAPE. We’ll also use ParameterGrid for parameter tuning because I find this approach more intuitive from a programming perspective, even though there are different ways to tune parameters in Prophet.
+
+For the data, navigate to the Prophet folder. Here we have daily bike sharing training. Once opened, you’ll see columns like date, season, year, month, holiday, weekday, and working day (a 0-1 flag indicating whether people were working). Other important columns include weather situation, temperature, A temperature (the normalized “feels like” temperature), humidity, windspeed, and demand metrics: casual, registered, and count. We will focus on count, which is the total demand.
+
+The dataset also comes with detailed documentation. Zoom in on the dataset characteristics. For example, weather situation is categorical even though it’s coded as 1–4 (1 = clear, 2 = mist, 3 = light snow, 4 = heavy rain). Temp is normalized temperature, while A temp is normalized “feels like” temperature. Reading and understanding these descriptions is crucial to truly “become one with the data.” Otherwise, we are just coding, not solving a problem.
+
+Now, let’s load the CSV: daily bike sharing training CSV. For Prophet, we don’t use the index column—it will function as a normal column. Once loaded, Colab might show recommended plots, but we won’t use them because our date column is a regular column and these plots aren’t suitable for time series.
+
+Next, check the data info. Are there null values? No, we have 701 entries, all consistent. All columns are integers except for date, which is fine. At this stage, we need to figure out which columns are essential, which ones to transform, and which can be ignored—this is a core part of data preparation. We don’t need to set frequency because we haven’t set date as the index yet; frequency will be handled later.
+
+I’ll stop here for this video. The focus was on loading our new script and getting the data. In the next video, we will dive into preparing the variables for modeling. Until then, have fun.
+
+# **E) Python - Preparing Data**
+
+Welcome back! In this video, we’ll make several data changes to prepare our dataset for modeling. We’ll start by renaming variables, then adjust the date format, and finally process the weather situation variable. Even though the date is not part of the index, it still needs to follow the standard format: year-month-day.
+
+Next, let’s focus on the weather situation variable. Although it’s numeric (1, 2, 3, 4), it is actually categorical and ordinal. Ordinal variables are categorical variables with a specific order. In this case: clear → mist → light snow → heavy rain. Using 1, 2, 3, 4 directly as numbers doesn’t make sense, so we need to rework this variable into a categorical style.
+
+First, let’s rename our target variable for Prophet. Instead of revenue, we’ll work with count, which we’ll assign as y. For the date column (ds), we’ll convert it using pandas.to_datetime() so that it’s in the correct format (yyyy-mm-dd) even though it’s not the index. The original format is month/day/year with single digits for month and day, so we specify the format accordingly in our conversion.
+
+Next, we prepare the weather situation variable using pandas.get_dummies(). We apply it to the weather situation column and set drop_first=True to avoid redundancy. After this, the dummy variables generated are two and three (note that situation 4 did not occur in the dataset period). We then concatenate these new dummy columns back to our main dataframe on the right side.
+
+Once the dummy variables are added, we rename them to make them more meaningful. Number 2 becomes weather_situation_2 and number 3 becomes weather_situation_3. This makes the dataset easier to work with in Python, avoiding numeric variable names.
+
+Finally, we drop unnecessary columns to simplify the dataset. Columns like instant (observation number), season, year, month, and weekday are removed because Prophet handles seasonality automatically. We also remove casual and registered since our focus is on count. We keep holiday and working day as they may impact bike rentals, along with temp, A temp, humidity, and windspeed. Using inplace=True ensures these changes are applied directly to the dataframe.
+
+At this point, we’ve accomplished quite a bit: we renamed variables 2 and 3, prepared the weather situation, adjusted the date format, and removed unnecessary columns. This completes the first layer of data pre-processing. Now, we’re ready to explore the dataset more deeply in the next video. Until then, have fun!
+
+# **F) Python - Exploratory Data Analysis**
+
+Welcome back! In this video, we’ll focus on exploratory data analysis (EDA), using our script as much as possible. Let’s start by opening our useful code template and copying the EDA section into our Prophet template.
+
+Our first task is to handle the date column. Since ds is a regular column, a simple way to work with it is to create a temporary dataframe and set the date as the index. We’ll create a copy of our dataframe called dataframe_temp and then set ds as its index using inplace=True. Once this is done, we inspect the head of the dataframe to ensure ds is correctly set as the index.
+
+Next, we’ll set the daily frequency for the index using dataframe_temp.index.freq = 'D'. Now, all plotting and resampling operations will be aligned correctly with daily intervals. Every reference to dataframe in our template should now be replaced with dataframe_temp.
+
+With this prepared dataframe, we can start looking at daily demand trends. Plotting daily demand reveals a growing trend, with seasonal cycles appearing larger in the second half of the dataset. We also notice some spikes: one at the very end near zero, several in 2011, and others in March and April 2012. These outliers are important because they highlight the portion of demand that can be explained by our regressors versus the unexplained error.
+
+Next, we inspect monthly trends by resampling the data to monthly frequency. From January to May, demand gradually increases, peaking between May and September, with October roughly at the same level. November and December show a decline. Quarterly resampling confirms this: Q1 has the lowest demand, Q2 increases, Q3 peaks, and Q4 drops again. This confirms that our data is highly seasonal, which is where Prophet’s capabilities will be valuable.
+
+We also attempted seasonal decomposition to see the underlying trend and seasonality. However, decomposition requires at least two complete cycles (730 days), which our dataset does not fully satisfy. Weekly decomposition (period = 7) gives some insight but isn’t fully representative. Prophet handles this more elegantly with structural time series decomposition, incorporating trend, seasonality, and regressors automatically, including complex seasonality like yearly or weekly cycles.
+
+Next, we examined autocorrelation and partial autocorrelation. The autocorrelation plot shows significant correlation for the first 50 days, indicating that recent values strongly influence future demand. The partial autocorrelation indicates that the most relevant lags are the first 6 days, suggesting that weekly seasonality is not strong in this dataset. This observation will influence how Prophet interprets the data, since it doesn’t explicitly use autoregressive components.
+
+In summary, after EDA, we observe a huge trend, multiplicative seasonality (amplitude increases over time), spikes in Q2 and Q3, and very low demand in Q1. Recent observations carry a lot of information, while weekly seasonality is minimal. Overall, we’ve gained a much deeper understanding of our dataset and are ready to explore Prophet modeling in the next video.
+
+Until then, have fun!
+
+# **G) Dynamic Holidays**
+
+Alrighty! In this section, we’re going to talk about dynamic holidays, and I really hope I haven’t overhyped this feature because it’s genuinely very useful. I find it simple to apply, and I’m excited to show you how it works.
+
+We’ll illustrate this with an example: Valentine’s Day, a day celebrated on February 14th. Let’s imagine we’re analyzing chocolate demand around this holiday. The demand typically increases from February 11th, peaks on the 14th, and then drops slightly on the 15th. Even after the holiday, demand remains slightly higher than average because of last-minute purchases—people forgetting or making late decisions. This creates a demand curve that rises before the event, peaks on the day itself, and tapers off afterward.
+
+The next question is: how do we model this demand curve? With traditional models like SARIMAX, you’d need to create a separate variable for each day of interest—so in this case, five variables for February 11th, 12th, 13th, 14th, and 15th. This quickly becomes cumbersome, especially when you have multiple events.
+
+Prophet makes this process much simpler. You only need to specify the day of the event (February 14th in our example) and define a lower and upper window of impact. The lower window specifies the number of days before the event, and the upper window specifies the days after. For our example, a lower window of -3 captures February 11th–13th, while an upper window of 1 captures February 15th. Prophet automatically applies the event effect across these days.
+
+The result is a much more beginner-friendly and intuitive approach. You can assess the impact of each day, visualize it easily, and avoid the complexity of managing multiple variables manually. Dynamic holidays in Prophet let you capture real-world events in your forecasts without excessive programming effort.
+
+Until the next video, have fun experimenting with dynamic holidays!
+
+# **H) Python - Holidays**
+
+Welcome back! In this video, we’re going to focus on holidays in our Prophet model. We’ll explore how they work, what’s already included in our dataset, and what adjustments we might need to make.
+
+First, let’s inspect our data. We can check the holiday column to see which dates are marked as holidays. Using a subset of the data where holiday == 1, we can extract only the relevant dates. However, we notice that the holidays don’t always repeat consistently, and some important holidays like Christmas are missing. Additionally, the dataset may mark some holidays as “observed,” which means that if a holiday falls on a weekend, it’s officially celebrated on the nearest weekday instead. While this is useful, we want to make sure key holidays like Easter and Christmas are explicitly included because their impact on demand is likely relevant.
+
+To create a complete set of holidays for Prophet, we start by defining general holidays using a DataFrame. For each holiday, we specify:
+
+holiday: a name for the holiday
+
+ds: the date of the holiday (as a timestamp)
+
+lower_window and upper_window: the number of days before and after the event where the holiday may have an impact
+
+For example, we might start with lower_window = -2 and upper_window = 2 to capture two days before and after each holiday.
+
+Next, we explicitly add Christmas, New Year’s Eve, and Easter. For Easter, we looked up the actual dates in 2011 and 2012:
+
+2011: April 24
+
+2012: April 8
+
+Each of these holidays is assigned its own identifier so we can later visualize and assess their individual effects on demand.
+
+Finally, we combine all holidays into a single DataFrame using pandas.concat. This combined holidays DataFrame now includes:
+
+General holidays (e.g., Martin Luther King Jr. Day, Presidents Day, Memorial Day, etc.)
+
+Christmas
+
+New Year’s Eve
+
+Easter
+
+At this point, you can also customize the impact window for each holiday based on domain knowledge, stakeholder input, or observed demand patterns. For instance, if you know that Christmas impacts sales for several days beforehand, you can adjust the lower_window accordingly.
+
+With this setup, our Prophet model can now incorporate holidays in a way that’s intuitive, flexible, and aligned with real-world events. This is a crucial part of feature engineering for time series forecasting, as holidays often drive significant spikes or drops in demand.
+
+Now that our holidays are ready, we can move on and get more familiar with the Prophet model itself.
+
+Until the next video—have fun exploring!
+
+# **I) Prophet Model Parameters**
+
+The Prophet model has a lot of parameters for you to tweak, and thus I actually really wanted to introduce you to them just before we actually apply them. This is so that you can familiarize yourself with them. What we're going to do is that we're going to start with seasonality, which can be yearly, weekly, or daily. For daily data, we include weekly and yearly seasonality, and for hourly data, we would also select the daily option.
+
+The important thing here is that we go one step further versus SARIMA and also Holt-Winters. If you recall, with those models we were setting this “M,” the seasonality cycle, and we could have put one. But here what we're saying is that we have more than one seasonality. If you are working with daily data, you have the weekly seasonality and the yearly seasonality. This is important because, in the end, we have different seasonal cycles that need to be accounted for, and this is now possible with Prophet as well.
+
+The seasonality can be multiplicative or additive. This is something that we have covered as a very quick recap. If the sales of ice cream increase by 50% in August, we’re talking about multiplicative seasonality. If it increases by €70 or $70 in absolute terms, then it is additive. The difference lies in the dimension: percentages for multiplicative, absolute figures for additive seasonality.
+
+We need to include the holidays as a DataFrame. We have built it, we know what it is, and it’s just a matter of including it here. These parameters are part of the model, and they are intuitive. We have three key values that we include, which allows us to tune the model. We'll start with the default values, and then as we move on throughout this section, we'll tune these parameters.
+
+The first parameter is the seasonality prior scale, which reflects the strength of the seasonality curve. The next is the holidays prior scale. This determines how much the holidays actually affect the seasonality curve. The seasonality and holidays are connected, but for holidays to have an impact, they need to interfere with the seasonality curve. This is exactly what this parameter accounts for.
+
+Finally, we move on to the trend with the change point prior scale. This controls how easily the trend changes. If the trend changes too easily, we risk overfitting. If it doesn’t change at all, we risk underfitting. The goal is to find the optimal value that allows the trend line to adjust appropriately. We'll also see this visually as we build a chart showing when the trend has inflection points or changes.
+
+Again, this can be a lot of information, but ultimately it’s all about reflecting the components of a structural time series: seasonality, trend, and holidays. We don’t have anything specific here for regressors, but we will include them in the model. This is the part where we aggregate everything, and we'll do that in the next video.
+
+To recap, there are three key parameters we’ll need to tune because these are values that directly affect the model. Anything else is more straightforward, as the seasonality values are already there. We can also tune the seasonality mode (additive vs. multiplicative), but we will focus on that in the future. For now, let’s build our first Prophet model.
+
+Until the next video, have fun!
+
+# **J) Python - Prophet Model**
+
+Welcome back. This is a very exciting video because this is really where the Prophet model starts. Let me include it here and do shift+enter. The way that I want to work with this is by first looking at the data frame. This is always important. Checking data_frame.head() with just one row is okay. This is version 1.2. Remove any NaN or missing values that you may have—they won't work with Prophet. I usually include a drop step just in case to remove any such values. We don’t really have any right now, but this is a template and it must be complete.
+
+Next, let's import Prophet. From prophet import Prophet. Shift+enter. Here we will be building the Prophet model. The model object is usually called m. When it comes to Prophet, they often refer to it as m. We start with Prophet and can include the seasonality. For instance, we can specify yearly or weekly seasonality, which you can see on the screen. But the auto part that Prophet sets usually works very well. Of course, you should never blindly trust technology, but in this case, it works fine.
+
+We initialize Prophet with holidays=holidays and set the seasonality_mode, which I will start as multiplicative based on our previous analysis. Then we have the seasonality_prior_scale (default is 10), the holidays_prior_scale (default 10), and the change_point_prior_scale (default 0.05). This sets up the first part of the model. We then fit the model with m.fit(data_frame).
+
+But we are not done yet. We need to include regressors, which must be added one by one using m.add_regressor(). Holidays are already covered, so let’s add the other variables. First, working_day, then temperature variables like temp_a and temp, humidity, wind_speed, and finally the weather situation variables weather_situation_2 and weather_situation_3. You can copy these names carefully to avoid spelling mistakes.
+
+Once all regressors are added, do control+enter. You will see output indicating the Prophet run. For example, it may mention that yearly seasonality is disabled or daily seasonality is disabled—this is something we can review later. For now, let’s keep it simple. Set yearly_seasonality=True and weekly_seasonality=True explicitly. Then run the model again, and it will be ready.
+
+This is how you build a Prophet model with regressors. These are the default parameters that come with Prophet, and these are the ones we will need to tune over time. For now, we keep building on this foundation.
+
+# **K) Python - Regressor Coefficients with ChatGPT**
+
+We'll come back. In this video, we are going to focus on the coefficients, and this is a very cool feature of Prophet: regressor coefficients. Prophet is very good at dealing with non-linearity. For instance, consider our example where we have temperature, felt temperature, humidity, wind speed—there are bound to be very high correlations here. Fortunately, in the background, Prophet compensates for this multicollinearity. This is why I love using Prophet for insights, because it handles this naturally.
+
+To get started, we import the utility: from prophet.utilities import regressor_coefficients. Then, it’s as easy as calling regressor_coefficients(m). Here we go. For instance, working_day has a positive coefficient of 0.33, which implies that the target increases by 33%. Temperature variables are normalized, so it’s not super easy to interpret directly, but both have positive coefficients, which makes sense. For bike sharing or bike demand, if the weather is warmer, people ride bikes. If it’s humid or windy, then they don’t.
+
+The same applies to weather situation variables. Weather situation two and three correspond to “mist plus cloudy” and “light snow/light rain,” which are not nice weather, so they have negative coefficients as expected. One thing you can do is ask ChatGPT to build a function to interpret the coefficients of a Prophet model. We tried this, but initially, the output was not ideal—especially with GPT-3.5. The interpretation function produced a dictionary, but it wasn’t very helpful, and the delta trend output was confusing.
+
+We then tried a different approach: building an agnostic function to read tables like the coefficient table so that it can work on different datasets. This function should be able to interpret coefficients correctly, taking into account whether the model is multiplicative or additive. After iterating and refining, we now have interpret_prophet_coefficients, which provides a much clearer understanding of each regressor’s impact.
+
+For example, when we apply this function to our model m, it outputs a table with clear interpretations: for each unit increase in working_day (0 or 1), the target variable is expected to increase by 33%. For temperature, the target increases by 81%. For weather situation two, the demand decreases by 11.56%. This gives a straightforward interpretation of the model coefficients and helps us understand the impact of each regressor.
+
+Of course, some details like multiplicative vs additive scaling can be tricky to recall, but having this function makes it much easier to interpret the results correctly. It also handles dummy variables and normalized features, providing a starting point for understanding the influence of regressors.
+
+It took quite a bit of time to get this function working and to interpret the coefficients properly, but persistence pays off. With this, we can clearly see how each variable affects our target, and we are ready to move forward. Let’s continue in the next video. Have fun!
+
+# **L) Python - Cross-Validation**
+
+We'll come back. In this video, we are going to focus on cross-validation, and we are going to make it happen. In the next video, we will focus on the performance of it, but for now, this is really about the setup and making it run. So let's kick it off. Let me also start here with a new section on cross-validation.
+
+We do need a specific function for this. So we import it using: from prophet.diagnostics import cross_validation. Let’s do that and move forward. After that, this is where we apply the cross-validation to the model. In the end, we build a DataFrame, which I’m going to call dataframe_cross_validation, using the cross_validation() function.
+
+To use this function, we need to include several parameters. First, we specify the model. The model is a Prophet class object, so we set model = m. Next, we need the period. The period determines how often we simulate a forecast. For example, if we do a forecast today, then in 15 days we will do another, and so on. In general, using seven or fifteen days is more than enough to give a first flavor of the model.
+
+After the period, we set the initial parameter, which determines how much data to use for training. This is important because it sets the cutoff for the initial training set. Currently, our dataset has 701 days (dataframe.shape[0]). Usually, we subtract 180 days, which gives 521 days for initial training. This is roughly six months, which is a reasonable period to train the model. If more data is available, you could go up to twelve months, but not more than one year. The idea is to ensure that the model works now, as current performance is what matters most.
+
+Next, we specify the horizon. The horizon defines how long we are going to predict. In our example, we take the future DataFrame from December 2nd to December 31st, which is 30 days. Therefore, we set horizon = 30. Finally, we set parallel to processes. This ensures that the cross-validation runs efficiently without needing a distributed client like Dask. Processes work best for this setup.
+
+Now that the parameters are set, we run the cross-validation. The result is stored in dataframe_CV, which is a pandas DataFrame. We can check it using .head() to ensure it ran correctly. This process does not take very long. Essentially, what we have done is taken our data and validated it at different periods. We went back 180 days in the past, and at periods of 15 days, we made a new 30-day forecast repeatedly across the dataset.
+
+With this, the cross-validation setup is complete. In the next video, we will focus on actually evaluating and interpreting the performance of our cross-validation results. Till the next video—have fun!
+
+# **M) Python - Performance Metrics**
+
+Welcome back. I realized that we didn't actually look at the output, so let's do it in this video. We will look at the cross-validation (CV) output and understand what actually comes out of it. The most important thing is to know what information we get. We can start by checking dataframe_CV.head(). Here, we see five columns.
+
+The first column is ds, which is the date related to that forecast. This is different from the cutoff, which indicates when the forecast was made. For instance, on June 19th, we might forecast for June 20th, 21st, 22nd, 23rd, and so on. Next, we have yhat, yhat_lower, and yhat_upper. These represent the prediction and the lower and upper levels of the confidence interval. Finally, we have y, which is what actually happened. This is essentially what comes out of the cross-validation process.
+
+So what can we do with this output? Prophet provides a function for evaluating the performance metrics. We import it using: from prophet.diagnostics import performance_metrics. Then, we call performance_metrics on our cross-validation DataFrame: performance_metrics(dataframe_CV). This gives us a variety of metrics across the horizon, such as MSE, RMSE, MAP, MAPE, SMAPE, and coverage.
+
+As usual, I like to focus on the MAPE because it provides a clear sense of relative error, and I also pay attention to RMSE because it reflects the impact of outliers. ME (mean error) can also be useful. For simplicity, we will focus on RMSE and MAPE. To do this, we first take the mean across the metrics using .mean(). Then we round the results for readability. For example, RMSE can be rounded to zero decimal places.
+
+For MAPE, we multiply the decimal output by 100 to express it as a percentage. After calculating, I noticed that our MAPE was extremely high—about 100%, which is massive and indicates that something is off. This could be due to predictions or possibly issues in the dataset itself.
+
+Fortunately, there is a simple way to investigate this: by plotting the metrics over time. Prophet provides the plot_cross_validation_metric function for this. We import it using: from prophet.plot import plot_cross_validation_metric. To use it, we simply pass our CV DataFrame and specify the metric, e.g., metric='mape'. Adding a semicolon at the end avoids duplicate output in Jupyter notebooks.
+
+Looking at the plot, we see that while most points seem reasonable, there are some extreme outliers that are causing the MAPE to inflate significantly. These small dots represent periods where the forecast error is very high. This indicates that we need to investigate both our predictions and our dataset more closely to understand the cause of these anomalies.
+
+In the next video, we will focus on exploring these issues in detail, analyzing why the MAPE is so high, and determining how to address it. Until then, have fun!
+
+# **N) Python - Fixing 2012-10-29 with ChatGPT**
+
+Welcome back. Let's explore this error and see what is happening. First and foremost, we need to look at the performance metrics. Diving deep into the performance metrics, we see that our MAPE is mostly okay, but on days 12, 13, and 14, it explodes to 400%, which is massive. Something is clearly wrong. Similarly, on days 27, 28, and 29, it spikes again. This indicates a significant issue that we need to investigate.
+
+To address this, we’ll start an exploration process, and I’m calling this section “exploring the error.” In a sense, this is where we put on our detective hats. I tried to find a detective hat, but I didn’t, so I’ll use a magician’s hat instead for this video. It’s inconvenient, but it works for now.
+
+The first step is to identify when our predictions differ drastically from the actual values. A simple approach is to compute the residuals or deviations. We can do this with dataframe_CV['deviation'] = dataframe_CV['yhat'] - dataframe_CV['y']. Once we have this, we can look at the days with the highest deviation by sorting the DataFrame based on the deviation column. Using sort_values with ascending=False allows us to see the top deviations.
+
+Looking at the results, we see that some deviations are extremely high. Interestingly, when we check the performance metrics, the RMSE spikes, but not as dramatically as the MAPE. The RMSE shows small increases around 1.2 to 1.5, but the MAPE explodes on certain days. This indicates that the issue is not the magnitude of the error itself but how MAPE reacts to very small actual values.
+
+To better understand this, we compute the deviation in percentage using deviation_percentage = (yhat / y - 1) * 100. After correcting a small error in referencing the DataFrame column, we see that October 29, 2012, shows a deviation of over 11,000%. This is reminiscent of the “It’s over 9000!” meme from Dragon Ball, highlighting how extreme this spike is. October 30, 2012, also shows a significant deviation.
+
+Investigating these dates, we find that Hurricane Sandy made landfall on October 29, 2012, affecting Washington, DC, and the surrounding East Coast areas. Heavy rainfall, strong winds, flooding, and power outages caused extreme anomalies in the data. On October 30, 2012, cleanup and recovery efforts continued, which also affected the data. These unique events caused these extreme outliers in our dataset.
+
+To handle this, the simplest approach is to replace these outlier values with the value of the previous day. This allows us to avoid skewing the seasonal patterns and regressor effects in the model. We retrieve the value of October 28, 2012, and replace the y values for October 29 and 30 with it. This correction ensures that our cross-validation and error analysis are fair and not distorted by these rare events.
+
+After replacing the values, we return to the modeling component. Our Prophet model and regressor coefficients might now show slight differences, but the main improvement is in our performance metrics. The MAPE now appears more realistic, around 16% when multiplied by 100, which is a better representation than the previous extreme spikes. While it’s not perfect, it’s a more accurate reflection of the model’s performance.
+
+Examining the errors again, the days with the highest deviation now correspond to more typical events, such as July or Thanksgiving, rather than extreme anomalies. This allows us to focus on feature engineering to further improve the model’s predictive power. In the next video, we will work on feature engineering and continue refining the model.
+
+# **O) Python - Feature Engineering**
+
+Welcome back. In this video, we are going to focus on feature engineering. Specifically, I will be looking at temperature and its lagged values. My hypothesis is that if someone is planning their next day—whether to rent a bike or do something else—the weather they see outside will influence what they plan to do tomorrow. To test this hypothesis, we first need to see if there is a correlation between the lagged weather values and what actually happened in terms of bike demand, which is our target variable, y.
+
+To begin, we need to create lagged variables for temperature. We will create these lagged versions for 1, 3, 5, and 7 days. I think this range is sufficient because otherwise the dataset gets too crowded. For each lag, we create a new column in the dataframe using an f-string, such as temp_lag_{lag}, and assign it the shifted temperature values. For now, we focus only on temperature (temp and a_temp), though in the future, we could include wind speed or other weather variables. The key here is to understand the method, and replacing or adding other variables is straightforward.
+
+Once we have created the lagged columns, we can inspect the dataframe with .head() to see the new lagged values. Naturally, there will be some NaN values at the beginning of each lag series. The next step is to compute the correlation between these lagged values and y to determine how strong the relationship is. To do this elegantly, we loop over variables (temp and a_temp) and lags (1, 3, 5, 7), isolate the relevant columns, and compute a correlation matrix.
+
+From the correlation analysis, we notice that the correlation between y and each lagged value is roughly similar across lags. This indicates that including all lags may not add much new information. In fact, the information in lag 1 is nearly identical to lag 7. Therefore, for simplicity, we can choose to include only one lagged variable, such as lag 1.
+
+To handle the NaN values that were introduced by shifting, we remove all other lagged columns except for temp_lag_1. This is done using dataframe slicing with .iloc, keeping only the relevant columns. Although this approach is not the most elegant or dynamic, it is simple and effective. Once the dataset is adjusted, we drop any remaining NaN values and prepare it for modeling.
+
+With the new lagged variable in place, we can run our Prophet model and perform cross-validation. The resulting performance metrics show that the inclusion of temp_lag_1 slightly changes the model's RMSE from 16.021274 to 16.01266. While the improvement is minor, it is a start and demonstrates the effect of feature engineering.
+
+Looking at the coefficients, we see an interesting result: temp_lag_1 has a negative effect of about 95%. This suggests that if the weather was favorable yesterday, bike demand tends to decrease the following day. This counterintuitive effect may indicate that high demand on one day can “borrow” demand from the next day, which is a very interesting insight.
+
+Although the numerical improvement in RMSE is small, adding lagged features is an important step in exploring potential enhancements to the model. The next step will be parameter tuning, which we will start in the following video. Parameter tuning is a more involved process, so make sure to spare a few minutes to code along and see it run.
+
+Overall, this video demonstrates how to create lagged variables, check correlations, and interpret their effect on bike demand. It is a foundational step in feature engineering that can inform future model improvements. Until the next video, have fun experimenting with your own lagged features!
+
+# **P) Python - Parameter Tuning Set Up**
+
+Welcome back. In this video, we are going to focus on parameter tuning—or better yet, we will set up the parameter grid in this video and do the actual tuning in the next one. The results will be discussed in the following video. We are breaking this down into multiple videos so that it’s easier to follow and digest.
+
+We start by defining the parameter grid to search. We create a dictionary called param_grid. The first parameter is the change_point_prior_scale. Here, we give it a couple of values: 0.05 and 0.5. Next, we define the seasonality_prior_scale with values 10 and 20. Then, we include the holidays_prior_scale and again give it 10 and 20. You can add more values if you want, but keep in mind that the more options you include, the longer the tuning will take. In a real-world scenario, you would want to try several values to get the best results. For the sake of this demonstration, we are using only two values for simplicity.
+
+Finally, we set the seasonality_mode, which can be either additive or multiplicative. In this example, we start with multiplicative. While entering the dictionary, we initially get an error because we mistakenly used an equal sign instead of a colon. After correcting it to use a colon, the dictionary works as expected.
+
+Next, we generate all combinations of the parameters. We create a list called all_params and use the parameter grid we defined earlier to generate every possible combination. If you want to see the generated combinations, you can print all_params and it will display all the possible sets of parameter values.
+
+For now, we are only preparing the parameter options. We also create a placeholder list to store the tuning results called tuning_results, which is currently empty. In the next video, we will build the loop to run the tuning using these parameter combinations.
+
+This sets up everything needed for parameter tuning. In the next video, we will run the tuning pipeline and evaluate the results. Until then, have fun.
+
+# **Q) Python - Parameter Tuning**
+
+Welcome back. In this video, we are going to build the pipeline for parameter tuning. The pipeline works in the following way: we first build a model with a set of parameters, then perform cross-validation, compute the error, and store the error. This process needs to be prepared carefully so that we can systematically test different parameter combinations.
+
+To start, we set up a loop over all parameter combinations. For each set of parameters, we first build the model. This is step one. Step two is performing cross-validation. After the cross-validation is complete, we compute and store the error. Essentially, we are taking all the building blocks we’ve already created—model creation, cross-validation, and error computation—and integrating them into a single loop. Even though it may seem like a lot of code, because the pieces are already built, it is straightforward to assemble.
+
+We begin by copying our Prophet model code into the parameter tuning section. All we need to do is replace the specific parameters with the current combination from our loop. This is done easily by using **params in the model initialization, which unpacks the dictionary of parameters into the constructor. The regressors remain the same, and we fit the model to the target variable as before.
+
+Next, we add the cross-validation step. The cross-validation settings, such as a 15-day period, 521 initial days, 30-day horizon, and processes for parallelization, remain unchanged. Once the cross-validation is complete, we compute the error. In this case, we focus on the RMSE (Root Mean Squared Error) as the most relevant metric. Using the performance_metrics function, we calculate the RMSE, take its mean, and store the result.
+
+Finally, each computed error is appended to our tuning_results list. This list was initially empty and now gets populated with the RMSE for each parameter combination tested. At the end of the loop, we will have a complete record of the error for every set of parameters, which allows us to identify the best performing combination.
+
+In summary, in this video we took all the building blocks we had prepared—model creation, cross-validation, and error measurement—and assembled them into a loop that systematically tries all parameter combinations. The logic is straightforward, even if the programming looks a bit complex. In the next video, we will analyze the results of this parameter tuning, see how long it took to run, and determine which parameters performed best.
+
+Until then, have fun experimenting!
+
+# **R) Python - Parameter Tuning Outcome**
+
+Welcome back. The parameter tuning finished much faster than I expected—just two minutes and 30 seconds. That’s really quick! Now, we are going to check the outcome of the tuning.
+
+First, we create a pandas DataFrame to store all the parameter combinations. This will help us organize the results in a tabular format. We start by including all the parameter combinations as the first step. Step two is to add the corresponding results—the RMSE values we computed for each combination—into this DataFrame. Once this is done, we can inspect the outcome interactively, which is one of the great features of Colab.
+
+Looking at the results, even though it initially appeared that a multiplicative seasonality mode might perform best, the tuning shows that the additive seasonality actually gives the best results. There’s a significant difference: for the best multiplicative result, the RMSE was around 1.259, whereas for additive seasonality, it dropped to 0.981.
+
+Examining the parameter values in detail, we see that the change point prior scale is consistently 0.05 for the best results, and the seasonality mode is always additive. The holidays prior scale and the seasonality prior scale have a smaller influence; their variation doesn’t drastically affect the outcome. This highlights that the seasonality mode and the change point prior scale are the parameters that matter most for improving performance.
+
+We also briefly explored some of the recommended plots, but nothing striking stood out due to the large number of combinations. The key takeaway is clear: the additive seasonality mode combined with a change point prior scale of 0.05 gives the best performance.
+
+Finally, we fetch the best parameter combination. To do this, we identify the index in the tuning results where the RMSE is minimal and select the corresponding parameters from all_params. We store this in a variable called best_params. After executing this step, we have the optimal parameter set ready for future predictions.
+
+In the next video, we will use this tuned model to predict the future. While much of the process—exploring the data, building the model, performing cross-validation, and tuning parameters—seems repetitive, the challenge is to adapt it all for predictive analytics. Essentially, we will move from training and evaluating the model to actually using it to forecast future values.
+
+# **S) Python - Predicting The Future Set Up**
+
+Welcome back. In this video, we’re going to focus on building the script to predict the future. I’ll be using the full workflow that we’ve developed since the beginning. Essentially, we will copy all the necessary steps, check what is needed, remove what isn’t, and ensure everything works together smoothly.
+
+This part of the process is split into four steps:
+
+Preparing the data – which we are doing now.
+
+Building and tuning the model – covered in the next video.
+
+Predicting the future – the video after that.
+
+Data visualization – the final step.
+
+To start, I go back to the beginning where we loaded the data. I don’t need all the library imports, but I copy the data loading and preparation steps. I skip the EDA steps since we’ve already done them, but I make sure to include the holidays, as well as the feature engineering steps for lagged variables. Some parts, like correlation checks, aren’t needed for prediction and can be skipped.
+
+Next, I set up the future regressors. I start with the training data, dataframe_train, and then load the future features (daily_bike_sharing_future). I concatenate the training and future datasets using pandas.concat. After concatenation, I reset the index with drop=True and inplace=True to ensure it’s sequential, which avoids any potential issues later. Checking the tail of the DataFrame shows that the indices are now in order.
+
+After preparing the combined dataset, I inspect it for null values. The columns casual, registered, and count have nulls at the end, which is expected since these are the values we want to predict. I also ensure the date format is consistent and prepare the weather-related variables. At this stage, I remove unnecessary columns to reduce clutter—keeping the system simple prevents errors and makes the script more robust.
+
+Next, I regenerate the holidays to include the complete set up until the end of 2012. After combining all relevant holidays, I create lagged variables for temperature (lag=1) and confirm the result using dataframe.head(). A single NaN at the very end is acceptable, as it won’t affect predictions.
+
+At this point, the data is fully prepared. Everything needed for prediction is in place, and the workflow is clean and error-free. If anyone is struggling, it’s helpful to compare their script with mine to ensure all required steps are included.
+
+In the next video, we will move on to building and tuning the model. Until then, have fun!
+
+# **T) Python - Tuned Prophet Model**
+
+Welcome back. In this video, we are going to build our tuned Prophet model with our training data.
+
+First, we need to remove the names we have just created with the lagged variable. Therefore, removing the NaNs is important. Make sure that we have a clean dataset as well. We need to focus here on just having the training data — the training data.
+
+The way that we fit our model is that we only use the training data. Therefore, we are going to build this train, and this is nothing but our DataFrame sliced up until the last 30 days. In our case, because we have been building this to predict the next 30 days, for the training set we remove the last 30 days which are for the future regressors and we just keep the rest.
+
+So we have this part, and this is done. Then we need to work on something here: we need to include the best parameters. And it's crazy easy because we just do double asterisk **best_params. This was something that we have built already, and this is it.
+
+Instead of fitting to the full DataFrame, we fit to the train DataFrame that we created. I do a shift-enter to run it.
+
+Okay, we're getting an error. Let's see what we can do. The error says: "cannot perform P.O.W. with this index type date time array."
+
+Ah, so one thing that we're missing here is a comma. Let's see if this works.
+
+Okay, so this works. That was the issue — not an error really, just a small typo that was easy to decode. Fortunately, it was also easy to fix.
+
+And this was actually it. Let me just check if I've done everything that I wanted. And yes, this is it.
+
+In the next video, we are going to use the model to predict the future. This is really the goal here — to make sure that the models we built, every analytical tool we produce, has an actual value, that it has an impact. That will be covered in the next video.
+
+# **U) Python - Forecasting**
+
+Alrighty, let's kick it off. In this video, we are going to do some forecasting. That will be our main focus, and we will do it step by step.
+
+First, we need to create a future DataFrame. Using our model, we generate a future DataFrame and specify the number of periods, which in this case is 30. We have established that we are predicting the next 30 days. Let’s take a look at the future DataFrame.
+
+If you look at it here, you see that we only have the date stamps from the 2nd of January all the way until the 1st of December. Okay, I think we are missing something. Let's go back and check.
+
+If I evaluate my training set and notice something missing, it’s because, ideally, we should have data all the way until the end of 2012. So something must be missing. Aha! I think it is because of this NaN issue. Let’s go back and run everything from when we reloaded the data and restarted the prediction process.
+
+Now, if we check again, everything works. Looking at our DataFrame, it is working correctly until the 31st of December. The issue must have occurred when we dropped the NaNs earlier. To fix this, I am going to put this step into the train set and drop the NaNs only from the training data. This should work.
+
+Let me run it. I build the model and make sure that everything is working. Now, let’s build the future DataFrame. It still wasn’t completely working before, but now we see that it goes until the 31st of December. Something changed along the way, but now it works.
+
+This is part one. At the same time, I want to include future regressors. The future DataFrame should also contain the regressors. I create future_regressors by taking the original DataFrame and dropping the columns ds and y. Running this gives us the future regressors as expected.
+
+Next, I drop any NaNs from the future regressors. This completes part one. However, our index currently runs from 1 to 730 in the DataFrame, and 0 to 729 in the future regressors, which is not ideal. To fix this, we reset the index in future_regressors with drop=True and inplace=True. This ensures the index runs correctly from 0 to 729 and the changes are stored.
+
+Now, we concatenate the future DataFrame and the future regressors using pandas.concat. Yes, there are a lot of small steps here, but in the end, it works. I set access = 1 and run it.
+
+Finally, we make the forecast. Using the model, we predict on the future DataFrame we have built. If we look at forecast.head(), we can see the output. This output is quite large, including not just the predicted values but also upper and lower confidence intervals for scenario forecasting. We also have the trend, additive components, and seasonal decompositions like working day effects and yearly patterns.
+
+Now it’s about exploring the forecast and understanding what is happening. We can see the predictions and how the data behaves structurally. The key point is that we now have y_hat for the last 30 days. This is the prediction we wanted to make.
+
+We will stop here in this video. In the next one, we will finish this Prophet tutorial with some data visualization and a proper conclusion.
+
+# **V) Python - Prophet Data Visualization with ChatGPT**
+
+Welcome back. In this final video of our practice tutorial, we are going to focus on data visualization. Along with that, I will also be using ChatGPT to demonstrate what we can do with it in practice. The idea here is to explore how ChatGPT can assist us in understanding and visualizing what is happening inside our Prophet model.
+
+The overall goal is to create a mix-and-match approach, combining ChatGPT (or GenAI) with traditional programming. This combination is very relevant in real-world workflows. Of course, there are situations—especially when very new features or tools are released—where GenAI might not yet be fully up to date. However, it is improving rapidly, and it is extremely useful from a productivity standpoint. You should definitely take advantage of it.
+
+When it comes to data visualization in particular, I really like using GenAI. Visualization code is often longer, requires more customization, and involves a lot of trial and error. In many cases, similar visualizations have already been built by others, so instead of starting from scratch, it is much easier to ask ChatGPT for help and iterate from there.
+
+So, I open ChatGPT and start a new conversation. In the prompt, I ask something like: “Give me five ways to visualize my Prophet model in Python.” I specify Python because there is always the possibility of using R as well, but here we want to stay within Python. I also ask ChatGPT to provide the code. The plan is to try each visualization, see whether it fits our needs, keep the ones we like, and discard the ones we don’t.
+
+I copy all the code that ChatGPT provides and start reviewing it. The first visualization is an evaluation metrics plot, but we don’t really need this anymore because we have already evaluated our metrics earlier. So we skip that one. The next visualization looks useful, so we keep it, even though we already notice there is an error in it that we will fix later.
+
+Next, we keep the “plot the forecast” option, which is usually very useful. We also keep the “plot the components” visualization, which is always a good one. You will often hear people say that plotting components is important, and here we will actually see why that is the case. We also decide to keep a time-series visualization. Everything else that ChatGPT provided is not really needed at this point, so we remove it. All required libraries have already been imported earlier, so there is nothing else to add.
+
+When we start running the code, we immediately get an error saying that data is not defined. This is because the correct variable name should be df. So we replace data with df everywhere it appears. We also make sure the forecast variable is correctly referenced. After fixing that and running the code again, it works.
+
+The first plot we see is a comparison between the actual values and the forecasted values. We notice that there are certain periods—especially spikes—that the model does not predict very well. This is completely expected. Sharp spikes are always difficult for forecasting models to capture accurately. Despite that, the overall forecast looks reasonable, and we can move on.
+
+Next, we plot the components, which is a very interesting visualization. Instead of calling the variable model, we correct it to m. Once we run it, we see the individual components of the Prophet model. First, we see the trend, which shows a clear upward movement from the beginning of the dataset to the end. This indicates long-term growth over time.
+
+Then we look at the holiday effects, which are always interesting. We see recurring spikes that are consistent across years, representing the impact of generic holidays. Most of the time, holidays do not have a very large impact, but there are some cases where the impact is significant. One of the biggest spikes is very likely related to Christmas, and another positive spike is likely due to Easter.
+
+After that, we examine the weekly seasonality. The values range roughly from –200 to +600, while our actual values are often in the range of 4,000 to 6,000. This tells us that weekly seasonality exists, but it is not particularly strong or impactful relative to the overall scale of the data.
+
+We then look at the yearly seasonality, which is clearly stronger than the weekly seasonality. However, it is not perfectly smooth or well defined. There are ups and downs, suggesting that we may not have enough data to fully capture a stable yearly seasonal pattern.
+
+Finally, we look at the regressors, and this is where the most significant impacts appear. The regressor effects range from about –2000 to +2000, which is substantial. This indicates that the regressors are driving a large part of the model’s dynamics. In fact, without these regressors, the model’s accuracy would likely be much worse. While there may be some seasonality in the regressors, the key takeaway is that this is where most of the explanatory power comes from.
+
+We also plot another version of the forecast, which looks very similar to the first chart. The main difference is in the visualization style: we now have lines and dots. The dots represent the actual values, while the line represents the predicted values (or fitted values). This provides another useful way to visually assess model performance.
+
+Lastly, we use a plotting function from Prophet combined with Plotly to create an interactive visualization. This type of plot may not be something we have seen before, but it is useful because Plotly allows interactive exploration of the data. Even though the information is similar to previous plots, the interactivity can be very helpful.
+
+Overall, all these visualizations look quite good. You can definitely explore further and customize them even more, but this is a solid approach. Using ChatGPT to generate visualization ideas and code, and then refining them manually, is a very effective workflow.
+
+# **W) Prophet Pros and Cons**
+
+Alrighty, so Prophet is definitely one of my favorite approaches, and I really hope that by now it has become one of your favorites as well. I want to go through the pros and cons of Prophet in a way that is as unbiased and objective as possible—although, no promises. Let’s kick it off with the positives first.
+
+The first major advantage of Prophet is that it is extremely flexible. There are loads of possibilities that you can include, and all of this complexity actually translates into flexibility. I hope you noticed how easy it is to program with Prophet. There are built-in functions for almost everything—visualization, cross-validation, forecasting, and more.
+
+This ease of use makes Prophet especially beginner-friendly, but it is also valuable even if you are an experienced practitioner. You don’t need to write complex custom Python functions or reinvent the wheel. Instead, you can focus more on the outcomes and insights rather than spending time on low-level programming details. That shift in focus can be extremely powerful in real-world projects.
+
+Another important positive is how Prophet handles events and holidays. You can explicitly define an impact window, with both upper and lower bounds, and this approach is both simple and intuitive. Even better, Prophet allows you to clearly see how these events affect the time series, which is very useful for interpretation and storytelling.
+
+Last but not least on the positive side, Prophet is excellent at handling non-linearity. When working with coefficients, Prophet often operates in terms of percentages rather than fixed linear effects. Additionally—although this is not always stated explicitly—the way Prophet handles regressors helps avoid multicollinearity issues.
+
+For example, if you have two regressors that are highly correlated, this would normally cause problems in a standard linear regression model. Prophet, however, uses a Stan-based modeling mechanism that deals with this internally. This means you don’t need to worry as much about correlated regressors, which is an important advantage to be aware of.
+
+Now let’s move on to the negative side.
+
+One downside is that Prophet really benefits from hyperparameter optimization. This does take additional time. While the extra effort is not excessive and is usually manageable, it is still something you need to account for. For that reason, I consider it a con, even if it’s not a major one.
+
+The biggest downside of Prophet—for me personally—is its weakness in handling short-term dynamics. This becomes especially clear when comparing it to models like Silver Kite, which we will look at next. Prophet does not include an autoregressive component that captures short-term changes that cannot be explained by regressors.
+
+As a result, when there is a sudden shift or abrupt change in the data, Prophet does not model it well. It takes time to adapt, which can lead to poor short-term accuracy. This limitation means that Prophet is not ideal when you care deeply about immediate or near-term forecasting performance.
+
+Because of this, I primarily use Prophet for long-term forecasts and insight generation rather than for short-term, high-precision predictions. If short-term accuracy is critical, Prophet can be problematic.
+
+# **XI) Section 11: Capstone Project: Prophet**
+
+# **A) Project Introduction**
+
+Transcript not available;
+
+# **B) Python - Challenge Solutions Part 1**
+
+Let’s solve this challenge together. You are provided with two files: a PDF and a CSV file. These serve as the starting point for the challenge. The first thing I do is download both of these files. Once that’s done, I head over to ChatGPT, where I want to specifically find a GPT that is designed for working with GitHub repositories.
+
+Now, a quick note here: if you don’t have a premium subscription, unfortunately you won’t be able to follow this part exactly the same way I do. That said, you still have access to the final Python file, which I will include in the course materials. You can also use regular ChatGPT or simply rely on the provided template. The most important thing here is solving the challenge itself and sharing one possible way of doing it.
+
+So I search for “GitHub” inside ChatGPT, and this is our first step. Immediately, the results are ordered by popularity. I click on the first option. It has a 3.8 rating, about 17 reviews, and is categorized under programming in English. Reading the description, it says it empowers the system for comprehensive repository interaction, from code contributions to read/write operations, reviews, and advanced task automation. This sounds promising.
+
+I also check the second option, which has around 5K users and the same 3.8 rating. It provides both general and specific guidance on publicly accessible GitHub repositories and their contents. Both options seem quite similar, so I decide to simply pick the most popular one and move forward.
+
+Once selected, I start the chat. Now, the way I approach this is by using a prompt-engineering technique called “chain of thought.” The idea is to start at a high level and then gradually go deeper, step by step. So the first thing I ask is whether it can access the Prophet GitHub repository, specifically clarifying that Prophet is a model used for time series forecasting. This helps narrow down the scope.
+
+The response is encouraging, which is great. From there, I ask what is new in the recent Prophet releases. At the same time, I open a new Google Colab notebook. What I want to do here is check which version of Prophet is currently installed in Colab and compare it with the most recent releases to see if there are any new features that we should be using.
+
+I run pip freeze, wait for the environment to connect, and then search for Prophet in the output. I see that the installed version is 1.1.5. I go back to ChatGPT and ask what’s new in Prophet since version 1.1.5. The response mentions newer versions and some added features, so I want to verify whether these versions actually exist.
+
+At this point, I notice some confusion. Versions like 1.16 and 1.17 are mentioned, but when I double-check, it turns out that 1.1.5 is actually the most recent official release. This makes me wonder whether the GPT is hallucinating newer versions. So I decide to assume that we are already working with the most up-to-date version and that there’s nothing critical missing.
+
+Now that this is settled, it’s time to actually solve the challenge. I upload both the PDF and the CSV file. I then give a clear instruction: read the challenge from the PDF, analyze the CSV file, outline the code, and include comments in the code. That should be enough to get started.
+
+However, the response I get back tells me that while the files were uploaded, it needs more clarity about the challenge described in the PDF. So I refine the instruction further. I explicitly state that the task is to analyze the PDF, extract all the steps needed to complete the challenge, and then apply those steps to the CSV file.
+
+This works better, but I immediately notice some issues. First, the generated code is using fbprophet, which indicates an old version of Prophet. That’s already a red flag. Second, the solution is overly simplistic: there are no regressors included, and the CSV file is largely ignored. While cross-validation is included, there is no parameter tuning.
+
+This isn’t necessarily wrong, but it’s incomplete. One thing that really bothers me is the continued use of fbprophet. So I push back and tell the GPT that using fbprophet implies an outdated version. I ask it to inspect the Prophet repository and ensure that it is using the most recent functions. I also explicitly instruct it to analyze the CSV file and include things like holidays and regressors in the model.
+
+At this point, I assess the GPT’s performance so far as “not amazing,” but I’m still curious to see what happens next. Then I hit another roadblock: I’m asked to sign in with GitHub, and I get an error saying my account is marked as pending and cannot authorize third-party applications.
+
+This is interesting, but not ideal. I try signing out and signing back in. Eventually, I realize that for this specific GPT, you actually need a GitHub account in order to authorize access properly. That’s not a big issue, but it’s something worth pointing out.
+
+Once I authorize the application, things finally start moving. The GPT begins to improve in quality. It starts outlining steps like loading and inspecting the CSV, initializing the Prophet model, and creating a future dataframe. However, I still see that holidays are effectively ignored, and assumptions are being made instead of actually reading the CSV.
+
+At this point, we at least have a rough understanding of what needs to be done. However, the video is getting quite long. So I decide to stop here. In the next video, we will break everything down properly. We’ll take each step one by one, place it into the notebook, and carefully implement it in a much more structured, step-by-step way.
+
+# **C) Python - Challenge Solutions Part 2**
+
+Welcome back. In this video, we are going to kick things off by using some of the material we obtained from ChatGPT and the GitHub GPT we’ve been working with so far. The goal is to see how far this can take us and what kind of results we can realistically get from it.
+
+The first thing we need to do is include the required libraries and load the data. For this, we need to connect to Google Drive, which is always an important step when working with Google Colaboratory. I navigate to my Drive and point it to the capstone project directory. Specifically, I go to My Drive → Python → Modern Time Series Forecasting Capstone Project, copy the path, and then use %cd to change the working directory. Once that’s done, everything is set up correctly and working as expected.
+
+At this point, I jump between tabs and begin the actual work. The first step is to load the data. While that’s happening, I also ask ChatGPT to analyze the CSV file and adapt the code accordingly, hoping that it will actually read the data and do something meaningful with it. It starts analyzing, which is a good sign.
+
+Next, I focus on importing the libraries and loading the dataset. I cut and paste pieces of code as needed and double-check how the data is structured. I verify column names, check whether parentheses are missing or duplicated, and quickly inspect the dataset using df.head(). This is the very first sanity check.
+
+At the same time, I keep the challenge requirements in mind. The first major requirement is to prepare the dataframe properly. This means renaming columns and transforming the date column. Since we usually perform these operations in place, I do that immediately. After running the cell again, I confirm that the date column is now named ds.
+
+However, I notice an issue: the code is replacing a column called demand, which doesn’t exist in our dataset. The actual column name is total individuals in shelter. So I correct this mistake, replace the correct column name, run the cell again, and confirm that this step is now properly completed.
+
+Preparing the dataframe also involves handling holidays. Even though this wasn’t explicitly specified in the challenge, it is important. I look at how holidays are handled, particularly when Easter equals one, and how Thanksgiving and Christmas are incorporated. I extract that logic, run it, and confirm that holidays are correctly created with lower and upper windows. The values chosen are zero and one, which is acceptable for now, so I don’t change them.
+
+The next step is initializing the Prophet model. This part is straightforward. We also see regressors being added, including holidays. However, this immediately raises a red flag. Holidays have already been added as holidays, so adding them again as regressors duplicates information. That’s a clear mistake, and I count this as a negative point for ChatGPT.
+
+I also notice that daily and weekly seasonality are disabled, which is actually correct because we are working with weekly data. Since we don’t have daily granularity, weekly seasonality in this context doesn’t make sense. The future dataframe creation is not perfect, but it’s good enough for now.
+
+At this point, one important realization should be forming: when things get complex or extensive, it’s not always easy to directly apply ChatGPT’s output. You need to understand what you’re trying to do and what is possible; otherwise, things can quickly go wrong. Once you have that understanding, ChatGPT becomes much faster and more useful.
+
+Next, I decide to explicitly handle the training and test split. I ask ChatGPT to fetch the PDF and provide the code for steps two and three. Looking at our data, I check the tail of the dataframe and realize that we don’t actually have future dates available. Unlike our earlier projects, we don’t already have data extending into the future.
+
+This means that to truly forecast forward, we would need to fetch external data, such as temperature or holiday data. While this is doable, it’s outside the scope of what we want right now. For visualization and evaluation, we still need a training and test split, which is mandatory.
+
+ChatGPT suggests using the last 60 days as a test set, which is reasonable. I go with that. I include this logic in the Prophet model and fit it on the training dataframe. This part is important: the model must be fitted on train_df, not the full dataset.
+
+From there, I create the future dataframe for the next 60 periods and add temperature as a regressor. This is one way of merging external regressors, and we’ll revisit this later. When I attempt to generate the forecast, I immediately run into an error.
+
+After thinking about it, I realize the issue: the model is treating the data as weekly, but the future periods were defined in days. I fix this by switching to weekly frequency and setting the horizon to 13 weeks instead of 60 days. Once I make this correction, everything works as expected.
+
+Now we move to training, testing, and accuracy assessment. I copy the evaluation code, calculate the forecast for the test set, compute the absolute error, and then calculate the mean absolute error (MAE). The MAE comes out to around 29, which is quite large.
+
+Looking at the plot, it’s clear why. The blue line represents the model predictions, and the black dots represent actual observations. There is a significant gap between them, meaning the model is not performing particularly well. This tells us that the model needs improvement.
+
+Next, I move on to step four. Even though we already have a template from earlier work, I still like this approach for two reasons. First, it feels different, so it doesn’t feel like repetitive practice. Second, templates age over time. Revisiting problems in a different way helps challenge assumptions and discover better approaches.
+
+Step four focuses on visualization. I organize the plots step by step, separating residual plots from error metrics. I check the forecast plot, which looks similar to previous ones. Then I examine the component plots.
+
+The components show a growing trend that stabilizes and then declines slightly. Holiday impacts are minimal—around one thousand compared to an overall level of four hundred thousand. Extra regressors also show minimal impact. Yearly seasonality exists but is still relatively small, and weekly seasonality effects from regressors are also low. Overall, it doesn’t look like there’s much happening that could significantly improve the model.
+
+I also examine the residual plots, but I don’t find them particularly useful. The plots are messy, not very insightful, and visually unattractive. I decide to delete them. Additionally, comparing residuals during prediction versus fitting is not entirely fair, since the model is optimized for training data. So I remove those plots as well.
+
+Finally, I move to step five: parameter tuning. I ask ChatGPT to provide code for this step. Initially, the output is not very good—it tries random adjustments without a clear structure. When I don’t like the output, I stop it and regenerate. This is one way of providing implicit feedback.
+
+Eventually, ChatGPT starts doing what I want. It proposes tuning parameters such as changepoint_prior_scale and seasonality_prior_scale, and it uses itertools instead of sklearn’s parameter grid. I actually like this approach because it’s different from what we used before and forces us to think in new ways.
+
+However, I notice another issue. ChatGPT attempts to split the data using the first 80% for training. This does not make sense in a time series context. We have data from 2014 to 2021, and what really matters is whether the model performs well in the most recent period. Context matters in time series forecasting. If the model works well in the first five years but poorly in the last year, that’s unacceptable.
+
+So I ignore that logic and stick with our existing train-test split. I also notice that ChatGPT is still treating the data as daily instead of weekly, which causes additional confusion. I fix these issues manually.
+
+Eventually, I run into another error related to frequency definitions. ChatGPT handles these errors fairly well, often fixing spelling or parameter mistakes quickly, and that’s something I genuinely appreciate. It makes experimentation much easier.
+
+At this point, the video has gone on for quite a while. I still need to wrestle a bit more with ChatGPT to get everything exactly right. So I decide to take a break here. In the next video, I promise we’ll finish this properly and also talk more about the pros and cons of using ChatGPT in this way.
+
+# **D) Python - Challenge Solutions Part 3**
+
+So, the error message explains the issue we encountered earlier. If you remember, we were working with cross-validation, and the problem comes from the fact that pandas does not support time units like six weeks or thirteen weeks. That was something I personally wasn’t aware of before. Because of this limitation, we need to convert those periods into days instead. So instead of six weeks and thirteen weeks, we now use 42 days and 91 days, which is perfectly fine.
+
+I update the period values accordingly and run the cell again using Control + Enter. Now the code is running, which is a good sign. At this point, though, we are more or less done with the main part.
+
+What I’d like to do next is take a look at the best parameters. Let me find where that is. Okay, here it is—this is the section where we retrieve the best parameters. I copy that part and place it at the end. The thing is, I honestly don’t know how long this is going to take to run. I probably should have checked beforehand, but it doesn’t really matter. I’ll just leave it running and move on.
+
+Before wrapping up, I want to briefly stress something that I think is extremely important: you really need to understand what a library can do and what it cannot do. As you saw, we struggled a bit along the way, and that’s completely normal. It’s part of the learning process. For something that’s relatively new, tools like this can be very helpful, and they can save you a lot of time—but they can also become an issue if you rely on them blindly.
+
+You shouldn’t just use tools like ChatGPT without thinking. You always need to keep the documentation in mind. Throughout all my courses and in the way I build them, I continuously refer back to the documentation to understand what’s really happening. It’s not the most exciting job—it’s research—but that’s the reality. Whether you’re an analyst, a data scientist, or just someone trying to solve a real problem properly, you have to do this if you want to go deep and do a really good job.
+
+ChatGPT still has a long way to go, especially for more niche or advanced use cases like this one. In particular, it can struggle with the most recent or up-to-date versions of libraries. Sometimes the code it generates isn’t the most elegant, sometimes it misses things, and sometimes you need to micromanage it quite heavily. You might even get outdated patterns.
+
+For example, in our case, we saw a simple print statement with a variable. That really should have been written as an f-string, which is the cleaner and more modern way of doing it. It’s a small thing, but it shows the point.
+
+At this stage, I’m going to stop here. I don’t think it really matters whether we inspect the best parameters right now. I’ll share the code so that you can look at it yourself, compare it with what you’ve done, and see how things differ depending on whether you used ChatGPT, another GPT model, or a predefined template.
+
+I’d actually be very keen to hear how you handled it, what kind of results you got, and how your approach compared. Also, this type of content—where I take a challenge and try to use AI tools to fix it—I’d really love to know what you think. Do you like it? Do you not like it? Is this something you’d like to see more of?
+
+Your feedback is genuinely the most important thing. If we want to make this course an absolute 11 out of 10, that feedback really matters. With that, we’ll stop here, and I’ll see you in the next section.
