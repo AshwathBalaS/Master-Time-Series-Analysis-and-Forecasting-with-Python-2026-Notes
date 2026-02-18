@@ -323,6 +323,95 @@ This Repository contains my "Master Time Series Analysis and Forecasting with Py
 
 **S) LSTM Pros and Cons**
 
+**XVI) Section 16: LSTM - Multiple Time Series Forecasting**
+
+**A) Multiple Time Series Forecasting**
+
+**B) M4 Data set**
+
+**C) Python - Preparing Script and Loading Data**
+
+**D) Python - Preprocessing Time**
+
+**E) Python - Visualization + Hourly Seasonality**
+
+**F) Python - Daily Seasonality**
+
+**G) Python - Time Covariates, Scaling and Time Steps**
+
+**H) Python - LSTM Model and Cross-Validation with Multiple Series**
+
+**I) Python - CV Results**
+
+**J) Python - CV Visualization**
+
+**K) Python - Parameter Tuning**
+
+**L) Python - LSTM Parameter Tuning Results**
+
+**M) Python - Predicting the future**
+
+**N) Python - LSTM Debugging**
+
+**XVII) Section 17: Temporal Fusion Transformers (TFT)**
+
+**A) Game Plan for TFT**
+
+**B) Introduction to Temporal Fusion Transformers**
+
+**C) Case Study Briefing - Electricity Pricing**
+
+**D) Python - TFT Starter File**
+
+**E) TFT Model Architecture**
+
+**F) Covariates: Past, Future and Static**
+
+**G) Python - Series, Time and Static Covariates**
+
+**H) Python - Past Covariates**
+
+**I) Python - Future Covariates**
+
+**J) Python - Scaling**
+
+**K) TFT Model Parameters**
+
+**L) Python - TFT Model**
+
+**M) Python - Cross-Validation**
+
+**N) Python - Cross-Validation Results**
+
+**O) Python - Visualizing the Cross-Validation Results**
+
+**P) Random vs Complete Parameter Tuning**
+
+**Q) Python - Parameter Grid**
+
+**R) Python - Parameter Tuning**
+
+**S) Python - Parameter Tuning Results and Storing**
+
+**T) Python - Tuned TFT Model**
+
+**U) Python - Interpretability**
+
+**V) TFT - Pros and Cons**
+
+**W) TFT Key Takeaways**
+
+**XVIII) Section 18: CAPSTONE PROJECT: Multiple Series with TFT**
+
+**A) Project Presentation: Multiple Series with TFT**
+
+**B) Python Solutions - TFT Model**
+
+**C) Python Solutions - Cross-Validation**
+
+**D) Python Solutions - Parameter Tuning**
+
+**E) Python Solutions - Predict The Future**
 
 
 
@@ -5100,3 +5189,1083 @@ Finally, here’s an important watch-out.
 LSTMs—and neural networks in general—are not particularly good at dealing with strong trends. They handle sequence data well, but when a time series has a powerful upward or downward trend—especially explosive growth or sharp declines—performance can suffer. If your data exhibits strong trends, you need to be very careful. Make sure the model is well trained, thoroughly tested, and validated before relying on it.
 
 And that’s it for LSTMs.
+
+**XVI) Section 16: LSTM - Multiple Time Series Forecasting**
+
+**A) Multiple Time Series Forecasting**
+
+All right. Welcome to multiple time series. To illustrate this, imagine that you have a coffee shop chain. Dealing with just one store is already complicated, but let's say you want to predict the next month's coffee sales. Along with that, you would also need to plan for how many coffee beans you are going to need, the milk, and so on. For now, let's focus solely on predicting sales.
+
+If you need to predict sales not just for one store but for multiple stores, then you need a method that can handle this complexity. This is where multiple time series forecasting comes in. Each store might have its own trend, but there is also interconnectedness among them. You don’t want to maintain many separate models predicting the same thing when a single model could do it. By using multiple time series, we can leverage information from one series to help predict another. So it’s not just about using the past to predict the future; we also use different series that have valuable information to improve our predictions.
+
+From a modeling perspective, this is very exciting. Essentially, you are looking at many things at once to try to forecast what will happen. For humans, this can be quite challenging, but deep learning is actually designed for this kind of task, making it very suitable.
+
+Up until now, we have been using past data to predict the future and have incorporated regressors to aid our models. Now, we need to take it a step further by using multiple sequences together. This requires analyzing all series collectively and understanding how they interact.
+
+Let’s look at the pros of multiple time series forecasting. First, it provides a more comprehensive view of what is happening. Instead of having separate models working in isolation, we measure error in one unified way. This gives us a bird’s-eye view of all sales across all cities. Second, it is highly scalable. What works for a few series works similarly for ten or more, both technically and in terms of time.
+
+On the other hand, there are some cons. Multiple time series forecasting is inherently more complex. Additionally, because we are looking at a bird’s-eye view, we lose some granularity in understanding individual series.
+
+Now, let me outline a step-by-step approach for performing multiple time series forecasting. The first step is collecting data. This is always crucial. In a real-world scenario, you would gather sales figures, external factors, and operational data such as seasonality or other factors that could influence KPIs.
+
+Next, we build a spreadsheet to organize the data. This includes cleaning the data, handling missing values, scaling it appropriately, and performing feature engineering to best represent the problem. For example, we could include coffee sales, pastry sales, merchandise sales, weather, holidays, and average temperature as features. Feature engineering might also create new variables to enhance predictive power.
+
+Once the data is prepared, we move to model building. We will continue using LSTM because we are already familiar with it. Traditional models struggle with multiple series because they are not designed for it, but deep learning models like LSTM can handle both single and multiple series. Everything learned for one series can be applied to multiple series. LSTM, a type of recurrent neural network, was initially created for sequence data and is particularly effective for time series due to its long-term memory capabilities.
+
+With multiple time series, we can link different series together. For instance, coffee sales could be linked to pastry sales, or iced coffee sales could relate to lighter pastry sales. This linkage is only possible with deep learning models.
+
+Our approach will involve preparing the data, building an LSTM model, making predictions, and evaluating the results. The goal is to take a complex problem and apply a solution that is simple and natural, without overengineering.
+
+That’s the plan. I hope this overview makes sense. Let me know if you have any questions, and I’ll be happy to help. See you in the next video.
+
+**B) M4 Data set**
+
+Welcome back. Let me share with you the M4 dataset. This dataset was part of the M4 competition, one of the most prestigious and comprehensive forecasting competitions ever held. It is an excellent resource for learning about multiple time series forecasting.
+
+Let me take you back to 2018, when the M4 competition was organized by Professor Spyros Makridakis and his team. Apologies if I mispronounced his name. This was the fourth in a series of competitions aimed at advancing the field of time series forecasting. The competition featured 100,000 time series from diverse domains, including finance, economics, demographics, and more.
+
+The goal of the competition was simple yet ambitious: to evaluate the performance of various forecasting methods and to encourage the development of new techniques. Participants were challenged to forecast future values of these time series using any method—or combination of methods—they preferred.
+
+The datasets were split into different frequencies, such as yearly, quarterly, monthly, weekly, daily, and hourly. Among these, the hourly dataset stands out due to its granularity and complexity, making it one of the most challenging datasets. This is why we are going to use it.
+
+The hourly dataset consists of 414 time series, each representing hourly data points. These series come from various real-world applications, such as electricity consumption, weather conditions, and traffic flows. The dataset covers different periods, with each series containing varying lengths of historical data. This variety provides a rich learning environment for us.
+
+So why is this dataset particularly great for multiple time series forecasting? First, the granularity is key. The hourly frequency provides a high level of detail and captures subtle patterns and short-term fluctuations that might be missed with lower-frequency datasets. This granularity is crucial for understanding the dynamics of time series data and sharpening your forecasting skills.
+
+Next, the complexity of the dataset is significant. It includes a wide range of time series with different characteristics. Some series exhibit clear seasonal patterns, while others show irregular trends or sudden spikes. This diversity presents a unique challenge and an excellent opportunity to learn how to manage such data and see how models like LSTM handle it.
+
+Moreover, the dataset’s real-world relevance is another important factor. The time series are derived from real-world applications, meaning your work will reflect challenges that businesses and organizations face daily.
+
+In conclusion, the M4 dataset offers a highly challenging environment for learning multiple time series forecasting. Its granularity, complexity, and real-world relevance make it an invaluable resource for anyone looking to deepen their understanding of forecasting techniques.
+
+So let’s get started. My challenge is to make this material both interesting and digestible for you, and I’m very much looking forward to it. Till the next video, have fun!
+
+**C) Python - Preparing Script and Loading Data**
+
+Welcome to multiple time series. You are going to find a starter file in the multiple series folder, which is also inside the deep learning folder. I’ve already run the code for the first video because some parts, like working with DART, can be time-consuming. Feel free to pause here, connect to your drive if you’re using Google Colab, and follow along with the folder and the DART library.
+
+Let’s start with the initial step and the decisions I made. First, we have our data, and I really want to show it to you. We have a pandas DataFrame with columns labeled as V’s and H’s. It’s important to note that the V’s represent hours, while the H’s represent the time series. I know it seems a bit confusing, but this is how the dataset is structured.
+
+To make sense of this data and transform it for easier use, we use numpy. Specifically, we do .values.squeeze() to get just the numerical values and tidy the structure. After applying this, our data shape is 415 by 961. Next, we remove the V and H labels, as they don’t have meaningful information for our analysis. If we need the hours later, we can create them ourselves. After excluding the first row and first column, we have a shape of 414 by 916.
+
+Since the data is in an unusual format, we need to transpose it. This switches the dimensions from 916 by 414 to 414 by 916, which is easier to work with for our multiple time series analysis.
+
+One thing to address is the presence of nine extra values. There’s no explanation for them in the documentation, and dealing with them would add unnecessary complexity. My goal here is to focus on multiple time series rather than handling these unknown values. Therefore, I made an executive decision to remove the rows containing these nine values rather than the columns. Specifically, rows 700 to 959 have no meaningful values, so we remove them while keeping all columns. After this, our dataset contains 700 hours and 414 time series, which is what we’ll use for our analysis.
+
+I understand that some of you may have questions about why we are not handling missing or unknown values, but the main purpose here is to focus on learning and applying multiple time series forecasting. If you have any questions about this preparation or anything else related to multiple time series, feel free to post in the Q&A, and I’ll be happy to discuss it.
+
+This concludes the preparation, and I’ll see you in the next video.
+
+**D) Python - Preprocessing Time**
+
+Welcome back. In this video, we are going to create a time series object. Spoiler alert: it’s going to be here, and we’ll use a specific Darts function to do this.
+
+First, we start by creating a pandas DataFrame. Why are we doing this? Over the course of this module, it’s very helpful to have the data in a pandas structure for easier manipulation. Let’s call it dataframe_pandas so it’s clear what we are referring to. We can do .head() to inspect the first few rows.
+
+Currently, we don’t have dates in the dataset, so we’re going to create a dummy starting date. This is important for visualization purposes—it’s easier to understand the data when we see dates rather than just hour numbers. For example, after the 300th hour, it’s hard to interpret without actual timestamps. We create the start date using pandas:
+
+start_date = pd.Timestamp("2000-01-01 00:00:00")
+
+
+Next, we’ll create the time series object using Darts. The function we use is from_times_and_values. Here, we provide both times and values.
+
+To define the time axis, we generate a date range using pandas:
+
+time_index = pd.date_range(
+    start=start_date,
+    periods=dataframe_pandas.shape[0],
+    freq='h'  # lowercase 'h' since uppercase 'H' is deprecated
+)
+
+
+This gives us a continuous time index with no holes, representing each hour. After running this, we have our index from 0 to 413, which matches our 414 columns of time series data.
+
+Now we can create the series object:
+
+series = TimeSeries.from_times_and_values(times=time_index, values=dataframe_pandas.values)
+
+
+And with that, we are ready to move on.
+
+In the next video, we’ll focus on data exploration. Normally, I would have this pre-prepared, but since we are working with multiple series, I want to go step by step so you can see the reasoning behind the visualizations and understand why they make sense.
+
+**E) Python - Visualization + Hourly Seasonality**
+
+Welcome back. In this video, we’re going to focus on data visualization and exploratory data analysis (EDA) for our multiple time series.
+
+To start, we can attempt a simple plot using dataframe.plot(). However, with 400+ series, this quickly becomes overwhelming and doesn’t provide any meaningful insight. Even trying plt.plot() or minor tweaks doesn’t really help—the sheer number of series makes the plot hard to interpret.
+
+The key question here is: what do we actually want to understand from our data? One interesting thing to explore is whether the series connect to each other. For example, do they exhibit similar seasonalities? The purpose of this video is to focus on daily seasonalities and how we can visualize them effectively.
+
+First, we transform our Darts series back into a pandas DataFrame:
+
+dataframe_with_time = series.pd_dataframe()
+
+
+Now that we have the DataFrame with time as the index, we can compute hourly means to start uncovering patterns. Instead of resampling, which may not work as expected, we can use groupby on the hour component of the index:
+
+hourly_means = dataframe_with_time.groupby(dataframe_with_time.index.hour).mean()
+
+
+This gives us the average values for each hour across all series. Now it’s ready to plot:
+
+plt.figure(figsize=(12,6))
+plt.plot(hourly_means, marker='o')
+plt.title("Hourly Means Across Series")
+plt.xlabel("Hour of the Day")
+plt.ylabel("Average Value")
+plt.grid(True)
+plt.xticks(range(24))
+plt.show()
+
+
+Even after this, the plot can still be cluttered because of the large number of series. One approach is to select a subset of the series, for example the first ten:
+
+plt.plot(hourly_means.iloc[:, 0:10], marker='o')
+
+
+This provides a clearer view, but another challenge remains: the series have different magnitudes. Some appear almost flat at the bottom, which makes it harder to interpret their seasonality.
+
+For now, this gives us an initial draft of how to visualize daily patterns. The next step will be to standardize the data so that we can clearly see seasonality across series.
+
+That’s it for this video. In the next one, we’ll focus on standardization and improving our visualizations to better capture patterns.
+
+**F) Python - Daily Seasonality**
+
+All right, let’s continue. The next step is to standardize the hourly means. We can start by computing the hourly means and then standardizing them. There are a few ways to do this—one approach is using pandas, another is with NumPy, which is slightly simpler:
+
+hourly_means = np.mean(dataframe_with_time.values, axis=0)
+hourly_std = np.std(hourly_means, axis=0)
+standardized_hourly_means = (hourly_means - np.mean(hourly_means)) / np.std(hourly_means)
+
+
+Once standardized, we can plot the first ten series to inspect the patterns. Adding gridlines, titles, and labels makes the visualization easier to interpret. Most of the series now follow a fairly consistent pattern, except for a few outliers.
+
+Expanding the plot to include the first 100 series confirms that most series share similar information and patterns. This is important because it means our model can leverage one series to help predict others, taking advantage of these shared trends. Even the slightly different series are not completely unique—they still have some common structure. At a larger scale, say 50,000 series, this shared information becomes even more valuable for the model, enabling high predictive accuracy.
+
+Next, we extend this analysis to weekly seasonality. We compute daily means grouped by the day of the week and then standardize these values in the same way. Plotting the first ten series gives us an initial view of weekly patterns. While these patterns are less specific than the hourly patterns, we can still observe consistent trends—some series rise, stabilize, or fall at similar points during the week. Plotting the first 100 series further confirms that there is still valuable information in the weekly trends.
+
+Overall, these visualizations show that multiple time series share significant structure, both daily and weekly. This validates the idea that deep learning models can leverage information across series to improve predictions.
+
+In the next video, we will focus on building time series covariates, which will be very similar to what we have done in the past, but adapted for multiple series. This will set the stage for modeling and forecasting.
+
+**G) Python - Time Covariates, Scaling and Time Steps**
+
+All right, let’s move on to the next step. In this video, we are going to focus on creating the time series covariates. Initially, these covariates are quite simple—they represent hours and weekdays. Since we have around 700 observations, having these two features is enough to start.
+
+First, we create a time series instance for the hour. We can use the pandas date range from our dataset to define this. We also apply one-hot encoding to represent the hours as categorical features, which helps the model better understand cyclical patterns.
+
+Similarly, we create the weekday series. Again, we use one-hot encoding so that each day of the week is represented as a separate binary feature. This allows the model to capture weekly seasonal patterns.
+
+Next, we import a scaler to normalize our covariates. We use fit_transform to scale the series, which maps the values between 0 and 1. This step ensures that all covariates are on the same scale, making it easier for the LSTM model to learn effectively.
+
+Finally, we stack the covariates together. This combines the hour and weekday series into a single input structure that can be fed into the model. At this point, we have our time series covariates fully prepared.
+
+The next step will be to use these covariates to build the LSTM model for forecasting multiple time series.
+
+**H) Python - LSTM Model and Cross-Validation with Multiple Series**
+
+Welcome back. In this video, we are going to build the LSTM model for forecasting our multiple time series. We start with the model configuration, which involves defining the input chunk length, forecast horizon, and training length. For this example, the forecast horizon is set to 24 hours, the input chunk length is 48, and the training length is the sum of the chunk length and forecast horizon. These parameters define how much past data the model sees and how far ahead it predicts.
+
+Next, we construct the LSTM model. Using the Darts library, we specify parameters such as the hidden dimension, number of RNN layers, dropout, epochs, and random state. For this example, the hidden dimension is 188, we use two RNN layers, a dropout of 0.1, 10 epochs, and a random state of 1502. We also set the input chunk length and optimizer learning rate at 0.003. Device selection and other trainer configurations are handled as well.
+
+Once the model is built, we fit it using our scaled series and the time series covariates (hour and weekday series). The covariates are passed as future covariates to allow the model to use known external features for prediction.
+
+During training, you might encounter a user warning regarding dropout and the number of RNN layers. Dropout only applies when the number of layers is greater than one, which is why we increased our RNN layers from one to two. After this adjustment, the model runs smoothly.
+
+With the model trained, we move on to cross-validation and historical forecasting. Using the historical_forecast function, we specify the series, future covariates, starting point, forecast horizon, stride, retrain flag, and whether to consider only the last points. One important detail is ensuring the stride is an integer, as forecast_horizon / 2 may return a float (e.g., 12.0), which causes errors. Adjusting this to an integer resolves the issue.
+
+We also clarify the output chunk length, which is set to 1 to predict one time step at a time. Even though the model predicts one step at a time, we can still aggregate predictions to cover the entire forecast horizon of 24 hours.
+
+After making these adjustments, the model runs successfully, performing historical forecasts over the multiple time series using both past observations and covariates.
+
+In the next video, we will analyze the model output and interpret the predictions. This will help us understand how well the LSTM model captures daily and weekly patterns across multiple series.
+
+**I) Python - CV Results**
+
+All right, welcome back. The cross-validation process has completed, and it was quite fast—about 39 seconds. Now, let’s check the performance of our model using cross-validation. Since this is multiple time series, we don’t necessarily know what each series represents. The actual values themselves are abstract, so it’s difficult to label them as “good” or “bad.” However, evaluating performance is an essential part of parameter tuning and ensures that we have a robust version of the model.
+
+To begin, we initialize an empty list for RMSE values and iterate through the cross-validation results. For each CV fold, we first get the predictions and convert them from a time series object to a pandas DataFrame. Using the scaler, we inverse transform the predictions so that they are on the original scale. We then determine the start and end indices of each fold using the predictions’ index, and extract the corresponding actual values from our original DataFrame. With the predicted and actual values aligned, we compute the RMSE for each fold and append it to our RMSE list.
+
+After processing all CV folds, we summarize the results by calculating the mean RMSE across folds and display it using an f-string. One common issue that arises here is ensuring that the iteration over CV folds uses integers. Using range(len(CV)) instead of range(CV) avoids the “time series object cannot be interpreted as an integer” error.
+
+For example, after correcting this, the mean RMSE might show a value like 479.9. This value is not about interpreting whether the prediction is “good” or “bad”—it is simply part of model evaluation and optimization. The cross-validation RMSE informs our parameter tuning, where we can experiment with different hyperparameters to improve performance.
+
+Finally, the next step will be visualizing the cross-validation results, which provides a clear, graphical representation of model performance across folds. This visualization is very helpful before proceeding to full parameter tuning.
+
+**J) Python - CV Visualization**
+
+Welcome back. In this video, we are going to visualize the cross-validation results. The process is straightforward. We start by iterating over the cross-validation folds using for i in range(len(CV)). For each fold, we create a figure with a size of (15, 5), which usually works well for this type of plot.
+
+Next, we plot the predicted values from the current fold. Since the predictions were scaled, we first inverse transform them using the scaler. Then, we plot the actual values for the same fold using series.plot(label="Actuals"). We also add a legend and a title to the plot, labeling each fold appropriately with Fold i+1.
+
+Sometimes, a warning appears: “number of series components is larger than the maximum number of components to plot.” By default, the maximum number of components to plot is ten, but this can be adjusted with the max number of components parameter. Even with adjustments, you may still get a minor warning, but the plot becomes much easier to interpret.
+
+One important detail: make sure the last_points_only option is set correctly. If it is True, you might see only one point plotted for the end, which can look odd. Setting it to False ensures that the full series is displayed, making the visualization meaningful.
+
+Once the visualization runs, you can clearly see the complete series along with the corresponding cross-validation predictions. This allows you to observe specifically where the cross-validation predictions fall within the series. The visualization naturally progresses from left to right along the time axis, showing how predictions evolve as more data becomes available.
+
+This method is especially useful if you want to highlight a specific portion of the series. You can subset the components and compare the actual values versus predicted values directly for clarity. Overall, this visualization is a powerful and intuitive way to see the performance of your model before moving on to parameter tuning.
+
+In the next video, we will start parameter tuning and work on improving the model further.
+
+**K) Python - Parameter Tuning**
+
+In this section, we move on to parameter tuning for our multiple time series setup. As we already know, the first thing we need to do is define a parameter grid. Unlike the earlier single-series example where we explicitly split the series, here we will not do any manual splitting. Instead, we rely fully on cross-validation to evaluate performance. Of course, you can choose to run one round, two rounds, or even three rounds of tuning depending on how exhaustive you want the search to be.
+
+For this example, we start with a Temporal Fusion Transformer (TFT) model. This is not just to “spice things up,” but also to show that there are multiple equally valid ways to perform tuning beyond the models we used earlier. The logic remains the same; only the model configuration changes.
+
+We begin by defining the parameter grid. For dropout, we use values of 0.05 and 0.1. For the number of epochs, we select 10 and 15. Next, we configure the learning rate, adding values such as 0.03 and 0.005, especially since we observed earlier that training with these settings runs relatively fast.
+
+For the training length, we verify the calculation carefully. Since the input chunk length plus the forecast horizon was initially 48 + 24, that gives us 72. Based on this, we test training lengths of 72 and 96. For the input chunk length, we confirm that 48 was used earlier, and we extend it by also testing 72. With all these combinations defined, we create the full parameter grid.
+
+Once the grid is ready, we estimate how many combinations we have. With all parameters combined, the grid size becomes fairly large, and we can expect the run time to be long—easily around an hour or more. This is why parameter tuning is often left running while you take a break.
+
+Next, we initialize an empty list to store results, typically something like an RMSE list. We then iterate through the parameter grid using a loop such as for params in grid. Inside this loop, we create the model using the current parameter combination. This includes configuring dropout, number of epochs, learning rate, training length, input chunk length, optimizer arguments, and trainer settings.
+
+After initializing the model, we run cross-validation. We pass in the scaled time series, future covariates, forecast horizon, and specify that last_points_only is set to False so that we retain the full prediction windows. This produces a list of cross-validation predictions.
+
+For each fold in the cross-validation output, we process the predictions step by step. First, we convert the predictions from a time series object into a DataFrame. Then, we apply the scaler’s inverse transformation so the values are back in their original scale. We determine the start and end indices of the prediction window using the minimum and maximum timestamps of the predictions.
+
+Using these indices, we extract the corresponding actual values from the original Pandas DataFrame. Once we have both the predictions and the actuals aligned over the same time range, we compute the RMSE for that fold. Each fold’s RMSE is appended to a temporary list for that parameter configuration.
+
+After iterating through all folds, we compute the mean RMSE across folds and append it to the main results list. This value represents the overall performance of the current parameter combination. The loop then continues to the next set of parameters in the grid.
+
+At this point, everything is running as expected. Because the tuning process is computationally expensive, it’s common to leave it running and return later to inspect the results. Once the process completes, you’ll have a list of RMSE scores corresponding to each parameter configuration, allowing you to identify the best-performing setup.
+
+This is where we stop this video. In the next video, we’ll come back, look at how long the tuning took, and analyze the results to decide which parameter combination performs best.
+
+**L) Python - LSTM Parameter Tuning Results**
+
+Very eager to wrap this up because this run took a long time. It says around three hours, but in reality it was almost four. I literally played a bit, did some exercise, took a shower, came back—and only then it was done. So yes, I am very happy that it finally finished.
+
+Now, of course, you might ask: “Okay Diogo, is there really a point to all of this? Why are we suffering through all this pain?”
+And yes, there is a point. I did not expect it to be this painful—almost four hours. Even two hours would already have been painful enough. But there is a point, and we are going to get to it now.
+
+What we do next is attach the RMSE results to the corresponding parameter grid. We then display the results. Initially, creating a Pandas DataFrame with the grid and results looks quite messy, and honestly, we don’t really need all that raw formatting. Instead, we just keep the results clean and transform them into an interactive table, which is much easier to explore visually.
+
+Once we sort the results, we start seeing clear patterns. Most of the best-performing configurations have a hidden dimension of 25. The input chunk length appears consistently favorable, the learning rate of 0.005 dominates, although 0.03 does show up occasionally. The number of epochs is almost always 15, and the number of RNN layers is consistently two. Training lengths vary slightly, but 72 seems preferable overall.
+
+This naturally raises an important question:
+Do we really need 128 parameter combinations and nearly four hours of computation to figure out that the number of epochs should be 15, hidden dimensions around 25, and RNN layers equal to two?
+
+Because what this is really telling us is more exploratory insight than absolute truth. Maybe we should have tested 20 epochs. Maybe one RNN layer would have been sufficient without dropout. Could we try hidden dimensions of 30? Could a slightly higher learning rate work better?
+
+The key takeaway is that this approach is inefficient. This is the most basic form of parameter tuning—the fundamentals—but it’s computationally expensive and slow.
+
+From here on out, and throughout the rest of the course, we will move toward more efficient parameter tuning strategies. Approaches that do not require this level of brute-force computation, and that could easily land us in the top five or top ten configurations within five or ten minutes, rather than hours. That is the real goal.
+
+Now, since this run took four hours, we definitely want to export the best parameters. We extract the best-performing configuration and save it—not as a dictionary, but as a CSV file, named something like best_params_lstm.csv.
+
+It’s also worth remembering that in a previous section, we worked with a single-series LSTM, where we did tuning in round one and round two. That approach is more efficient in practice, but it also means we optimize parts independently and never see the full picture. Here, we do see the full picture—but it’s inefficient. Ideally, we want a balance between both.
+
+With the best parameters exported, we move on to predicting the future. We start by importing the CSV file using Pandas and setting the index column correctly. At this point, we need to be careful with data types. Some parameters are floats, others should be integers—such as hidden dimensions, input chunk length, training length, and number of epochs.
+
+Instead of transforming everything at once, it’s cleaner to explicitly extract each parameter and cast it to the correct type. We assign integers to the RNN layers, hidden dimensions, epochs, training length, and input chunk length, and floats to dropout and learning rate. Once everything is properly typed, we are good to go.
+
+During this process, we notice a small issue when accessing parameter values. The fix is to use .iloc[0] to correctly retrieve values from the DataFrame row. This also helps avoid future warnings and makes the code more robust. Once corrected, everything works as expected.
+
+At this point, the best LSTM parameters are loaded, cleaned, and ready to be used.
+
+I’m going to stop this video here.
+In the next one, we’ll add future covariates, which are currently missing. Since we are predicting the future, we also need future values for the time-based covariates such as hours and weekdays. Once those are added, we’ll be able to fully wrap up the LSTM for multiple time series.
+
+**M) Python - Predicting the future**
+
+At this stage, we need to generate future values for our time series dates. Specifically, we want to create a future time index that starts one hour after the last timestamp in our data. This is important because if we start at the same timestamp, we would create an overlap between historical data and future predictions. Since predictions begin one hour ahead, the future index must reflect that.
+
+To do this, we use pandas.date_range. The start is set to the last timestamp in the dataset plus one hour. We define the frequency as hourly and specify the number of periods based on the forecast horizon. This gives us a clean future datetime index that begins exactly where predictions should start. This completes step one.
+
+In step two, we create time series objects for the future covariates, specifically the hour of day and weekday. This follows the exact same structure used for the historical covariates. Using the future time index, we generate a time series object and then extract datetime attributes such as hour and weekday. These attributes are one-hot encoded in the same way as before, ensuring consistency between historical and future covariates.
+
+Next, we stack the future covariates together. First, we stack the future hour and future weekday features. Then, we append these future covariates to the existing historical covariates. We do not replace the old covariates; instead, we extend them forward in time. This ensures that the model has covariate values both for the training period and for the forecast horizon.
+
+With future covariates prepared, we move on to building the tuned LSTM model. We initialize the RNN model with model="LSTM". We pass in the best parameters obtained from tuning: hidden dimension, number of RNN layers, dropout, number of epochs, training length, and input chunk length. We also set the random state to 1502 for reproducibility, include the optimizer parameters, and define the PyTorch Lightning trainer arguments.
+
+Once the model is defined, we fit it on the scaled series, this time explicitly providing the future covariates. The training runs for the tuned number of epochs, which in this case is 15. Training completes successfully.
+
+After training, we move to the final step: making predictions. We call model.predict() with the forecast horizon and pass in the future covariates. However, at this point, we encounter an error. The error message indicates that the provided future covariates do not extend far enough. Specifically, the future covariates must start at or before a certain time step, but the model is detecting a mismatch.
+
+This suggests that something is off with the date alignment. To debug this, we start inspecting the future weekday covariates. We notice that they begin on January 30th. We then check the scaled series and confirm that it also ends on January 30th. At first glance, this seems correct.
+
+However, when we inspect the original covariates, we see that they extend up to January 31st. This is unexpected and indicates a misalignment between the series and covariates. The covariates appear to go further in time than the target series, which can confuse the model when it tries to align past and future inputs.
+
+We then check the lengths of the objects. The scaled series has a length of 700, while the covariates have a length of 724. Although this might seem acceptable since covariates can extend further, the index alignment is what really matters. Something in how the covariates were stacked or appended has shifted the time index.
+
+At this point, despite checking the stacking logic, inspecting indices, and verifying lengths, the issue is still not immediately obvious. This is one of those subtle time-index alignment problems that can be tricky to debug live.
+
+Rather than dragging this on further, I’m going to stop this video here. I’ve done as much live debugging as reasonably possible. In the next and final video, I’ll show you the exact fix, explain what was wrong, and demonstrate the correct way to align future covariates for prediction.
+
+**N) Python - LSTM Debugging**
+
+This one turned out to be fairly easy once identified. The issue was simply in how the covariates were passed during prediction. Instead of passing only the future covariates, I should have passed the full covariates object, which already contains both historical and future covariates. When I used the shortcut, I mistakenly provided only the future portion, which caused the misalignment error.
+
+So the fix was straightforward: during prediction, use covariates instead of future_covariates. This ensures the model has access to the entire covariate timeline, covering both the past (needed for context) and the future (needed for forecasting). Once this change is made, the prediction step runs correctly without any date or alignment issues.
+
+The final step is to transform the predictions back to their original scale. The model outputs predictions as a time series object in scaled form, so we first convert the predictions into a DataFrame using time_series_to_dataframe. After that, we apply the scaler’s inverse_transform method to bring the predictions back to their original units. This gives us the final, interpretable forecast values.
+
+At this point, this output is exactly what we want. You could optionally add some visualization to plot the predictions against historical data, but functionally, this DataFrame is the final result. From here, it can be stored, exported, or directly written into a database or downstream system.
+
+And that’s it for us. I hope you enjoyed this walkthrough. I know it had its painful moments, but it also covered a complete, real-world workflow—from feature engineering and modeling to tuning, debugging, and final prediction. If you have any questions, feel free to ask. I’m happy to help, and I’ll see you in the next video.
+
+**XVII) Section 17: Temporal Fusion Transformers (TFT)**
+
+**A) Game Plan for TFT**
+
+Imagine you’re running demand forecasting for a large retail chain, but your current models just can’t keep up. Sales are influenced by intricate seasonality, promotions, holidays, special events, and even sudden market shifts. Traditional approaches like ARIMA or even standard LSTMs start to fall short in these situations. They struggle to dynamically adapt to all these interacting factors, especially when the forecasting horizon extends beyond just the next few steps.
+
+This is where DFT (Temporal Fusion Transformers) truly stands out. DFT shines precisely in scenarios where other models struggle. It is designed to deliver accurate multi-horizon forecasts, while explicitly accounting for complex temporal patterns and multiple influencing variables. Whether it’s promotions, calendar effects, or changing market dynamics, DFT can incorporate all of this information into a single, coherent forecasting framework.
+
+By the end of this section, you’ll have a clear understanding of the DFT architecture. We’ll break down its unique components step by step, including how attention mechanisms work and how the model is structured to handle multi-horizon forecasting. The goal is not just to use the model, but to truly understand what is happening under the hood and why it works so well for complex forecasting problems.
+
+You’ll also gain hands-on experience building a DFT model from scratch using the Darts library in Python. We’ll go deep into the implementation details, exploring every important configuration and design choice. This means you won’t just copy-paste code—you’ll understand how each part contributes to the model’s performance.
+
+Beyond building the model, we’ll focus on optimizing DFT performance. You’ll learn practical techniques to fine-tune hyperparameters, improve accuracy, and make the model more robust. Optimization is a critical step, especially for real-world applications where both performance and efficiency matter.
+
+What truly sets DFT apart is its ability to perform multi-horizon forecasting, predicting multiple future time steps at once. This is incredibly valuable for operational and strategic planning, where decisions often depend on forecasts across several future periods rather than a single point estimate.
+
+Another key strength is its attention mechanism, which dynamically prioritizes the most relevant features at each point in time. This allows the model to focus on what truly matters for the forecast, significantly improving accuracy in complex environments.
+
+DFT also excels in interpretability. Unlike many black-box models, it provides insights into which features have the greatest impact on the forecast. This transparency makes the results more trustworthy and easier to explain to stakeholders.
+
+Finally, DFT offers remarkable flexibility with inputs. It can seamlessly handle a wide variety of data types, including static features, known future covariates, and observed past variables. This flexibility makes forecasting more robust, comprehensive, and adaptable to real-world business needs.
+
+This is an exciting section. DFT is a powerful and modern forecasting technique, but it is also complex. That’s why we’ll approach it step by step, ensuring clarity at every stage. Let’s get started.
+
+**B) Introduction to Temporal Fusion Transformers**
+
+Let me start with a story about one of the tech giants: Uber.
+
+Back in 2018, Uber faced major challenges when it came to accurately forecasting ride demand. Urban environments are highly dynamic—demand shifts due to time of day, weather, special events, and sudden market changes. Traditional forecasting approaches such as ARIMA and even LSTM-based models were not sufficient. They struggled to cope with the complexity, variability, and multi-scale nature of the data.
+
+To overcome these limitations, Uber’s data science team decided to implement Temporal Fusion Transformers (TFT). The motivation behind this choice was clear: TFT can handle multiple forecasting horizons within a single model and dynamically adapt to a wide range of influencing factors. This made it especially suitable for Uber’s use case, where demand patterns vary not just across time, but also across regions and external conditions.
+
+Using TFT, Uber was able to forecast ride demand across different locations and time periods while explicitly accounting for special events such as concerts and sports games, as well as weather conditions. The results were significant. The TFT-based approach improved forecast accuracy by approximately 15% compared to previous models. This improvement allowed Uber to better align driver availability with rider demand.
+
+As a direct business impact, more accurate forecasts reduced passenger wait times by about 10% and increased the number of rides per driver by roughly 12%. Additionally, improved demand predictions helped Uber optimize its driver incentive programs, leading to an overall operational cost reduction of around 5%. This real-world success highlights why TFT has gained so much attention in modern time series forecasting.
+
+Now, enough with the story—let’s focus on what really matters for this lecture.
+
+In this section, we will cover the core principles of Temporal Fusion Transformers. We’ll break down the key components that make TFT so powerful, explain how it excels at multi-horizon forecasting, and explore how it dynamically prioritizes relevant features over time. We’ll also discuss why interpretability and flexibility are central strengths of this model.
+
+At its core, the Temporal Fusion Transformer is an advanced deep learning architecture designed specifically for time series forecasting. It integrates multiple data sources and adapts dynamically to changing temporal patterns, which significantly improves forecasting accuracy in complex, real-world scenarios.
+
+One of the most important components of TFT is its attention mechanism. Attention allows the model to focus on the most relevant parts of the data at each time step, ensuring that critical signals are emphasized while less relevant information is down-weighted. This selective focus plays a key role in improving prediction quality.
+
+TFT also incorporates LSTM-based encoders and decoders, which are responsible for capturing long-term dependencies in time series data. In addition, it supports static covariates—features that do not change over time but strongly influence outcomes, such as city, region, or store type. We’ll dedicate a separate lecture to static covariates, as they are crucial for understanding how TFT personalizes forecasts.
+
+When it comes to multi-horizon forecasting, TFT truly sets itself apart. Traditional models like ARIMA or standard LSTMs can predict future values, but they often require separate models or complex configurations for different horizons—for example, one model for hourly forecasts and another for daily forecasts. TFT, on the other hand, is designed to predict multiple future time steps simultaneously within a single framework.
+
+This means a single TFT model can produce hourly, daily, and weekly forecasts in one go. For companies like Uber, this is extremely valuable, since operational decisions often depend on forecasts across multiple time scales—different times of day, days of the week, and even longer planning horizons. Having one unified model makes the forecasting pipeline simpler, more consistent, and easier to maintain.
+
+Another defining feature of TFT is dynamic feature prioritization. Through its attention mechanisms, the model continuously adjusts the importance of different features over time. This allows it to adapt in real time to changing conditions. For example, during peak travel hours or major events, factors such as weather or local concerts may become far more influential than usual.
+
+Conceptually, you can think of this as a heat map of feature importance over time. Darker regions indicate higher attention weights, showing which features the model considers most relevant at each moment. While these visualizations are often conceptual, they reflect how TFT internally adapts to shifting patterns in the data.
+
+Interpretability is another major strength of TFT. Because the model explicitly computes attention weights and feature importance, users can understand why a certain prediction was made. You can see which features mattered most at a given time and how their influence changed. This level of transparency is especially valuable in business settings, where trust, explainability, and actionable insights are just as important as raw accuracy.
+
+Finally, TFT is highly flexible in terms of inputs. It can handle static features such as city or holiday indicators, known future inputs such as scheduled events, and observed historical data like past demand. This flexibility allows the model to seamlessly combine diverse data sources and capture the full complexity of real-world forecasting problems.
+
+To summarize, Temporal Fusion Transformers represent a major leap forward in time series forecasting. They are not just more complex models—they are more complete models, capable of handling multiple horizons, diverse inputs, dynamic feature importance, and interpretability all at once. Just as Uber successfully leveraged TFT to improve operations, you can apply the same principles to your own forecasting challenges.
+
+In the next video, we’ll go deeper and start exploring TFT in practice.
+
+**C) Case Study Briefing - Electricity Pricing**
+
+In this video, we’re going to walk through a very cool case study where we bring Temporal Fusion Transformers (TFT) to life using a real-world electricity consumption dataset. This dataset captures electricity usage over time and is rich with patterns, trends, and seasonality. It gives us the perfect foundation to understand how TFT works in practice and how it can be used to forecast future electricity demand accurately.
+
+One of the key reasons this dataset is so well suited for TFT is the presence of dynamic temporal patterns. Electricity consumption is not static—it varies significantly by hour of the day, day of the week, season, and even special circumstances. These natural fluctuations make the dataset an excellent playground for advanced forecasting techniques, especially models like TFT that are designed to adapt to changing temporal dynamics.
+
+There is also strong real-world impact behind this use case. Accurate electricity demand forecasting is absolutely critical for energy providers. These forecasts help balance supply and demand, ensuring grid stability and preventing outages. Poor forecasting can lead to inefficiencies such as overproduction, wasted energy, or even situations where electricity prices become negative because supply far exceeds demand. This makes the problem not just interesting, but genuinely important.
+
+From a modeling perspective, this case study represents a step into advanced forecasting territory. We are moving beyond simple univariate examples and starting to incorporate multiple features and richer structures. In this section—and especially in the challenge that follows—we will explore how TFT handles complexity, multiple inputs, and long-term dependencies within the data.
+
+Our primary goal here is to build a large, expressive TFT model capable of handling time series with depth and structure. We’ll start by focusing on a single series to keep things manageable, but this is just the first step. TFT is particularly strong at handling multivariate time series, and we’ll gradually move in that direction as well.
+
+Another important focus is on long-term dependencies. We want the model to distinguish between short-term noise and meaningful long-term trends. Just as importantly, we want to extract interpretable insights from the model. This means not only making accurate predictions, but also understanding why the model predicts what it does. We’ll work toward visualizing and interpreting the outputs so that the reasoning behind the forecasts becomes clear.
+
+To wrap it up, by the end of this case study, you won’t just have built a state-of-the-art forecasting model. You’ll also understand the logic behind its predictions. This combination of strong predictive power and interpretability is exactly what makes Temporal Fusion Transformers such a powerful and exciting tool.
+
+**D) Python - TFT Starter File**
+
+Welcome to TF. This is going to be, I think, the most complex topic that we’ve covered so far, especially from a more theoretical perspective. However, from a practical point of view, it’s not going to be very different, because we have already learned quite a bit—especially when working with the Darts library. So from that angle, this should be a breeze for us.
+
+You’re going to find the TF folder inside the deep learning folder, and inside that, you’ll find a starter file. I’ve already taken care of mounting Google Drive, setting up the path folders, and installing the required library. You just need to change whatever is necessary in the path; otherwise, everything more or less stays the same.
+
+Next, we’re going to import the libraries and start exploring the data. At the same time, I’ll also import the TF model. Alright, the TFT model is imported, and now we can take a look at the dataset itself.
+
+This is actually quite an interesting dataset. We have electricity data along with a few exogenous regressors. What we’re computing here are electricity prices. What makes this particularly interesting is that electricity prices can actually be negative, which feels very strange at first—but it does happen. Prices become negative when the electrical network has too much electricity and not enough consumption. In those cases, prices keep decreasing to the point where they become negative, essentially signaling, “We can’t hold this anymore—please take it away from us.” So it’s a very interesting phenomenon to model.
+
+Now, looking at the data, we have electricity prices along with a few countries included. For now, we’re going to stick to just one country to keep things simple. We’ll expand to others later as part of a project. Specifically, we’re going to focus on “D,” which represents Germany—Deutschland in its original format.
+
+So we’ll focus only on D for now. When we inspect the information, we can see that we have a unique ID, which is D, along with the target variable y and two exogenous variables. We’ll start building from there. The data is hourly, so the first thing we do is set the frequency to hourly.
+
+Let’s take a look at the price series. This is where you can clearly see what I meant earlier about negative prices—there are points where prices drop below zero. Overall, the series feels deeply seasonal. We see spikes, a more or less stable trend, and strong seasonal patterns throughout.
+
+Let’s decompose the series. We have a couple of options here. For example, we can use 168, which is the number of hours in a week—24 times 7. If we run this, we get a quick preview. Looking at the target variable y, you can clearly see how deeply seasonal it is. There’s a very well-defined seasonal component, and the trend looks relatively stable, though it does fluctuate up and down.
+
+Part of this behavior is due to the fact that hourly data is extremely volatile. Hourly time series are among the hardest to predict because the law of large numbers has the least effect at this level of granularity. The more granular the data, the less smoothing effect you get from statistical aggregation.
+
+If instead we use 24 as the seasonal period, you can see that the trend becomes even stranger. The seasonal component, however, remains very well defined. You can experiment with different values and really explore the structure of the data.
+
+You might also consider switching to a multiplicative decomposition to see the difference. However, we can’t use multiplicative seasonality here because the data includes zero or negative values. That makes total sense—once you start multiplying by negative values, the results become meaningless. So for our case, we’ll stick with additive seasonality.
+
+Looking at the autocorrelation plot, you can see that there’s a lot of information present. There are clear spikes around 24 hours and 48 hours, which is exactly what we would expect given the hourly nature of the data. This confirms strong daily and multi-day dependencies.
+
+If we look at the partial autocorrelation plot, we also see a lot of information. There are strong signals at one, two, and three hours before, as well as around 23, 24, and 25 hours before—capturing both short-term dependencies and seasonal effects. We also see signals around 48 hours, meaning there’s information coming from two days ago as well.
+
+Finally, we move on to creating the time series object. I’ve added a comment here about static covariates. This becomes relevant when you build a TFT model with multiple static covariates—such as multiple countries. In that case, the unique ID (representing each country) would be included as a static covariate. This is how the TFT model would be informed about the multiple-entity perspective.
+
+That’s it for this part. In the next video, we’re going to focus on something called additive encoders for time variables, and we’ll explore the documentation related to that. I’ll see you in the next video.
+
+**E) TFT Model Architecture**
+
+First and foremost, a warm welcome. This is going to be a fun video, and in this session we’re going to cover the Temporal Fusion Transformer (TFT) model architecture. So take a deep breath, close your eyes… and ta-da! Here comes a big, shiny equation. Don’t worry—we’re going to go through it step by step.
+
+Let’s break it down. We start with y at time t, which represents the predicted value for the i-th time series at time t, for a given quantile q, at a forecast horizon τ. This can feel tricky at first, but the key idea is that TFT predicts values in terms of quantiles. Quantile forecasting is not mandatory in TFT, but it allows the model to express uncertainty and probability in its predictions.
+
+Next, we have the forecast horizon τ. As discussed earlier, TFT supports multi-horizon forecasting, meaning the model can predict multiple future time steps at once.
+
+Then we have f(q), which represents the function used to compute the quantile forecast. This function takes several inputs to generate predictions. One of these inputs is τ, which indicates how far into the future we are forecasting.
+
+Another input is Y, which represents the historical target values for the i-th time series. This includes the past observations of the target variable and forms the backbone of the model’s understanding of historical behavior.
+
+We then introduce unknown inputs, also called past covariates, for the i-th time series from time t−k to t. These are variables that are only known up to the current time step, such as past weather conditions, historical sales, or other observations that occurred in the past but are unknown in the future.
+
+In contrast, we also have known inputs, also referred to as future covariates, spanning from time t−k to t+τ. These inputs are known in advance and include features such as holidays, day of the week, or scheduled events—anything that we can confidently project into the future.
+
+Finally, we include static covariates for the i-th time series. These are features that do not change over time, such as location, product type, or category. Static covariates provide context that remains constant across all time steps.
+
+Putting this together, the TFT model predicts across multiple forecast horizons τ, produces quantile-based forecasts, and leverages historical inputs, known future inputs, unknown past inputs, and static covariates. All of these components are bundled together to produce probabilistic forecasts.
+
+Now, if you thought that equation was a whammy, here comes a double whammy. And just as a fun note, according to the dictionary, a whammy is an event with a powerful and unpleasant effect—a blow. So here we go.
+
+What you’re now looking at is the actual TFT model diagram, and the main goal of this lecture is to help you master this framework. This is not easy—it’s big and complex—so we’ll go step by step, explaining each component and how everything builds on top of each other. If anything doesn’t make sense, feel free to reach out—I’m here to help.
+
+We start by focusing on xₜ₊₁. Everything begins with variable selection. Just like in any model, this is where the inputs are chosen and weighted based on importance.
+
+From there, the output of variable selection flows into the LSTM decoder. The LSTM decoder processes information from past data and known future inputs to generate predictions for future time steps. It operates sequentially, using its memory to capture both short-term and long-term dependencies while predicting step by step into the future.
+
+After the LSTM decoder, we encounter the Add & Norm gate, which plays a crucial role in maintaining the stability and efficiency of the network. This gate combines the decoder output with residual connections from previous layers, helping preserve information and gradients. The output is then normalized to keep values within a manageable range, preventing exploding or vanishing gradients and improving training stability.
+
+While the LSTM decoder excels at capturing sequential dependencies, some variables are better preserved without sequential processing. By allowing certain signals to bypass the LSTM, the model ensures that critical features have a direct influence on the final prediction. This hybrid approach strengthens forecasting accuracy by combining sequential modeling with direct feature influence.
+
+This entire process is repeated for each future step—xₜ₊₁, xₜ₊₂, xₜ₊₃, and so on—up to xₜ₊τ. Variable selection, the LSTM decoder, and the Add & Norm gate work together to continuously refine predictions using both historical and known future inputs. At this stage, we are still dealing with known future inputs, such as day-of-week effects or holidays.
+
+So far, we’ve focused on the future—but we also need to understand the past. This is where the LSTM encoder comes into play. The LSTM encoder processes historical inputs to capture temporal dependencies and encodes them into a fixed-length context vector. This vector summarizes past behavior and provides essential information to downstream components.
+
+In short, the LSTM encoder captures past data, variable selection identifies the most important features, and the LSTM decoder predicts future values, with Add & Norm gates ensuring stability. Together, these components form a strong foundation for time series forecasting.
+
+Up to this point, the architecture may feel similar to a standard LSTM setup. However, this is where things start to diverge.
+
+The next major component is the Gated Residual Network (GRN). The GRN enhances learning by managing the flow of information using gating mechanisms. These gates allow important signals to pass through while filtering out noise.
+
+GRNs also use residual connections, which add the input of a layer back to its output—similar to the Add & Norm gate—helping preserve information and gradients. Finally, normalization ensures consistent output ranges and stabilizes training. By integrating GRNs into the TFT, the model efficiently focuses on the most relevant features while maintaining stability.
+
+Next, we arrive at one of the most important components: the Masked Interpretable Multi-Head Attention (MIMHA) mechanism. This powerful component allows the model to focus on different parts of the input data simultaneously.
+
+The “multi-head” aspect means that multiple attention heads operate in parallel, each focusing on different patterns or dependencies. In the diagram, this is represented by multiple arrows, with each arrow corresponding to a different attention head.
+
+Attention works by assigning weights to different time steps, emphasizing relevant information while downplaying less important signals. This selective focus allows the model to capture complex relationships and long-range dependencies, improving both accuracy and interpretability.
+
+After attention is applied, the output flows through another Add & Norm gate, combining attention-enhanced data with residual connections and normalizing the result to maintain stability.
+
+In some cases, the output of the GRN may bypass the MIMHA layer and go directly to the next Add & Norm gate. This happens when the GRN has already sufficiently refined the important signals. Bypassing attention reduces computational cost, speeds up processing, and helps prevent overfitting by avoiding unnecessary transformations.
+
+The GRN continues refining the information, filtering out noise and preserving essential features. The refined output then moves through subsequent Add & Norm gates, continuing the cycle of processing and stabilization.
+
+At the final stage of the architecture, the processed data reaches a dense layer. This layer applies the final transformation—similar to an activation function—integrating all learned patterns and dependencies to produce predictions.
+
+The output consists of quantile forecasts, which provide a range of possible future values rather than a single point estimate. This is extremely valuable for understanding uncertainty and making risk-aware decisions.
+
+Another critical component is the static covariate encoders. These encode features that do not change over time, such as location or product type. Static covariates are connected to multiple layers in the model because they provide consistent context that influences predictions at various stages.
+
+Within the Temporal Fusion Decoder, information from past inputs, future inputs, and static covariates is synthesized using attention mechanisms and GRNs. The decoder emphasizes the most relevant signals and generates the final predictions while accounting for dependencies and patterns.
+
+The position-wise feed-forward layer applies linear transformations and activation functions independently to each time step, capturing non-linear relationships without altering temporal order.
+
+The temporal self-attention mechanism allows the model to attend to different time steps simultaneously. Multiple attention heads focus on different temporal patterns, helping capture long-range dependencies and improving forecast accuracy.
+
+Finally, static covariates are integrated into the Temporal Fusion Decoder, enriching the model’s understanding by combining stable and dynamic information. This ensures that both constant and time-varying aspects of the data are considered.
+
+The architecture also allows the output from the first Add & Norm gate to bypass the Temporal Fusion Decoder entirely and move directly to the final Add & Norm gate. This happens automatically when the initial processing is already sufficient, reducing computational complexity, speeding up inference, and preventing overfitting. The Darts library handles this internally.
+
+To summarize, the TFT architecture combines variable selection, LSTM encoders and decoders, gated residual networks, attention mechanisms, dense layers, and static covariate encoders to produce accurate, probabilistic forecasts. It synthesizes past data, known future inputs, unknown past inputs, and static context while maintaining stability and interpretability.
+
+And… oof. That was a long one. But I truly hope this deep dive helped clarify how the TFT architecture works and how all the pieces fit together.
+
+Thanks for sticking with it, and I’ll see you in the next video.
+
+**F) Covariates: Past, Future and Static**
+
+In this video, we’re going to dive into the concept of covariates in the context of the Temporal Fusion Transformer (TFT). This is a topic I really want you to have completely nailed down. While understanding the architecture is extremely important, covariates play a huge role in the practical implementation of TFT, especially when we start working in Python. Mastering this concept is essential, so let’s get started.
+
+First, let’s talk about past covariates, which are also known as historical features. These are variables from past time steps that help the model understand the context leading up to the present moment. Past covariates are crucial because they allow the model to capture trends, seasonality, and recurring patterns in the data. Without this historical context, forecasting would be far less accurate.
+
+Next, we have future covariates. These are inputs that can be used to predict future values because they are known ahead of time. Future covariates are especially useful in scenarios where certain conditions are planned or scheduled in advance. Examples include promotions, holidays, planned events, or calendar-based features such as day of the week or month. The key rule here is simple: if you know it in advance, you can use it.
+
+This concept may sound familiar. In earlier models like Prophet or similar traditional approaches, we were already using future covariates. Those models relied on future information to explain past behavior and predict future outcomes. However, what’s new here is that TFT allows us to combine future covariates with past covariates at the same time, which gives the model a much richer understanding of the data.
+
+Another important addition in TFT is static covariates. These are features that do not change over time but still provide essential context for forecasting. Examples include location, product type, customer segment, or any categorical or grouping variable that remains constant. Static covariates help the model differentiate between different entities and understand structural differences across time series.
+
+These static features influence forecasting because they provide broader context. For example, two time series may look similar historically, but if they belong to different regions or product categories, their future behavior could be very different. Incorporating static covariates ensures that the model accounts for these underlying characteristics when making predictions.
+
+To conclude, understanding and effectively using past covariates, future covariates, and static covariates is absolutely crucial for getting the most out of the TFT model. By incorporating all three types, the model can leverage information from multiple angles—historical patterns, known future events, and stable contextual features.
+
+It’s this multi-dimensional perspective that makes TFT such a powerful and flexible forecasting model.
+
+That’s it for this video. If you have any questions, feel free to reach out—I’m here to help. I’ll see you in the next video.
+
+**G) Python - Series, Time and Static Covariates**
+
+In this video, I’m going to walk you through the documentation for the Temporal Fusion Transformer, focusing on a very important component that appears across essentially every model: the encoders. You might have already noticed this section in the documentation, or maybe I gave you a few spoilers earlier, but this part is absolutely key for how we handle time-based features.
+
+What’s happening here is that, up to now, we’ve often been manually creating cyclical covariates—things like hour of day, day of week, or month—by writing custom code. The good news is that Darts already provides built-in encoder utilities that can generate these features for us automatically. This makes our workflow much cleaner and less error-prone.
+
+So what I’m going to do is take this encoder block from the documentation, copy it, and paste it directly into our code. Think of this as an initial setup. From here, we can easily customize and extend it based on our data.
+
+Since our dataset is hourly, it makes complete sense to include all relevant time-based encodings. At a minimum, we definitely want hour, day, and day of week. These capture strong cyclical patterns that are almost always present in hourly time series data. We can also include month, which helps the model learn longer-term seasonal effects.
+
+You might be wondering whether adding even more features—like week of year—is necessary. The answer is: it doesn’t hurt. In practice, adding week-level information can sometimes help the model capture mid-term seasonality, so we’ll include that as well. This encoder setup works just as well for daily data, weekly data, or other frequencies—you simply adjust which encodings you include.
+
+In addition to cyclical encoders, we also keep the positional encodings for past and future relative time steps. These remain unchanged and help the model understand where each time step sits relative to the prediction window.
+
+We also add an encoded year feature. This is a simple but effective transformation where the year is standardized—for example, subtracting 1950 and dividing by 50. This scaling ensures the year feature remains numerically stable and easy for the model to learn from. While encoding the year for future values doesn’t always make a big difference, there’s no downside to including it, so we add it here as well.
+
+All of this together forms a compact but powerful block of code that automatically generates time-based covariates. Once defined, we simply feed these encoders directly into the model, and Darts handles the rest internally.
+
+And that’s really it for this video. We now have a clean, reusable way to generate all the time-based covariates we need, without manually engineering them every time.
+
+**H) Python - Past Covariates**
+
+In this video, we’re focusing again on the Temporal Fusion Transformer (TFT) model. One thing that really stands out when you look at its architecture is that everything is “green”—meaning TFT is designed to accept almost every type of input you can think of. Unlike earlier models we’ve worked with, this is the first one that truly takes everything at once.
+
+What this means in practice is that TFT is extremely flexible. We can train it using only past data, or past and future data together, or even only future covariates if that makes sense for the use case. On top of that, the model supports univariate and multivariate time series, which opens up a huge number of possibilities. Essentially, if something can be done in time series forecasting, TFT can handle it—and I’m going to show you how.
+
+In this specific video, we’re going to isolate past covariates and work only with those. The idea is to take things step by step so we clearly understand what each covariate type does and how to pass it into the model correctly.
+
+We start by working with the dataframe. For now, we simply include all the relevant columns so we can build from there. The dataset contains a unique ID, the target variable y, and two additional features: exogenous_1 and exogenous_2. In this example, we’ll focus only on those two exogenous variables.
+
+Next, we define a variable—let’s call it x_past—which contains exogenous_1 and exogenous_2. These will serve as our past covariates, meaning they are known only up to the current time step and not into the future.
+
+Once that’s done, we create the past covariates time series using TimeSeries.from_dataframe. We pass in the dataframe and specify x_past as the value columns. That’s all we need—nothing fancy here. This single line converts our past features into a proper Darts TimeSeries object.
+
+After creating the past covariates, we quickly verify them to make sure everything looks correct. We check that the series exists, that the values are there, and that the structure is as expected. Once confirmed, we’re good to go.
+
+And that’s it for this video.
+
+In the next one, we’ll move on to future covariates and see how they differ from past covariates and how they plug into the TFT model. I’ll see you there.
+
+**I) Python - Future Covariates**
+
+Up until now, we’ve been working with future covariates. And when we talk about future covariates, it’s important to clarify what that actually means in practice. Even though we call them future covariates, they usually cover both past and future time periods. That’s simply how the model expects them to be structured.
+
+In contrast, past covariates truly belong only to the past. They are used during training to help the model learn patterns, but they are not required during the prediction step. You don’t need to feed them into the model when generating forecasts. Future covariates, on the other hand, must be available for the future time steps you want to predict. This has been the case so far, and it will remain the case in this video as well.
+
+There is one very important note I want to emphasize here. If you include a variable as a future covariate, you do not need to include the same variable as a past covariate. You can choose one or the other. In this walkthrough, I am deliberately including both past and future covariates—not because it’s required, but to demonstrate how both can be wired into the TFT model. From a modeling perspective, including both does not provide any extra benefit here. In most real-world scenarios, you would typically choose future covariates if you have them, and only fall back to past covariates when future information is unavailable. This flexibility is one of the key strengths of TFT compared to many other models.
+
+Now let’s move into the implementation.
+
+We begin by loading the future covariate data. This dataset contains the same structure as before, but extended into the future. Once loaded, we take a quick look at it to confirm that the data is present and correctly formatted.
+
+Next, we subset the data to include only the relevant unique ID. For simplicity, we are still working with a single entity. This keeps the example clean and focused.
+
+At this stage, we isolate the exogenous variables—specifically exogenous_1 and exogenous_2. These are the variables we want to treat as future covariates. We verify that the target variable y is not included here, because future covariates should not contain the target itself.
+
+After that, we concatenate the past and future exogenous data. This ensures we have a continuous sequence of covariates covering both historical and future time periods. When doing this, we need to be careful with the concatenation axis. Initially, things may look off if the wrong axis is used, but once corrected, the combined dataset aligns properly.
+
+Once the concatenation is correct, the final step is to convert this pandas DataFrame into a TimeSeries object. We use TimeSeries.from_dataframe, passing in the combined dataframe and explicitly setting the frequency to hourly, since the frequency hasn’t been defined earlier. This step is crucial because TFT relies on correctly defined time indices.
+
+After this conversion, we now have a properly formatted future covariates TimeSeries, ready to be used by the model.
+
+And that’s it for this video.
+
+In the next one, we’ll move on to scaling, which is an essential preparation step before fitting the TFT model. I’ll see you there.
+
+**J) Python - Scaling**
+
+Now let’s move on to scaling.
+
+This is a very important step, especially when working with deep learning models. Scaling puts everything on a similar numerical scale, which helps the model train faster and more efficiently. Without scaling, the model can struggle with variables that have very different magnitudes, which can slow down convergence or even confuse the learning process. At the end of the day, this step is all about performance and stability.
+
+We start by importing the scalers. I usually like to keep things clean and organized, so I separate them. One scaler is used for the target time series, and another scaler is used for the covariates. This makes it easier to manage transformations and avoids accidental mixing of data.
+
+First, we apply scaling to the target series. We create a scaled version of the series by calling fit_transform on the scaler. This is very straightforward: the scaler learns the distribution of the data and then transforms it accordingly. Once this step is done, our target series is now properly scaled and ready for modeling.
+
+Next, we move on to the covariates. Here, we scale both the past covariates and the future covariates. Just like with the target series, we apply fit_transform so that the scaler learns the appropriate scaling parameters and transforms the data. After this step, all covariates—both historical and future—are now on a consistent scale.
+
+At this point, everything is properly scaled, and we are fully prepared to move forward with the TFT model. This is always a good moment to pause and double-check that all components—series, past covariates, and future covariates—are aligned and scaled correctly.
+
+Before stopping, there’s one more important thing to define: the forecasting horizon. We explicitly set the forecasting horizon to 24. This means we are predicting the next 24 time steps.
+
+Why 24? That’s a very good question. If you look at the future covariates, they span from index 0 to 23. This directly corresponds to 24 hours. After that, the next entity or sequence begins. So, in simple terms, we are forecasting the next 24 hours, which aligns perfectly with the structure of our future covariates.
+
+And with that, we’re done for this video.
+
+In the next one, we’ll finally start building the TFT model itself. I’ll see you there.
+
+**K) TFT Model Parameters**
+
+Welcome to this lecture, where I’ll walk you through the key parameters of the Temporal Fusion Transformer (TFT) model. We’ll focus on the most important parameters, explain what each of them means, and understand how they influence the model’s behavior. Let’s get started.
+
+The first parameter is the input chunk length. This defines the length of the historical data window that the model uses as input. In our example, we set this value to 96, which means the model looks at the past 96 time steps when making predictions. This historical window is crucial because it allows the model to capture patterns and dependencies over a meaningful period of time. Having sufficient historical context helps the model generate more accurate forecasts.
+
+Next, we have the output chunk length. This parameter determines how many future time steps the model predicts in a single forward pass. In our case, it is set to 24, which represents our forecasting horizon. This is one of the most important parameters because it directly defines what we are trying to predict. If your goal is to forecast the next 24 time steps, the model must be explicitly configured to do so. In practice, the model is tuned around this value.
+
+Moving on, we have the hidden size. This refers to the number of hidden units in the LSTM layers of the model. We start with a default value of 16, meaning that each LSTM layer contains 16 hidden units. The hidden size determines the model’s capacity to learn and represent complex patterns in the data. While a larger hidden size can capture more intricate relationships, it also increases computational cost and training time.
+
+The next parameter is the number of LSTM layers. In our setup, we use two LSTM layers. Having multiple layers allows the model to learn hierarchical representations of the data, which can improve its ability to capture long-term dependencies. However, increasing the number of layers also increases model complexity, training time, and the risk of overfitting. This makes the number of LSTM layers an important parameter to tune carefully.
+
+After that, we define the number of attention heads. This refers to the multi-head attention mechanism used in the model. We set this value to four, which means the model can focus on different parts of the time series simultaneously. Multiple attention heads allow the model to attend to various temporal patterns at the same time, improving its understanding of dependencies and relationships within the data.
+
+Next is the dropout rate, which is a regularization technique used to prevent overfitting. During training, dropout randomly disables a fraction of the model’s units. We use a standard value of 0.1, meaning that 10% of the units are dropped during each training iteration. This encourages the model to generalize better by reducing its reliance on specific neurons.
+
+We then specify the batch size, which determines how many samples the model processes before updating its weights. With a batch size of 64, the model processes 64 samples at a time. This setting strikes a balance between training speed and memory usage, enabling efficient training without overwhelming computational resources.
+
+Another important parameter is the number of epochs. This represents the number of complete passes through the entire training dataset. We set this to 10, meaning the model sees the full dataset ten times during training. Increasing the number of epochs can improve performance, but it also increases the risk of overfitting, so this parameter should be chosen carefully.
+
+Next, we have static covariates. Although we won’t use them in this example, we still set this parameter to true. Static covariates allow the model to incorporate features that do not change over time, helping it better understand both the inputs and their broader context. This is a very important aspect of the Temporal Fusion Transformer. In fact, TFT is particularly well-suited for multivariate time series, and static covariates are one of the key reasons for its strength. Keep this in mind, especially for the upcoming challenge.
+
+That’s it for the main parameters. By understanding what each of these settings does, we can later optimize and tune them to ensure the model achieves the best possible accuracy. I’ll see you in the next video.
+
+**L) Python - TFT Model**
+
+Welcome back. In this section, we’ll build our Temporal Fusion Transformer (TFT) model step by step. I have the documentation open alongside us so we can go through the setup together and clearly understand each configuration choice. Let’s get started.
+
+We begin by defining the input chunk length. This parameter represents the number of past time steps that the model uses as input. According to the documentation, it applies to the target series past values and also to future covariates, if the model supports them. While the documentation example uses a value of 168, we will set it to 96. One important recommendation here is that the input chunk length should always be greater than the forecast horizon.
+
+Next, we define the output chunk length. This parameter specifies the number of time steps the model predicts at once per internal chunk. It’s important to note that this is not the same as the forecast horizon, and the documentation explicitly highlights this distinction. The output chunk length controls how many steps the model predicts in a single forward pass, while the forecast horizon determines how far into the future we ultimately want predictions.
+
+Another important point mentioned in the documentation is that if the forecast horizon n is set to be smaller than the output chunk length, it can prevent autoregression. To avoid this, we set our forecast horizon to be the same as the output chunk length. In our case, both are set to 24. An interesting feature here is that even if future covariates do not extend far enough into the future, the model can still generate longer predictions. For example, even if we only have future covariates for 24 steps, the model could still predict 48 steps ahead. This makes the TFT quite flexible. For now, however, we’ll stick to matching the output chunk length with our forecast horizon.
+
+We do not use the output chunk shift, so we leave it unchanged. Moving on to the hidden size, this parameter defines the number of hidden units in the model. A value of 16 works well as a starting point, and we’ll keep it at that.
+
+Next, we configure the number of LSTM layers. TFT can be thought of as an LSTM on steroids, given how much complexity is layered on top of it. We’ll start with two LSTM layers, which is a reasonable default. Along with this, we also define the number of attention heads, which we set to four. This allows the attention mechanism to focus on different parts of the time series simultaneously.
+
+For regularization, we include dropout, which we set to 0.1. This helps reduce overfitting by randomly dropping units during training. Other parameters are left at their default values, as they are not critical to adjust at this stage.
+
+We also set use static covariates to true. While we don’t actually have static covariates in this example, this parameter allows you to enable or disable them easily depending on your dataset. It’s good practice to be aware of this option, especially for more complex, multivariate problems.
+
+Next, we configure the trainer arguments to ensure that we can leverage the GPU during training. If you thought training an LSTM took time, imagine training a model with multiple LSTM layers combined with attention mechanisms. Proper trainer configuration is essential here to keep training feasible.
+
+We also set a random state of 1502, which we always include for reproducibility. This completes our model configuration.
+
+With everything set up, we now fit the model to the data using the fit method, passing in the target series, scaled past covariates, and scaled future covariates. We remove the verbose option and execute the training.
+
+As you can see, the model does not train as quickly as a standard LSTM. This is expected. TFT is a highly complex model, and with that complexity comes longer training times. In practice, I reserve TFT for truly complex problems. Complex models should be used for complex tasks—if your problem is simple, a simpler model will often perform just as well and be far more efficient.
+
+I’ll leave the model running for now, and we’ll return in the next video to focus on cross-validation. I’ll see you there.
+
+**M) Python - Cross-Validation**
+
+Welcome back. In this section, we’ll move on to cross-validation, which is the next step after training our TFT model. This step is crucial because it helps us understand how well the model generalizes over time rather than just fitting a single train–test split.
+
+We start by creating a new cell and defining our cross-validation object. For this, we use the model’s historical_forecasts method. This allows us to generate rolling forecasts over different points in time and evaluate the model’s performance more robustly.
+
+We first make sure that the inputs are correctly specified. The target series remains the same, and both past covariates and future covariates are passed exactly as before. These stay unchanged throughout the cross-validation process.
+
+Next, we define the start point for cross-validation. To determine this, we check the size of the dataset using the dataframe shape, which gives us a total length of 1680 time steps. A common approach is to start cross-validation sufficiently far from the beginning of the series. I usually subtract a multiple of the forecast horizon from the total length. While ten times the forecast horizon is a typical choice, the TFT model takes longer to run, so here we reduce it to five times the forecast horizon to keep execution time manageable.
+
+We then specify the forecast horizon, which is set to 24. This means that at each cross-validation step, the model predicts the next 24 time steps. The stride is also set to the forecast horizon, meaning we generate a new forecast every 24 steps. In practice, this controls how frequently forecasts are made. For example, you could choose a stride of 12 to generate forecasts every 12 hours, but here we keep it aligned with the forecast horizon.
+
+We set retrain to True, which means the model is retrained at each cross-validation step. This is more computationally expensive but provides a more realistic evaluation, especially for time series that evolve over time. We don’t care about verbosity in this case, and we explicitly set last points only to False so that we retain the full set of historical forecasts rather than just the final prediction.
+
+At this point, we review all the parameters—start, forecast horizon, stride, retrain—and everything looks correct. We then execute the cell and let the cross-validation run.
+
+This is a good moment to wrap up the video, as cross-validation with TFT can take some time. Based on previous runs, I would expect this to take around five minutes. For reference, the normal model took about 53 seconds, and since we’re effectively repeating this process multiple times, roughly four minutes sounds reasonable. That said, I’m often wrong with time estimates, so let’s see how it actually turns out.
+
+Come back in the next video, where we’ll review the results.
+
+**N) Python - Cross-Validation Results**
+
+All right, we’re back. Let’s check how long the cross-validation actually took. Was the estimate correct or not? It turns out it took about four minutes, so the estimate was pretty accurate. That means everything ran as expected, and we’re good to move forward.
+
+Now we’re going to do what I usually call the “same dance,” which is a pattern you’ll see often and can very easily automate. The idea is to evaluate each cross-validation fold by extracting predictions and actual values, computing an error metric, and storing the results. To begin, we initialize an empty list that will store our error values. In this case, we create an empty list called rmse_cv.
+
+Next, we iterate over each fold in the cross-validation results. We do this with a loop that goes over the length of the cv object. Inside the loop, the first step is to extract the predictions for the current fold. These predictions are stored as a time series, so we convert them back to their original scale by applying the inverse transformation using the series scaler. Initially, there was an error because the loop index was missing, but once we correctly used for i in range(len(cv)), everything worked as expected.
+
+After retrieving the predictions, we need to extract the corresponding actual values. To do this, we first determine the time window covered by the predictions. We take the minimum and maximum timestamps from the prediction index to define the start date and end date. Using these dates, we slice the original dataframe and retrieve the actual target values (y) for the same time period. This ensures that predictions and actuals are perfectly aligned in time.
+
+Once we have both predictions and actual values, we compute the error metric. Instead of using mean squared error directly, we import and use the root mean squared error (RMSE), which is often easier to interpret because it is on the same scale as the target variable. For each fold, we calculate the RMSE between the actuals and the predictions and append the result to the rmse_cv list.
+
+After iterating through all folds, we compute the overall performance by taking the mean of the RMSE values stored in the list. We then print the final result in a clean and readable format. The final RMSE comes out to around 25.2.
+
+This error feels quite large. When you look at the actual values, which tend to hover around 25, an RMSE of roughly the same magnitude suggests that the model is significantly off in its predictions. This indicates that, while the model is working technically, its predictive performance may not be satisfactory.
+
+To better understand what’s going on, the next step is visualization. In the next video, we’ll plot the predictions against the actual values so we can visually inspect where the model is going wrong and how the forecasts compare to reality. I’ll see you there.
+
+**O) Python - Visualizing the Cross-Validation Results**
+
+Welcome back. Let’s move on to visualization. In this step, we want to visualize the cross-validation folds by plotting the model’s predictions against the actual values. This will help us understand where the model is performing well and where it is struggling.
+
+We start by creating a figure and axes using Matplotlib. A figure size of 10 by 6 works well for this kind of comparison. Once the plotting area is ready, we iterate over each fold in the cross-validation results. For each fold, we retrieve the predictions and the corresponding actual values in exactly the same way we did during error computation. This ensures consistency between evaluation and visualization.
+
+Inside the loop, we plot the actual values first and label them as “Actuals.” Then we plot the predictions on the same axes and label them as “Predictions.” To make the comparison clearer, we apply a dashed line style to the prediction plot. This visual distinction makes it easier to separate predicted values from the true values at a glance. After plotting both lines, we add a legend so the plots are clearly identified.
+
+Next, we set a title for the plot, something like “TFT Model Cross Validation,” to clearly indicate what we are visualizing. Once everything is set up, we render the plot.
+
+When we look at the resulting visualization, we can clearly see the predictions versus the actual values. At first glance, the model appears to be quite off. One of the most noticeable issues is the presence of sharp spikes in the predictions. These spikes look unnatural and are especially concerning because they don’t seem to correspond to similar movements in the actual data.
+
+Outside of these spikes, the predictions don’t look entirely unreasonable. In fact, in periods where the spikes are absent, the model seems to roughly follow the overall trend. However, the spike behavior is problematic and suggests that the model is learning something unstable or incorrect.
+
+It’s also worth noting that this particular time period is especially challenging to predict, as it falls toward the end of the year. End-of-year periods often have unique seasonal effects and irregular patterns, which can make forecasting more difficult. Still, even accounting for that, these extreme prediction spikes should not be present.
+
+At this point, it’s clear that we have some issues with the model. The next logical step is parameter tuning. We need to explore whether adjusting the model’s hyperparameters can reduce these spikes and improve overall performance. That’s exactly what we’ll move on to next. I’ll see you in the following video.
+
+**P) Random vs Complete Parameter Tuning**
+
+Welcome to this lecture on random search for parameter tuning. Let me start by asking you a question.
+
+How many people do you need in a room to have a 50% chance that at least two people share the same birthday? Think about it for a moment. There are 365 days in a year, so intuitively you might expect that you need a very large number of people. Can you take a guess, even roughly? Could you calculate it?
+
+The answer might surprise you. You only need 23 people. With just 23 people in a room, there is already a 50% chance that at least two of them share the same birthday. This is a classic probability problem known as the birthday paradox, and it highlights just how unintuitive randomness and probability can be for humans.
+
+So why start a lecture on parameter tuning with this example? The birthday paradox illustrates the power of randomness and its unexpected efficiency. Just as it takes far fewer people than expected to get a shared birthday, randomness can also be surprisingly effective when searching for good parameter combinations in machine learning models.
+
+When it comes to complete or exhaustive parameter tuning, the idea is to systematically test every possible combination of parameters. While this approach is thorough, it is also extremely computationally expensive and time-consuming. If we look at our current example, we have parameters such as input chunk length and several others that we could tune. The output chunk length is fixed at 24 because that is our forecasting horizon, but even then, the total number of possible combinations comes out to 2,187.
+
+This is massive, especially given how complex the Temporal Fusion Transformer is. If you thought LSTM models were slow to train, TFT models are even slower. Testing thousands of combinations quickly becomes impractical, both in terms of time and computational resources.
+
+This is where random parameter tuning comes in. Random search provides a very efficient alternative to exhaustive search. Instead of testing every possible combination, we randomly sample parameter configurations that are likely to perform well. With far fewer evaluations, we can still arrive at strong model performance.
+
+There is also solid research showing that random search is more than good enough in practice. One important concept here is the balance between exploration and exploitation. Random search explores the hyperparameter space broadly, while still discovering and exploiting combinations that work well.
+
+Another key idea is diminishing returns. Beyond a certain point, evaluating more and more parameter combinations leads to very small performance improvements. Random search tends to identify high-performing configurations early, without needing to exhaustively test everything. At that stage, it often becomes more valuable to focus on improving the input features or the data itself rather than continuing to fine-tune parameters.
+
+In conclusion, random parameter tuning offers a practical and efficient alternative to grid search. Multiple studies have shown that it can match the performance of exhaustive methods while requiring far fewer evaluations. This makes it especially valuable for optimizing complex models like the Temporal Fusion Transformer.
+
+Just like the birthday paradox challenges our intuition about probability, random search challenges the assumption that exhaustive testing is necessary for optimal results. It isn’t. Randomness, when used wisely, is more than enough.
+
+**Q) Python - Parameter Grid**
+
+As discussed earlier, we are now going to use a random sampling approach. From what we have learned, this method works very well in practice. There is a high likelihood that we can find very good parameter configurations simply by sampling randomly, without having to try every possible combination.
+
+At the same time, we don’t really need to test everything. Especially as a starting point, randomly exploring a wider range of options is actually more effective. It allows us to quickly identify promising regions in the parameter space and then refine our search later if needed.
+
+To begin, we define a parameter grid. This is simply a dictionary that contains the parameters we want to tune and the values we want to sample from.
+
+We start with the input chunk length. Here, we’ll try values such as 48 and 96, and we’ll also include 168 since we know that weekly seasonality can be important for hourly data. Next, the output chunk length will remain fixed at 24, because this corresponds to our forecasting horizon and we don’t want to change that.
+
+For the hidden size, let’s double-check our initial configuration. We originally used a hidden size of 16. Since we want to explore in both directions, we’ll include smaller and larger values as well. So we’ll try 8, 16, and 24.
+
+Next are the LSTM layers. We’ll test 1, 2, and 3 layers. This allows us to explore simpler as well as deeper architectures and see how they affect performance.
+
+For the number of attention heads, we originally used 4. We’ll expand this to include 2, 4, and 6 attention heads. This gives the model flexibility to attend to different temporal patterns at varying levels of complexity.
+
+Then we define the dropout rate. We’ll try 0.05, 0.10, and 0.15. This helps us evaluate how much regularization is beneficial for preventing overfitting in this model.
+
+We’re also missing the number of epochs, which is another important parameter. For this, we’ll test 5, 10, and 15 epochs. This gives us a balance between undertraining and overtraining.
+
+With these choices, we now have a complete parameter grid. At this point, the total number of possible combinations is quite large, but we are not going to test them all.
+
+Instead, we define how many combinations we want to try. We’ll set the number of iterations to 5. Since each run takes roughly four minutes, this means the total tuning time will be around 20 minutes. This is a reasonable compromise. If you’re short on time, you can reduce this number. If you’re more curious or have more computational resources, you can increase it.
+
+Next, we generate a list of parameter combinations using a parameter sampler. This comes from scikit-learn. We pass in the parameter grid, the number of iterations, and a random state. Setting the random state to 1502 ensures reproducibility.
+
+Once this is done, we obtain a list of sampled parameter configurations. If you use the same random state and the same number of iterations, you should see similar results.
+
+Now, we define a set of fixed parameters. These are parameters that we do not want to tune, such as encoder settings, the use of covariates, and trainer-related arguments. These stay constant across all experiments.
+
+For each parameter set in our sampled list, we update it with these fixed parameters. This ensures that every model configuration includes the necessary base settings, while still varying the parameters we want to explore.
+
+Finally, we can print or inspect the parameter list to quickly verify that everything looks correct. This completes the setup phase for random parameter tuning.
+
+In the next video, we’ll actually start training models using these parameter configurations and evaluate their performance. I’ll see you then.
+
+**R) Python - Parameter Tuning**
+
+At this point, we know exactly what needs to be done. If this is not your first section working with NAS or parameter tuning with me, then this should feel familiar. You already know the flow and the logic behind it. And if you’re using Google Colab, ideally you’ll have Gemini available. While notebooks are not always perfectly connected, things keep improving over time, especially when working with these kinds of deep learning libraries.
+
+We start by iterating through the parameter list. This time, we loop directly over params. Unlike earlier sections, we deliberately included everything inside the parameter list during our pre-work. Because of that, our loop becomes much cleaner and simpler.
+
+Inside the loop, we pass the scaled series, the scaled past covariates, and the scaled future covariates directly into the model. Since all preprocessing has already been handled, there’s no extra logic required here.
+
+Next, we define the cross-validation step. We use historical forecasts with the forecast horizon set explicitly. The stride is also set to the forecast horizon, retraining is enabled, and last_points_only is set to false so that we retain all predictions across folds.
+
+Once cross-validation is complete, we iterate over each fold. For each fold, we extract the predictions and inverse-transform them using the series scaler. This brings the predictions back to their original scale so that they can be meaningfully compared to the actual values.
+
+We then retrieve the corresponding start and end dates from the prediction index. Using those dates, we slice the original dataframe to extract the true observed values for the same time range.
+
+With predictions and actuals aligned, we compute the root mean squared error for that fold. Each fold’s RMSE is appended to a list so that we can later compute an average error across all folds.
+
+At this point, it’s important to note that we need to initialize the RMSE list before entering the fold loop. This was missing initially, which would cause an error. Once the RMSE list is properly initialized, everything runs as expected.
+
+After iterating through all folds, we compute the average RMSE for the current parameter combination and append it to our results. Optionally, we print the parameter configuration along with its average RMSE using an f-string. This makes it easy to track performance as the tuning progresses.
+
+Finally, we execute the cell. Based on our earlier estimates, this process should take around 20 minutes, though it’s safer to be prepared for closer to 30 minutes depending on how complex some of the sampled models are.
+
+That’s it for this video. Let the tuning run, keep an eye on the runtime, and in the next video we’ll review how long it actually took and analyze the results.
+
+**S) Python - Parameter Tuning Results and Storing**
+
+The full run took 34 minutes, which honestly isn’t bad at all. I wasn’t too far off with the estimate, and that’s always good to know when working with complex models like TFT. This gives us a realistic expectation for future tuning runs.
+
+Now that the tuning is complete, the next step is to attach the RMSE values to the parameter list so that we can properly analyze the results. We start by converting the parameter list into a Pandas DataFrame. Once we display it, we can immediately see all the sampled configurations along with their corresponding RMSE values.
+
+At first glance, the visualization isn’t perfect. The encoders column makes the table a bit messy and hard to read, but that’s fine for now. What really matters is the performance. And the results are impressive. We can clearly see RMSE values around 12, 13, 14, and 15, which is a massive improvement compared to the original RMSE of 25. Even with just five random configurations, we managed to cut the error by more than half, which is absolutely stunning.
+
+Of course, it’s worth emphasizing that five iterations is still very small. If we increased this to ten or twenty random samples, we could likely squeeze out even better performance. But even at this early stage, the gains already demonstrate why random search is such a powerful approach for tuning complex models.
+
+Next, we want to extract and store the best-performing parameters. To do that, we sort the DataFrame by RMSE and identify the configuration with the minimum value. Instead of directly exporting the sorted head, we explicitly filter the row where the RMSE is equal to the minimum RMSE in the DataFrame. This gives us a clean and unambiguous selection of the best parameter set.
+
+Once we isolate the best parameters, we export them as a CSV file. This is useful both for reproducibility and for later reuse without having to rerun the entire tuning process.
+
+Now we move on to preparing these best parameters for building the final model. When we extract them from the DataFrame, we need to be careful with data types. Some values come back as NumPy integers, so we explicitly cast parameters like input_chunk_length, output_chunk_length, hidden_size, num_attention_heads, lstm_layers, and n_epochs to standard Python integers. The dropout value remains a float, which is exactly what we want.
+
+For the encoders, we simply reuse the encoder configuration we defined earlier. These components don’t need to be isolated again because they remain static across models. The same applies to most of the fixed parameters such as trainer arguments and covariate usage settings.
+
+At this point, everything is ready. We now have a clean, well-defined set of optimized parameters that significantly outperform our initial model configuration.
+
+I’ll stop the video here. In the next one, we’ll build the final TFT model using these best parameters and move on to generating future predictions. That’s where all this work really pays off.
+
+**T) Python - Tuned TFT Model**
+
+The issue was just here, with the future covariates. What I should have used was simply the covariates, because I wanted everything included—both the future covariates and the past covariates together. When I used the shortcut earlier, I accidentally included only the future covariates, which is why the problem occurred.
+
+The last thing I wanted to do here was to transform the predictions. First, we convert the predictions time series into a DataFrame. After that, we take the scaler and apply the inverse transform to the predictions so that they are back in the original scale.
+
+So now we have the predictions here, and this would be the final output. At this point, we could also add some visualization if needed, but essentially, this is the output we are looking for.
+
+From here, you simply take this output and feed it into a database, and that’s it for us.
+
+I hope you enjoyed this. I know that I had a lot of fun. If you have any questions, let me know—I’m here to help, and I’ll see you in the next video.
+
+**U) Python - Interpretability**
+
+Okay, let’s move on to interpretability, which is a very cool feature. What I like the most about this is that it’s super easy to use directly from Darts explainability. We start by importing the explainer.
+
+Once that’s done, we build the explainer around the model. So we define the explainer by passing the model into it. After that, we generate the explainability results by calling the explain method on the explainer. That’s it—very easy and very quick.
+
+Now that we have the explainability results, we can visualize them. First, we plot the variable importance by calling the variable selection plot. We pass in the explainability results and set the figure size, initially to something like 10 by 6. After looking at it, we can slightly adjust the size. The width of 10 was fine, but increasing it to 15 makes the visualization clearer and easier to interpret.
+
+When we look at the results, we notice that there are two main components: the encoder and the decoder. The encoder is responsible for taking in and understanding the information, while the decoder uses that information to generate the output. From the plot, we can see that one of the exogenous covariates is the most relevant variable. Along with that, the month feature is also highly relevant for the decoder. Overall, the exogenous variables play the most important role.
+
+From a business perspective, there may not be a huge difference in how you interpret every single variable, but one thing becomes very clear: the exogenous variables really take center stage. They are extremely important for the predictions, and the model clearly acknowledges this. You typically see high relevance both in how the information is understood by the encoder and how the output is produced by the decoder.
+
+Next, we look at one final interpretability feature: plotting the attention mechanism. This is a big part of the Transformer architecture. We use the explainer again and call the method to plot attention, passing in the explainability results and specifying the plot type as time.
+
+In this visualization, we are essentially looking at the average attention head. This may differ slightly from run to run, but it shows where most of the model’s attention is coming from. In this case, most of the attention is coming from future values. You can clearly see that the future appears repeatedly, while only the first part corresponds to the past. This indicates that future values hold a lot of information for the model.
+
+There are different plot types available. If we choose time, it plots the mean attention over all horizons. If we choose all, it plots the attention per horizon, where the maximum horizon corresponds to the output chunk length used during training. We can also use a heatmap, which visually highlights where the attention is strongest—the brightest areas show the most relevant information.
+
+Personally, the time-based plot is the clearest. It makes it very obvious where the attention is coming from, and you can see a clear spike showing where the model finds the most relevant information. This gives a strong indication of what the model is relying on when making predictions.
+
+And that’s it. I hope you enjoyed this—I know that I did. I think this kind of interpretability is super relevant, and I really hope you take this and apply it to your own projects. If you do, please share it with me, because I love hearing your stories. I’ll see you in the next video.
+
+**V) TFT - Pros and Cons**
+
+Now that we’re done with forecasting, let’s evaluate the strengths and weaknesses of the TFT model, starting with the pros.
+
+One of the biggest advantages is its high forecasting accuracy. TFT is a very complete technique that brings together many powerful ideas into a single framework. It is built on the Transformer architecture, which is the foundation behind most modern generative AI and state-of-the-art modeling approaches today.
+
+Another major strength is how well it handles multiple time series. While models like LSTMs can technically do this, TFT is specifically designed for multi-series forecasting and works naturally with static covariates. On top of that, it provides built-in interpretability. Through attention mechanisms and gating layers, it clearly shows which features influence the forecast, making it much more transparent than most deep learning models.
+
+The architecture is also extremely flexible. It supports static, past, and future covariates, allowing you to adapt it to almost any forecasting requirement. Additionally, it is robust to missing data and can handle irregular time series, which is very valuable in real-world business scenarios where data is rarely perfect.
+
+Now, let’s look at the cons.
+
+First, there is the issue of computational complexity. TFT typically requires a GPU and significant processing power. Training times can be long, and for real-time applications where immediate forecasts are required, this model may not be the best option.
+
+Data preparation is another challenge. Preparing the data for TFT can be time-consuming, as you need to carefully isolate and structure static, past, and future covariates. This setup effort is much higher compared to simpler models.
+
+The model is also prone to overfitting, which is a common issue with deep learning approaches. If you are working with a small dataset, TFT may not be the right choice. The architecture includes multiple hidden layers, attention mechanisms, and masks, which can make the model too complex for limited data.
+
+Finally, there is the interpretation complexity. While TFT does provide interpretability tools, understanding and explaining the results can still be difficult for non-experts.
+
+To conclude, TFT is an extremely powerful model and offers an excellent solution for complex forecasting problems. However, you should think of it like using a big missile or a shotgun—it’s best used when the target is large. Hopefully, that metaphor sticks.
+
+Always consider the computational demands, data requirements, and overfitting risks before choosing this model. That said, when used in the right context, it’s a very strong tool and definitely something you can confidently showcase.
+
+**W) TFT Key Takeaways**
+
+Let’s take a moment to look back at everything we’ve covered. We started with an introduction to TFT, understanding how it works and why it is particularly well suited for multiple time series forecasting, which is a key challenge in many real-world problems.
+
+We also explored the electricity pricing use case, which was a great way to see how TFT behaves in practice. While the example itself was interesting, the real value came from breaking down the architecture, where we went into significant depth.
+
+We began with the Variable Selection Network, which is responsible for identifying the most important features for forecasting. Then we looked at the LSTM encoder, which helps the model understand and analyze historical data. After that, we introduced the Temporal Fusion Decoder, which combines all inputs to generate predictions.
+
+We also discussed the attention mechanisms, which allow the model to focus on what truly matters at different points in time. Finally, we covered the Gated Residual Networks, which help information flow through the model efficiently and ensure stable and effective learning.
+
+This architecture is complex, but you went through it step by step, and I strongly encourage you to revisit the lecture on the TFT architecture. It is probably one of the longest theoretical lectures I’ve done, but it’s worth the effort. And if you have questions, I’m always here to help.
+
+We then moved into the hands-on portion. We got our hands dirty by learning how to prepare the data, with a strong focus on covariates, the importance of scaling, and how to configure the model with the right parameters. We also implemented cross-validation, which is a crucial step for reliable model evaluation.
+
+On top of that, we worked with visualizations, which were especially helpful in understanding how the model’s predictions compare to the actual values. Seeing forecasts alongside real data always adds clarity and confidence.
+
+We also discussed the pros and cons of TFT, which is an important step in understanding when and when not to use such a powerful model. TFT has come a long way, and this has been a long journey for us as well.
+
+Whether it’s electricity pricing or any other problem you want to tackle, the key idea remains the same: if it moves, we can predict it—we just need to choose the right forecasting model.
+
+**XVIII) Section 18: CAPSTONE PROJECT: Multiple Series with TFT**
+
+**A) Project Presentation: Multiple Series with TFT**
+
+In this video, I’m going to walk you through what the challenge is and what you need to do. Inside the capstone project folder, you’ll find multiple files. One of the most important ones is the project briefing, which you should review carefully. This document provides the project overview and clearly outlines the key objectives.
+
+The core of this challenge revolves around the electricity dataset, which we have already explored earlier. Your goal here is to select two different time series from the dataset. This is important because the focus of the challenge is on multiple time series forecasting. If you can successfully work with two time series, you can scale the same process to ten or more—the workflow remains essentially the same.
+
+There are two different ways you can approach this challenge.
+
+The first approach is to start completely from scratch. You create your own file and build everything yourself step by step. This is a perfectly valid option, and I would strongly recommend it if you’re still getting familiar with the Darts library or if you have open questions. Starting from scratch gives you more practice and a deeper understanding, and it also gives you more opportunities to ask questions along the way.
+
+The second approach is to use the starter file provided in the folder. This is the approach I’ll be using. The starter file already contains everything that is basic or that we’ve covered so far. All the critical components related to TFT and this specific dataset are already in place.
+
+What makes this challenge different is not the fundamentals—we’ve already gone through those—but rather how you apply TFT to multiple time series. That’s the real focus here. You already know the tools; now the challenge is about putting them together in a multi-series forecasting setup.
+
+That’s it for this challenge overview. I wish you the best of luck, and I’ll see you in the next video.
+
+**B) Python Solutions - TFT Model**
+
+From my perspective, this is more of a Python challenge than a pure time series challenge. The real work here is about handling the dataset properly and working with the right functions. Once the data is structured correctly, the time series modeling itself becomes much more manageable.
+
+To get started, I already have the data and the file connected to the drive. I’ll first make sure everything is visible and properly set up. The next step is to install the Darts library. All the libraries we use will remain the same—there’s nothing new to add here.
+
+Once everything is installed, we inspect the dataset and check how many time series we have. I also left a piece of code that visualizes all time series at once, which helps us understand how the data is structured. I’ll let everything run first, and once it’s done, we’ll look at the output.
+
+After running the code, we can clearly see that there are two time series at the beginning, one in the middle, and two at the end. This gives us multiple options: we could predict the first two, the last two, or even train a model on one group and predict the others. That would be perfectly reasonable. However, that’s not the goal here. The goal is to perform multiple time series forecasting, meaning we want to train the model on more than one series at the same time.
+
+For this challenge, I decided to work with Belgium and France. We isolate these two countries from the dataset and inspect the dataframe to understand its structure. Up to this point, everything we’ve done should feel familiar.
+
+Now we reach the part where the actual coding starts. Since we’re working with multiple time series, we need to handle categorical identifiers properly. If we look at the unique_id column, we’ll see values like Belgium and France. These need to be converted into categorical codes so that the model can process them.
+
+We do this by converting the unique_id column to a categorical type and then using .cat.codes to transform the categories into numerical values (0 and 1). We store this transformation back into the dataframe. This is our first key step: converting the unique_id into a categorical variable.
+
+The second step is handling the index. Currently, the time column is set as the index, but for Darts we need it as a regular column. We use reset_index() to convert it back into a column and then preview the dataframe to confirm everything looks correct.
+
+Next, we define the variables we’ll use throughout the notebook. To keep things clear, I use uppercase variable names. We define:
+
+TIME_COL for the time column
+
+TARGET (Y) for the target variable
+
+GROUP_COL for the static variable (unique_id)
+
+FREQ set to hourly ("H"), since the data is hourly
+
+With these variables defined, we can now create the TimeSeries objects. Since we’re working with multiple series, we use TimeSeries.from_group_dataframe. We pass in the dataframe, the time column, the group column, the target column, and the frequency. This creates a list of time series—one for each country.
+
+When we preview the result, we see that the output is now a list rather than a single TimeSeries object. This is expected and is one of the main differences when working with multiple series. It’s not as neatly packaged as before, but it’s fully usable.
+
+Next, we move on to past covariates. This part is straightforward because we already know how it works. In this dataset, we have two exogenous variables: exogenous_one and exogenous_two. We isolate these variables and again use TimeSeries.from_group_dataframe to create past covariates for each series.
+
+At this point, we have:
+
+A list of target time series
+
+A list of past covariate time series
+
+Both are structured in the same way, which is important.
+
+Now we move to the future dataframe. We isolate the future data for France and Belgium and preview it to ensure everything looks correct. Just like before, we convert the unique_id column into categorical codes. This step is critical because static covariates in TFT must be numeric.
+
+We then prepare a combined dataframe (df_full) by concatenating the historical dataframe (with the target column removed) and the future dataframe. This ensures both dataframes have the same structure, which is required for future covariates.
+
+Using this combined dataframe, we create the future covariates TimeSeries. Again, we use from_group_dataframe with the same parameters, passing in the covariate columns instead of the target.
+
+It’s important to note here that including the same exogenous variables as both past and future covariates is technically redundant. However, the goal here is to demonstrate how both past and future covariates are handled. In real projects, you should only include what actually makes sense for your data.
+
+Next comes scaling. This is something we’ve done many times, so it should feel familiar. We initialize a scaler and fit-transform:
+
+The target series
+
+The past covariates
+
+The future covariates
+
+During this step, we encounter an error related to mismatched time series during scaling. This requires a bit of debugging. After reinitializing the scaler and ensuring we use fit_transform consistently across all series, the issue is resolved.
+
+We then move on to the TFT model setup. Nothing fundamentally changes here compared to previous notebooks. The only thing that usually changes is the forecasting horizon, which we define explicitly.
+
+However, we hit another error:
+
+TFTModel can only interpret numeric static covariate data.
+
+This confirms that the issue is related to static covariates. After inspecting the dataframe again, we realize that the unique_id column was still being treated as an object in some places. Once we reconvert it properly to categorical codes and rerun the necessary steps, the issue is resolved.
+
+At this point, everything is working as expected. We have:
+
+Multiple time series
+
+Past and future covariates
+
+Proper scaling
+
+A TFT model ready to train
+
+This video has already gone on for quite a while, so I’ll stop here. The debugging process is part of the learning experience, and overall this hasn’t been particularly difficult—it just requires careful attention to detail.
+
+**C) Python Solutions - Cross-Validation**
+
+At this point, the modeling step is already complete. The training was actually very fast—it took around 46 seconds, which is great. We still have the trained model available, so now we can move on to the next and very important step: cross-validation.
+
+Let’s go through this step by step.
+
+First, we define the inputs for cross-validation. We use the transformed target series (series_y_transformed), the transformed past covariates (past_covariates_transformed), and the transformed future covariates (future_covariates_transformed). These are the scaled versions of the data, which is exactly what the model expects at this stage.
+
+Next, we define the cross-validation setup. For the starting point, I’m going to use 24, meaning we start the first validation window 24 time steps into the data. I also update the forecasting horizon here. Instead of predicting far into the future, I decide to go 10 forecasting horizons back in time and predict a horizon of the same length.
+
+For the stride, I also set it to the forecasting horizon. Optionally, in a real-world setting, you could divide this value by two to get a more thorough evaluation with overlapping windows. That said, this is optional and depends on how exhaustive you want the validation to be.
+
+I then set retrain = True, which means the model will be retrained at each cross-validation step. This is usually a good practice when you want a realistic estimate of performance. I also set last_points_only = False, so we keep all forecasted points rather than only the last one from each window.
+
+After setting all of this up, I run the cell. At first, I get an invalid syntax error, which turns out to be caused by a comma placed inside a comment. Once I remove that and rerun the cell, everything starts running correctly.
+
+This cross-validation step is expected to take some time—roughly around 10 minutes, depending on the machine and configuration. Because of that, I’m going to stop this video here.
+
+In the next video, once the cross-validation is complete, we’ll take a closer look at the cross-validation output, analyze the results, and interpret what they tell us about the model’s performance.
+
+**D) Python Solutions - Parameter Tuning**
+
+Welcome back. In this video, we’re going to walk through how to get our cross-validation results, and then we’ll continue all the way through to parameter tuning. Let’s get started, because this is probably the most challenging part of the entire process.
+
+First, let’s take a look at our cross-validation object just to understand what it looks like. When we inspect it, we see that it’s essentially a list, and this is what we need to explore. If we print the length of the CV object, we see that the length is two. Now, why do we have two? The reason is simple: we have two time series. Because of that, if we access CV[0], something will show up, but if we try CV[2], we’ll get an error because it’s out of range. The valid indices are only 0 and 1, one for each unique series.
+
+Next, we look at how many backtesting periods we have. If we print the length of CV[0], we see that we have ten backtesting periods. That means indices 0 through 9 will work, but trying to access index 10 will again throw an out-of-range error. If we go one level deeper and print the length of something like CV[0][0], we get 24, which corresponds to the forecasting horizon. So in total, we have two series, ten backtesting periods, and 24 forecasted values per period. This is our starting point.
+
+To make things clearer and easier to work with, we define a couple of helper variables. We define the number of backtests as the length of CV[0], and the number of series as the length of CV. This makes the logic much easier to follow and visualize. Now we’re ready to start looping through the backtesting periods.
+
+We begin by looping through each backtesting period. For each backtesting period, we also loop through each series. Before doing that, we initialize an empty list called period_predictions. This list will be overwritten for every backtesting period, and that’s perfectly fine because we compute the RMSE fresh each time. Inside the nested loop, we append the predictions using the structure CV[i][j], where i represents the series index and j represents the backtesting period.
+
+Once we’ve collected the predictions for a given period, we inverse-scale them using scaler1.inverse_transform. This gives us the predictions back in their original scale. At this point, we want to calculate the RMSE for each series within the current backtesting period. To do that, we initialize another empty list, usually called something like series_rmse.
+
+We then loop through the number of series again. For each series, we convert the predictions into a DataFrame, because working with DataFrames makes it much easier to align predictions with actual values. We determine the start and end timestamps from the prediction index. Using these timestamps, we extract the corresponding actual values from the original dataset by filtering on the time range and the unique ID of the series.
+
+After extracting the actual values, we make sure the indices line up correctly. Optionally, we can check that the prediction index matches the actual index, which is a good sanity check. Once everything is aligned, we compute the RMSE using the square root of the mean squared error between the actual values and the predicted values. We append this RMSE to the series_rmse list.
+
+After looping through all series for the current backtesting period, we compute the mean RMSE for that period and append it to a list that stores the RMSE values across all backtesting periods. At the very end, we compute and print the overall RMSE across all backtests. In our case, we end up with an RMSE of around 34. If you recall, we did better in an earlier attempt, but this is a different problem with different time series, so that comparison isn’t entirely fair. Still, this gives us a solid baseline.
+
+This is exactly why we now move on to parameter tuning and benchmarking. The current performance leaves room for improvement, so we try to do better. We use a parameter sampler along with a parameter grid and decide how many parameter combinations we want to try. In this case, we choose ten combinations. This will take longer because we’re working with multiple time series, which increases the overall complexity.
+
+We then add our fixed parameters, such as using static covariates, and combine them with the sampled parameters to form a parameter list. Next, we initialize a list to store the results. We define the loop that goes through each parameter set, builds the model with those parameters, and runs cross-validation. For the cross-validation logic itself, we reuse the code we just wrote, since it’s already quite lengthy and detailed.
+
+For each parameter combination, instead of printing intermediate results, we compute the mean RMSE and append it to our results list along with the corresponding parameter set. We then print something like “Tested params … lead to RMSE …” so we can track progress as the tuning runs.
+
+At this point, we kick everything off. Assuming nothing has gone horribly wrong, the process will continue running. This step can take a long time—around two hours in our case—because of the repeated cross-validation across multiple series and parameter combinations. Once it’s done, we’ll be ready to analyze the results and see which parameter set performed best.
+
+That’s where we’ll pick things up in the next video, where we review the outcomes and wrap up this entire challenge. See you then.
+
+**E) Python Solutions - Predict The Future**
+
+Alright, so we are almost at the end. I have to say, this was extremely painful. It took about three hours and fifteen minutes in total. During that time, I prepared lunch, had lunch, talked with my family, and honestly got a bit frustrated with how long everything was taking. But in the end, it’s finally done—three hours and fifteen minutes later.
+
+Now let’s look at the outcome. The next step is to check the results, and then we are going to move on to exporting and predicting the future. The code itself is the same as before, and this part should feel very familiar to you by now. Let me jump into it and set this up as a dynamic table. There we go. I’ll zoom out a bit because I can’t see the MSI properly.
+
+Okay, it’s there, but something looks a bit odd. I’m using the ParamList tool here, so let me triple-check what’s going on. I have ParamList2, I have the fixed parameters, and then I add those parameters to the ParamList. This setup should work. Let me run this again, because I’m not sure what happened. I mean, I know the list itself won’t change since we have a random state set, so we should always get the same results. Maybe I double-clicked something—that’s usually the most likely culprit.
+
+Alright, here we go. We have, I think, around 34 or 35 runs. And now, yes, we see a very significant improvement. The score is around 17, which means we really improved what we were doing by using a much more complex model. We’re looking at 20 epochs, six attention heads, four LSTM layers, and a dropout of 0.3. So clearly, the more complex models are giving us better results. That’s actually very curious and very insightful.
+
+Next, we export the parameters. This step is important because otherwise we would need to spend another four hours retraining everything. After that, we move on to the part where we predict the future. We import the best parameters, convert what needs to be converted into integers, and then we build the model again using those parameters. All of this eventually leads us to forecasting the future, which is what we’re already doing at this point.
+
+Once that’s done, we need to unpack the predictions. As always, I want to take a look at the predictions to see what we actually got. Let me check the current status. Okay, let me pause for a few seconds—yes, we’re still at epoch number five. Lucky number five.
+
+Alright, it’s done now. It took around two and a half minutes to run. The predictions themselves were very quick, but with double the number of epochs and a more complex model—especially with more attention layers—things naturally get a bit trickier and slower.
+
+Now we need to inverse the transformation. So we use scaler1.inverse_transform to inverse-transform the predictions. That’s step number one. Let me assign this to unscaled_predictions. Next, we convert each time series into a data frame. So we create a list of data frames using something like pd.DataFrame(pts) for each item in unscaled_predictions.
+
+Let’s take a quick preview of these data frames to see what we got. There you go. Now, this next part is optional. Optionally, you can concatenate all of these together. To do that, we can create something like forecast_data_frame and use pandas.concat(data_frames, axis=0). Then we can inspect the final forecast data frame.
+
+Finally, we export everything to a CSV file. So we save it as something like forecasts_multi_TFT.csv. And that’s it—we’re done.
+
+The very last thing I want to mention is about the format of this video. This was a new format for me. Usually, I do most of the coding together with you step by step, but I felt that this might become repetitive. So I tried something different this time. Let me know what you think. Was it good? Was it bad? Did you like the idea, but feel that the execution was so-so?
+
+I’m here to improve as well, just like you. I’ll see you in the next video.
