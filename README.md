@@ -249,6 +249,82 @@ This Repository contains my "Master Time Series Analysis and Forecasting with Py
 
 **D) Python - Challenge Solutions Part 3**
 
+**XII) Section 12: Intermittent Time Series**
+
+**A) Game Plan for Intermittent Forecasting**
+
+**B) Python - Intermittent Time Series Setup**
+
+**C) Python - Data Prep**
+
+**D) Python - Feature Engineering**
+
+**E) Python - Time Series EDA**
+
+**F) Python - Darts Data Preparation**
+
+**G) Python - AutoArima**
+
+**H) AIC and BIC**
+
+**I) Python - Cross-Validation**
+
+**J) Python - Cross-Validation Results and the Zero issue**
+
+**K) Python - Plotting Cross Validation**
+
+**L) Predict the Future + Challenge**
+
+**XIII) Section 13: Mid-Course Feedback**
+
+**A) Will you help me?**
+
+**XIV) Section 14: PART 3 - DEEP LEARNING FOR TIME SERIES FORECASTING**
+
+**A) Deep Learning for Time Series Forecasting Overview**
+
+**XV) Section 15: RNN - LSTM**
+
+**A) Game Plan for LSTM**
+
+**B) Simple Neural Network**
+
+**C) Recurrent Neural Networks (RNN)**
+
+**D) LSTM**
+
+**E) Python - LSTM Setup**
+
+**F) Python - Time Variables**
+
+**G) Python - Scaling**
+
+**H) LSTM parameters**
+
+**I) Activation Functions**
+
+**J) Python - LSTM Model**
+
+**K) Python - Cross-Validation**
+
+**L) Python - Cross-Validation Performance**
+
+**M) Python - Parameter Grid**
+
+**N) Python - Parameter Tuning Round 1**
+
+**O) Python - Parameter Tuning Round 1 Part 2**
+
+**P) Python - Parameter Tuning Round 2**
+
+**Q) Python - Parameter Tuning Final Results**
+
+**R) Python - Tuned LSTM Model and Predicting the Future**
+
+**S) LSTM Pros and Cons**
+
+
+
 
 # **I) Time Series Analysis and Forecasting with Python**
 
@@ -3910,3 +3986,1117 @@ At this stage, I’m going to stop here. I don’t think it really matters wheth
 I’d actually be very keen to hear how you handled it, what kind of results you got, and how your approach compared. Also, this type of content—where I take a challenge and try to use AI tools to fix it—I’d really love to know what you think. Do you like it? Do you not like it? Is this something you’d like to see more of?
 
 Your feedback is genuinely the most important thing. If we want to make this course an absolute 11 out of 10, that feedback really matters. With that, we’ll stop here, and I’ll see you in the next section.
+
+# **XII) Section 12: Intermittent Time Series**
+
+# **A) Game Plan for Intermittent Forecasting**
+
+I have to say that this section exists because of you. It has been the number one request I’ve received over the last year, and that’s exactly why I decided to act on it. It’s very important to me to keep you happy, because this is part of your journey, part of your learning, and, most importantly, it’s highly relevant for you.
+
+Because of that, I really want to encourage suggestions. Please let me know what you’d like to see. I try to act on most of them. The only cases where I usually don’t act are when it’s a request coming from just one person, because that makes it a bit difficult to prioritize. But overall, I truly try to act on the majority of suggestions. And for that, I want to sincerely thank everyone who is committed, who takes the time to give feedback, suggestions, and requests. I genuinely appreciate it.
+
+Now, let’s start with the problem itself.
+
+The problem here is regular time series. This is what a usual time series looks like from a daily perspective: Monday to Sunday, 24/7. That’s also very much aligned with my own experience. I’ve worked in e-commerce for a very long time, and even my own online business runs 24/7. So this “always on” mindset is deeply embedded in how I think about data.
+
+However, I fully understand that not all data is meant to be 24/7. Take retail stores, for example. Many of them are closed on Sundays, and retail is such a large part of commerce that we absolutely need to address this properly.
+
+Let’s take a concrete example. The dataset we’re going to work with is from a store called Rossmann. It’s a large retail chain in Germany, and their stores are closed on Sundays because, in general, almost everything is closed on Sundays. On top of that, they’re also closed on holidays, which makes the situation even more complicated. At that point, you naturally start asking yourself: what can we actually do about this?
+
+This is where things become quite troublesome.
+
+To give you another example, here in Berlin, where I live—and most likely across all of Germany—there are about eight Sundays per year that are exceptions. Roughly one out of every six Sundays is an exception where stores are allowed to open. As a result, you can end up with weeks where stores are open for five, six, or even seven days. In rarer cases, you might only have four open days, for example when there are two holidays within the same week.
+
+From a programmatic perspective, this is a nightmare.
+
+So this is the framework we’re going to use. First, we need to identify which days the stores are closed. Second, we need an external variable to represent this information. Third, we need to apply a strong model to get good results.
+
+We’ll start by defining the outer boundaries of what we want to cover. The challenge is that most models—especially advanced ones—cannot inherently handle business logic like “if the store is closed, then sales are zero.” These models are probabilistic and non-deterministic by nature. Because of that, we need to apply a flat, programmatic rule: if closed, then prediction equals zero. This logic has to be applied alongside the model predictions.
+
+A very fair question to ask at this point is whether there are specific models designed for intermittent time series. The answer is yes. One of the most well-known ones is Croston’s method. It’s quite an old model, originally developed in the 1970s. There have been some improvements since then, but overall it hasn’t kept up with more modern approaches or deep learning models.
+
+Because of this, intermittent time series forecasting is still a somewhat underdeveloped area. While new methods may appear in the future, for now it is generally better to rely on advanced, adaptive time series models. The key idea is that we already know in advance when a store is closed. Since we have that knowledge, we should simply enforce it programmatically by setting predictions to zero on those days.
+
+The real challenge, therefore, is understanding how to keep this entire flow working smoothly from start to finish: understanding the logic behind the predictions, understanding the additional information that feeds into them, and clearly seeing how everything connects so that we can make this work in practice.
+
+That’s it for this video. In this part, it’s really more about application than theory, because the model we’re going to use is already familiar to us.
+
+# **B) Python - Intermittent Time Series Setup**
+
+In this section, we’re beginning our work on intermittent time series, and for this, we’re going to use a MAX-type model. Alongside that, we’ll also be using a different library—my personal favorite—the Darts library. You’ll find the starter file for this lecture inside the intermittent time series folder, which itself lives under modern time series forecasting. The Darts library will stay with us throughout this section so that we can frequently refer to its documentation. This documentation will effectively be our guide, and it’s very important that we look at it carefully.
+
+Originally, I used to introduce Darts later, around the LSTM section, which comes after this. But for now, I’m introducing it here. It’s simply a very good library, and I personally try to use it for almost everything related to time series. If you navigate through the documentation, you can see at the very end a long list of all the models that are available. For this specific use case, we’re going to rely on Auto ARIMA.
+
+One important thing to understand about Darts is that it often retrieves models from other underlying libraries. That’s completely fine. What really helps us is that the overall modeling interface becomes very consistent. Even if the underlying implementation comes from different sources, the way we work with models remains very similar across the board.
+
+If you look at Auto ARIMA in particular, it’s slightly different from the regular MAX model. We’ll talk about the pros and cons of using Auto ARIMA versus a standard MAX approach throughout this section. The main difference is that Auto ARIMA is much more “autopilot.” You give it the data, and it makes many decisions on its own. That means you have less control compared to a fully manual approach. But I don’t want to get ahead of myself just yet.
+
+The main purpose of this video is very simple: to install the Darts library. You can feel free to install the latest version. It usually just works, and it works very well in Google Colab. I haven’t explicitly shared it here, but when you receive the course materials, you’ll also get a requirements file. So if you’re using Jupyter Notebook, VS Code, or any other environment, you can simply install the requirements, and everything should work smoothly.
+
+I’ve also included a few helper functions here. This is meant to be an introduction, so I don’t want to go overboard. From the Darts library, we’ll only focus on a small subset of functionality for now, because the main focus is intermittent time series—by far the number one request I’ve received for this course. I’m genuinely very happy to finally bring this content to you. We’ll run all of this code and then move on to our dataset, which is actually quite cool.
+
+The dataset we’re going to use comes from a store called Rossmann. By coincidence, it’s a very popular retail chain here in Germany. The data itself is in German, and although their website isn’t available in English, the concept is straightforward. Rossmann sells health-related products, cosmetics, pet care items, basic grocery products, and similar everyday goods. It’s a very German-specific type of retail store from my perspective, especially since we didn’t really have this exact concept back in Portugal.
+
+That said, it’s an excellent dataset from a time series forecasting point of view. Retail forecasting is notoriously challenging. There’s high variability in sales, strong dependency on opening and closing days, location effects, promotions, and holidays. All of this makes retail data very tricky—and therefore very interesting—to model.
+
+For now, we’re going to keep things simple and explore just one time series at a time, focusing on a single store. Later on, you’ll learn how to handle multiple time series, especially in the LSTM section. This same dataset could also be used with LSTM or other deep learning models, but we’ll get to that later.
+
+At this point, we install our libraries. You might notice an error like “no such file or directory.” If that happens, it’s usually resolved by mounting your Google Drive, which is exactly what we do next. Once the drive is mounted, we can access our data correctly.
+
+Looking briefly at the dataset, we have variables such as store ID, day of the week, date, sales, number of customers, whether the store is open, promotions, state holidays, and school holidays. One thing I’d like you to think about already is this: which of these variables actually make sense to include in a forecasting model, and which ones do not? That’s an important question to keep in mind.
+
+Once the data is loaded, we immediately see a warning about mixed data types in one of the columns. We’re not going to cover that fix here, but it’s something we’ll need to address. When we inspect the dataset further, we see that it’s massive—over one million observations. Since there are so many stores, we’ll focus on just one to keep things manageable.
+
+The good news is that the dataset has no missing values, which makes life much easier. That’s also what you’d generally expect from a dataset like this. From here, we’ll explore the data, decide which features to keep, which ones to remove, and how to prepare everything properly.
+
+With that, the setup is complete. Data preparation is coming next.
+
+# **C) Python - Data Prep**
+
+In this video, we’re going to do quite a few things. The first step is to subset the data to just one store. The reason for this is that Auto ARIMA cannot handle multiple time series at the same time. We’ll deal with multiple time series later, using deep learning models. So for now, step one is to focus on a single store.
+
+Step two is to take a closer look at the date variable. We need to understand how it’s currently structured, what’s wrong with it, and how to fix it. At some point, this date must become the index of our dataset, and that will be the main focus of this video. If we still have time, we’ll briefly look at some of the other variables, but for now the priorities are subsetting and fixing the index.
+
+So let’s start by subsetting the data to include only store 1. Once we do that and preview the dataframe, this is our initial result. Immediately, one thing stands out: the dates look wrong. For example, the 31st appears before earlier dates. The order is clearly incorrect, and that’s something we definitely need to fix.
+
+As you already know, one thing I really like to do is rename variables to make them cleaner and more consistent. In this case, we rename sales to y, and date to ds (for datestamp). We do this using a dictionary in the columns argument, mapping sales → y and date → ds. That’s our next step.
+
+After that, we need to format the ds variable as a proper datetime object. This is how we explicitly tell Python that this column represents dates and how it should be interpreted. Once we do this, we can confirm it by checking the dataframe information, where we now see that ds is of type datetime. That’s progress.
+
+However, if we preview the dataframe again, the dates still look off. So the next step is to set ds as the index. This is an important step, and the approach I personally prefer is using set_index with inplace=True. It’s clean and elegant.
+
+Once we do that and preview the dataframe again, we can see that ds is now the index. But we’re not done yet. The order of the dates is still not usable. If we tried to feed this directly into a model, we would definitely run into issues.
+
+To understand what’s happening, we look at the index itself. We can see that although the index is a datetime index, the frequency is still set to None. Python knows these are dates, but it doesn’t know how frequently they occur.
+
+The fix for this is fortunately very simple. We explicitly set the index frequency to daily. Once we do that, everything falls into place. If we now inspect the index again, we see that it has a daily frequency, and the data is properly structured in time order.
+
+At this point, the main goal of this video is achieved. We’ve successfully subset the data to one store, fixed the date column, converted it to a datetime format, set it as the index, and ensured the correct daily frequency.
+
+I’m going to wrap up this video here.
+
+In the next one, we’ll start focusing on the remaining variables: open, promo, state_holiday, and school_holiday. We’ll begin specifically with state holiday, because that’s the column that triggered the warning earlier (column seven). That’s where we’ll pick things up next.
+
+# **D) Python - Feature Engineering**
+
+In this video, we’re going to work a bit more on the dataset. We’ll do a small amount of feature engineering and then take a deeper dive into the state holiday variable. This is the variable that triggered the initial warning we saw earlier, so it deserves special attention.
+
+If we look at the state_holiday column, we immediately notice something odd. We see a zero, then another apparent zero, but they’re not actually the same. This strongly suggests a data type issue. One of them is likely a string value, while the other is a numeric value. In addition to that, we also see values like A, B, and C.
+
+To make this clearer, we can explicitly inspect the unique values in the state_holiday column. When we do that, the issue becomes obvious: we have '0' (a string), 0 (a number), and then the values A, B, and C. This confirms that the column has mixed data types, which explains the warning we received earlier.
+
+Now, there’s another important observation here. The number of occurrences for A, B, and C combined is very small—less than 30 in total—while the zeros occur hundreds of times. Because of this imbalance, I don’t particularly like treating these categories separately.
+
+Instead, what I prefer to do is map the state_holiday variable in a very simple and robust way. The idea is straightforward:
+
+If the value is A, B, or C, we map it to 1.
+
+Everything else becomes 0.
+
+This approach is clean, easy to understand, and, most importantly, generalizable. If we later apply the same logic to other stores, we don’t have to worry about edge cases or specific category distributions. It’s an all-encompassing rule that will consistently work.
+
+We implement this using an apply function with a lambda expression, and we make sure to store the result back into the state_holiday column. After doing this, if we preview the dataframe, we can see that state_holiday is now a clean binary variable with only ones and zeros.
+
+Next, we briefly check the school_holiday variable to make sure there are no similar issues. When we inspect it, we see that it already consists of just zeros and ones, so it’s good to go and doesn’t need any additional processing.
+
+The next stage is to remove variables that we don’t need.
+
+Looking at the dataset, there are a few columns that clearly don’t add value for our current modeling setup:
+
+store: we’re only working with one store, so this column carries no useful information.
+
+day_of_week: since we’re using a seasonal model with a weekly (7-day) seasonality, this information is already implicitly captured.
+
+customers: this variable is fundamentally intertwined with sales. A sale happens because there is a customer, and a customer is recorded because a sale happens. There’s no meaningful causal direction here—they’re essentially the same information expressed differently. Because of this strong dependency, we should remove customers.
+
+The variables we want to keep are:
+
+open (this is critical for the intermittent nature of the series),
+
+promo,
+
+state_holiday,
+
+school_holiday,
+
+and, of course, the target variable y.
+
+We then drop the unnecessary columns using the drop method with columns=... and set inplace=True. After fixing a small execution issue and re-running the command correctly, we confirm that the dataframe now contains exactly the variables we want.
+
+At this point, the core data preparation is complete.
+
+In the next video, we’ll do a very brief exploratory data analysis. Feel free to follow along using the script. With autocomplete support available, we’ll be able to move through that part quite quickly.
+
+# **E) Python - Time Series EDA**
+
+All right, now we move on to EDA, and we need to be quick here. We already know how to do exploratory data analysis in Python, so let’s kick it off efficiently.
+
+The first thing we do is plot the time series itself. We simply plot df['y'] to get a quick visual understanding of how the data looks. From this plot, we can see that the series is fairly stable overall, with a slightly decreasing trend. There are clearly some effects that suggest sales are decreasing over time, but nothing dramatic. What stands out immediately is the strong seasonality, especially visible through all the zeros on Sundays. Overall, this very much looks like a seasonal time series.
+
+Given that observation, if we think ahead, we would expect this seasonality to show up clearly in the autocorrelation and partial autocorrelation plots. Since the trend is relatively weak, the series feels quite stable. When a series is stable like this, it usually means that the immediately previous values don’t carry an overwhelming amount of information, because there isn’t a strong upward or downward momentum driving the series.
+
+With that intuition in mind, we go ahead and plot the ACF and PACF. We use around 50 lags, which is a reasonable and informative number for this kind of data.
+
+Looking at the autocorrelation plot, what we see matches our expectations. The autocorrelation structure is very stable. The correlation at lag 49 is very similar to what we see at lag 7, or at least on the same scale. This tells us that the dominant signal is seasonal rather than driven by short-term dependencies. There isn’t a lot of unique information coming purely from the immediately previous days, which is something we more or less expected.
+
+When we move to the partial autocorrelation plot, things get even more interesting. Here, we clearly see strong seasonal information extending across the previous four weeks. That’s an important insight. We also notice some negative values, which suggests that higher sales on one day can negatively affect sales on subsequent days. That’s an interesting behavioral pattern, especially when observed in the short-term lags.
+
+At this point, there’s not much more we need to do from an EDA perspective. We’ve confirmed stability, strong seasonality, and some interesting short-term dynamics. That’s enough for our purposes here.
+
+In the next video, we’ll move on to something quite important: data preparation for Darts. The way data is fed into Darts models is fairly consistent across different models, so what we learn there will carry forward into future sections as well. We’ll go through it briefly, using the documentation together, and this will form the foundation for what comes next.
+
+# **F) Python - Darts Data Preparation**
+
+In this video, we focus on data preparation, specifically preparing the data so that it can be used with the Darts models. The first step, which is very common across almost all modeling workflows, is to isolate the target variable. In our case, that target is y.
+
+We start by extracting y from the dataframe. At this point, it’s still just a pandas object, so nothing special has happened yet. Before storing it permanently, it’s useful to walk through the transformation step by step so we clearly understand what’s going on.
+
+What we have initially is a pandas dataframe. Now, to work with models in Darts, the data needs to be converted into a TimeSeries object. Looking at the documentation, we see that a TimeSeries can be created directly from a dataframe. If a time column is provided, it will be cast to a datetime index. If not, the dataframe index itself is used.
+
+In our case, this is perfect, because our time information is already in the index. That means we don’t need to specify a time column at all. We can simply pass the dataframe to TimeSeries.from_dataframe, and that’s it.
+
+So we take our isolated y and convert it into a Darts TimeSeries. Once we do this, the data is no longer a simple pandas structure. Instead, it becomes a specialized object that contains not only the values, but also metadata such as the number of components, coordinates, and time information. This format is unique to Darts, but the good news is that most things inside Darts follow this same structure. Once you understand it, working with it becomes very straightforward.
+
+We then store this transformed object as our target. That completes step one.
+
+Next, we move on to the covariates. To do this, we take the original dataframe and drop the target column y. Everything that remains becomes a covariate. We then convert this dataframe into a TimeSeries in exactly the same way as before.
+
+This time, the resulting object has multiple components—one for each covariate. We can see their values, their names, and the associated metadata. Again, this is very easy to implement once you’re familiar with the pattern.
+
+At this point, it’s worth mentioning static covariates. We’re not using them here, but they become very important when working with deep learning models and multiple time series. When we get to that stage later, static covariates will definitely come into play.
+
+The next important step is scaling.
+
+We do not need to scale the covariates in this case because they are binary variables—zeros and ones. You can already consider them scaled. However, our target variable y is not scaled, and scaling is important for many models, including Auto ARIMA in this setup.
+
+So we create a scaler and apply it to the target time series. We use fit_transform, which first fits the scaler to the data and then transforms it. When we preview the scaled target, we can clearly see that the values now lie between 0 and 1. That confirms everything worked as expected.
+
+And that’s it for this video.
+
+At this point, we are fully ready to build our Auto ARIMA model. The scaler itself is very straightforward—there isn’t much more to it beyond fitting it to the data and transforming the values.
+
+# **G) Python - AutoArima**
+
+All righty, let’s do this—Auto ARIMA.
+
+The first thing we do is open the documentation and look for Auto ARIMA. And here it is. One important thing to keep top of mind is that this implementation is based on the StatsForecast package. So before we go any further, it’s worth opening that reference and understanding where things are coming from.
+
+Auto ARIMA in Darts builds on models provided by StatsForecast. That’s perfectly fine, and actually very helpful, because it gives us a consistent modeling interface while relying on a well-tested backend. There have been a few requests to add StatsForecast explicitly as a standalone section, and I’m honestly considering it, because it can be very interesting on its own—but that’s a side note for now.
+
+Let’s focus on how Auto ARIMA works.
+
+When we look at the documentation, we see that Auto ARIMA supports feature covariates, which is exactly what we need. That means we can pass our external regressors—like open, promo, state holiday, and school holiday—directly into the model, and it will just work.
+
+Now, one important conceptual point about Auto ARIMA is this: although it’s “automatic,” we still need to understand how it chooses its parameters. Auto ARIMA selects the model orders using an information criterion—specifically the AIC (Akaike Information Criterion). We’re going to cover AIC in detail in the next video, but as a quick spoiler, AIC balances two things:
+
+How well the model fits the data
+
+How simple the model is
+
+In practice, we want both: good fit and low complexity.
+
+Up until now in this course, and generally in most applied forecasting workflows, we’ve been selecting models using metrics like RMSE or MAE. That is still the gold standard. If that approach is “100% correct,” then using AIC is maybe “80% correct.” But that’s okay. It’s fast, easy to implement, and gives us a very strong baseline—especially for something like intermittent time series.
+
+This makes Auto ARIMA an excellent starting point. It’s quick to set up, supports covariates, works well with cross-validation, and gives us a solid benchmark. If later you want more control or more advanced tuning, you can always move to other models using a similar process.
+
+Now let’s actually build the model.
+
+First, we import Auto ARIMA. Model imports usually take a little longer, and that’s normal. Once it’s imported, we define the model itself. The setup is surprisingly simple. There are only a few parameters that really matter for us here:
+
+seasonal=True, because we clearly have seasonality
+
+seasonal_length=7, since our shortest and most important seasonal cycle is weekly
+
+stepwise=True, which is optional but highly recommended
+
+The stepwise option is important for performance. Instead of trying all possible combinations of ARIMA parameters, the model uses a stepwise search strategy. It starts with a small set of candidate models and then explores variations around the best one, adjusting parameters up or down by one step at a time. As soon as it can no longer find an improvement in AIC, it stops.
+
+This stepwise approach comes from classic forecasting literature, most notably the work popularized in Forecasting: Principles and Practice. This book has been a foundational reference for ARIMA modeling for many years. Even though the original implementations were often in R, the same logic applies here in Python.
+
+In practical terms, stepwise search often cuts computation time roughly in half, which is especially useful when you’re doing cross-validation. That’s why we enable it.
+
+With that, the model definition is complete.
+
+The next step is to fit the model. We fit it on the scaled target time series, and we pass the future covariates that we prepared earlier. That’s it—the model now has everything it needs.
+
+There was a lot of explanation here, but conceptually the process is simple:
+
+Define Auto ARIMA with seasonality and stepwise search
+
+Fit it on the scaled target
+
+Provide the future covariates
+
+We’ll stop here for now.
+
+In the next video, we’ll take a closer look at AIC and BIC, understand what they really mean, and why Auto ARIMA relies on them.
+
+# **H) AIC and BIC**
+
+In this video, I’ll cover AIC and BIC, and also explain how they connect to our Auto.ARIMA function. Let me start by clarifying what these terms actually mean.
+
+AIC stands for Akaike Information Criterion, and BIC stands for Bayesian Information Criterion. You can think of both of them as KPIs that help us choose the best model. The way they do this is by assigning a score to each model, almost like judges in a talent show evaluating performances.
+
+So what is really happening here? AIC and BIC give us a score, but how do they calculate that score? They take into account two main components. The first one is goodness of fit, which tells us how well the model fits the data. The second one is model complexity, which you can think of as the number of parameters the model is using.
+
+The AIC is all about balance. It wants a model that fits the data well, but at the same time does not go overboard by using too many parameters. A good way to think about this is like baking a great cake using the minimum number of ingredients needed.
+
+The BIC, on the other hand, works in a very similar way, but it applies a much harsher penalty when the model becomes complex. Because of this stronger penalty, BIC usually prefers simpler models. Compared to BIC, AIC is slightly more flexible and focuses more on finding the right balance rather than strongly discouraging complexity.
+
+Now let’s connect this idea to Auto.ARIMA. For every model that Auto.ARIMA tries, it tests different combinations of the autoregressive (p), integrated (d), and moving average (q) components. For each of these combinations, Auto.ARIMA computes the AIC and BIC scores. The model that ends up with the lowest score is usually considered the best choice. This is very important to remember: lower is better.
+
+There are several advantages to using a process like this. First of all, it is straightforward and objective. It allows us to compare different models using a single KPI, making the selection process more data-driven. At the same time, the penalty for complexity helps reduce overfitting, which increases the chances that the model will generalize well to new data.
+
+Another important benefit is flexibility. AIC and BIC are not limited to ARIMA-based models like ARIMA, SARIMA, or ARIMAX. You can also use them in other areas such as segmentation and regression analysis. This makes them valuable tools to have in your overall modeling toolkit.
+
+However, there are also some limitations to keep in mind. AIC and BIC do not give you an absolute “good” or “bad” score. Their values are only meaningful when you compare them across multiple models. To be fair, this limitation applies to most KPIs as well.
+
+Another drawback is that they do not directly align with business-focused metrics. From a business perspective, companies usually care more about error metrics, such as how far the model’s predictions are from the actual values. AIC and BIC focus on goodness of fit and complexity, and businesses typically do not care much about model complexity itself.
+
+Lastly, because these criteria penalize complexity, there is a risk of information loss. In some cases, more complex models may capture important nuances in the data, and AIC or BIC might dismiss them too early.
+
+Now, if we zoom in on the process itself, the function simply runs through many combinations of p, d, and q, calculates the corresponding AIC and BIC values, and compares them. Once again, the model we choose is the one with the lowest value. This point is critical and worth repeating.
+
+To sum it all up, AIC and BIC are extremely helpful because they allow us to automatically try different parameter combinations in a structured and objective way. You saw how easy this was with the ARIMA model, and the same applies to SARIMA and ARIMAX models as well.
+
+Of course, these methods are not perfect. Eventually, we should focus more on error-based metrics such as MAE, RMSE, and MAPE, which we will do later. But for now, using AIC and BIC is absolutely fine, and they give us a solid way to assess and compare our models.
+
+# **I) Python - Cross-Validation**
+
+All right, we’re back. This step was actually super quick. It only took a few seconds at most. You can see that the process shows the attempts, and it didn’t take long before it found an optimal value.
+
+Now, what we’re going to do next is cross-validation, which is always a very important step. Cross-validation helps us understand how well our model performs across different points in time, instead of just fitting well on a single training window.
+
+The first thing we need to define is the forecast horizon. Personally, I usually like to use 30 days when we’re working with daily data. For me, this is generally the best approach. Forecasting just the next week often feels a bit unrealistic, because in most operational settings, not much actually changes within one week. Most real-world forecasts tend to focus on a 30-day window, and sometimes even up to 90 days, depending on business requirements and enterprise needs. For now, we’ll start with 30 days, and this is what we’re going to evaluate.
+
+Because we are using auto.arima, parameter tuning does not apply here. The model already handles that internally by selecting the best parameters based on information criteria.
+
+Next, we perform cross-validation using a rolling forecast approach. We define forecast_cv using the model’s historical_forecasts method. Let’s quickly look at the documentation to understand what this method expects. It’s not listed under attributes but under methods, specifically historical_forecasts.
+
+This method requires the series, as well as the future covariates, which are the ones we already fitted earlier. We then specify the forecast horizon, which in our case is set to 30 days.
+
+There are a few additional parameters available, such as train length and start, but those are not strictly required. One parameter that is often important is stride. There are multiple ways to use stride. For example, if you have a 30-day forecast horizon, you might decide that every week you forecast the next 30 days. In that case, you could set the stride to one-fourth of the forecast horizon. For now, we’ll keep it simple and set the stride equal to the forecast horizon itself. This means we forecast the next 30 days, then the next 30 days again, and so on.
+
+Another important parameter is retrain, which we set to True. I always prefer to have retraining enabled. In our case, the goal is to evaluate auto.arima in a setup where the model continuously re-optimizes itself by finding the best parameters according to AIC. Since this is the behavior we want to evaluate, retraining should definitely be included.
+
+There are a few more optional parameters, such as verbose, which controls how much information the function prints while running. Personally, I don’t care much about verbose output here, so I leave it disabled.
+
+One parameter worth discussing is last_points_only. This method can return either a full sequence of forecasts or just the last predicted point. If we were to set last_points_only=True, and our forecast horizon is 30, then we would only get the 30th predicted value. For our use case, that doesn’t make much sense, so we explicitly set last_points_only=False.
+
+Now let’s talk about the start parameter. This controls when the rolling forecast begins. Based on my experience over many years of forecasting, a good approach is to start far enough in the past to allow multiple evaluation windows. In this case, we look at the total length of the dataset and subtract the forecast horizon multiplied by 12. This gives us approximately 10 to 12 evaluation windows, which is usually a solid and reliable setup.
+
+At this point, we encountered an error: an unexpected keyword argument called target_series. This is because the method expects the argument to be named series, not target_series. So we replace that with series=target_scaled.
+
+We also need to include the future covariates, which we pass using future_covariates=covariates. Some parameters such as train length are removed, and we keep only the required ones: series, future covariates, start, forecast horizon, stride, retrain, and last_points_only.
+
+After correcting these parameters, we run the function again. This time, it appears to be working correctly.
+
+I’m going to stop here. The cross-validation is now running, and in the next video, we’ll explore the output in detail. I’ll see you there.
+
+# **J) Python - Cross-Validation Results and the Zero issue**
+
+What we’re going to do now is eventually build a loop, but before that, I really want us to go step by step and carefully inspect the output. The result of the cross-validation is stored in cv, so let’s start by looking at that.
+
+At first glance, the output looks a bit odd. There are quite a few things going on here. The key thing to understand is that this output behaves like a list. Since we ran 12 cross-validation folds, we should expect 12 outputs. Each element in this list corresponds to the predictions from one cross-validation window.
+
+So, for example, cv[0] gives us the first set of predictions. When we inspect those values, we immediately notice that they are scaled. That means the very first step we need to take is to apply the inverse transformation using the scaler. Once we do that, we get the predictions back in their original scale.
+
+Now, looking at these values, it’s clear that something feels off. We can see negative values, which realistically should not exist in this context. These values simply don’t make sense for the problem we’re solving. For now, they are there, and we’ll deal with them properly in the next steps, but it’s important to acknowledge that this is an issue we need to address.
+
+Before fixing that, let me show you how to retrieve and align everything properly. A very useful next step is to convert the predictions into a time series. Once we do that, we still have the same values, but now they are indexed by dates, which makes further analysis much easier.
+
+What we can do next is retrieve the start and end index of the predictions and use those to extract the corresponding actual values. We take the minimum index from the predictions as the start date and the maximum index as the end date. Using these two dates, we slice the original dataset to get the actual values over the same period.
+
+When we do this, we can confirm that everything lines up correctly. The predictions cover the period from the 6th of August to the 4th of September, and the actuals match that same window. At this point, we’re in a very good position because our predictions and actuals are properly aligned.
+
+Now, this brings us to an important discussion around intermittent time series. In practice, there are very few models that can naturally handle intermittent behavior and explicitly predict zeros when, for example, a store is closed. Mathematically, you can’t just force a model to “slap a zero” into the prediction—it doesn’t work that way.
+
+There are models that were specifically designed for intermittent time series, but these are generally older models. In my perspective, even a relatively simple model like auto.arima will often outperform those older approaches, especially when compared to modern deep learning models or when working on larger and more complex problems. Those older intermittent-demand models simply don’t scale or perform well enough.
+
+Because of that, the simplest and most practical solution is to apply a rule after prediction: when the store is closed, we set the prediction to zero. That’s it. If the “open” indicator is zero, the prediction becomes zero as well. This approach is straightforward, effective, and widely used in practice.
+
+Once we apply this rule, we can inspect the predictions again and confirm that the values correctly drop to zero when the store is closed.
+
+Now we move on to evaluation. We calculate the RMSE (Root Mean Squared Error) by comparing the actuals with the predictions. For this particular fold, we get an RMSE value of 588. Of course, you could calculate additional error metrics if you want, but RMSE is sufficient for now.
+
+What we want to do next is generalize this across all cross-validation folds. We create an empty list called rmse_cv. Then we loop over all cross-validation outputs using a for loop. For each fold, we repeat the same process: inverse transform the predictions, align them with the actuals, apply the zero rule when the store is closed, compute the RMSE, and append it to the list.
+
+At the end, we print all RMSE values and compute the mean RMSE across folds using NumPy. After fixing a small indexing mistake and replacing a hardcoded zero with the loop variable, everything runs correctly. The final average RMSE comes out to 792.
+
+That’s it for this video. In the next one, we’ll focus on visualization. We’ll explore how the model performs across different folds, see where it does well, and identify where it struggles. I honestly expected a bit more from some of the folds, so we’ll dig into that and see if there are any potential issues or opportunities for improvement.
+
+# **K) Python - Plotting Cross Validation**
+
+I really like to visualize things, especially when it comes to cross-validation. I find that visualization is usually very insightful, because it helps us understand whether there’s something odd going on—whether a specific residual stands out or if there’s something truly out of the ordinary. For this reason, we’re going to visualize CV[0], comparing it directly against the actual values.
+
+We’ll start by gathering everything we need. This usually follows the same pattern as before. We focus on the first cross-validation fold by explicitly selecting CV[0]. From there, we take the predictions, apply the inverse transformation using the scaler, and then handle the zeroing logic. After that, we retrieve the first and last index of the predictions and use those to slice the actual values over the same time range. Finally, we plot both the actuals and the predictions using plt.plot, and we add a legend so we can clearly distinguish between them.
+
+When we first plot this, the output looks pretty ghastly. The default figure size just doesn’t work well here. So we fix that by explicitly setting the figure size. A figsize of (10, 6) usually works very well for me, and once we apply that, the visualization already looks much better and easier to read.
+
+The next issue is the legend placement. By default, the legend isn’t ideal—it feels a bit awkward and distracts from the plot. To fix this, we go into the Matplotlib documentation and adjust the legend parameters. By specifying the legend location explicitly, we can control where it appears. After trying a few options, it turns out that placing the legend in the lower right works best for this plot. It keeps the visualization clean and avoids overlapping with important parts of the data.
+
+With the plot cleaned up, we can now actually interpret what we’re seeing. Overall, the model performs quite well in this fold. The predictions are relatively stable across most days, and they don’t fluctuate much. This makes sense when we connect it back to the underlying data and the autocorrelation analysis we did earlier.
+
+If you recall, the autocorrelation showed very little information in the recent past—especially in the last six days. Because of that, we wouldn’t expect the autoregressive component to have a strong effect. As a result, the predictions remain fairly flat, which is exactly what we observe here. This behavior is expected and actually reassuring.
+
+Visualization also allows us to spot areas that might deserve further investigation. For example, when looking at the period just before Christmas, we can clearly see strong seasonality in the actuals (the black line). This immediately raises a question: could we improve the model by adding additional variables that better capture this seasonal behavior? These are the kinds of insights that only really become obvious when you visualize the data.
+
+This is where domain knowledge, data understanding, and visualization all come together. By knowing the industry, understanding the data, and carefully inspecting plots like this, you can often find opportunities to significantly improve your models.
+
+That’s it for this video. I want to leave you with a challenge to think about how you could extend or improve this approach. I’ll see you in the next one.
+
+# **L) Predict the Future + Challenge**
+
+In most—if not all—sections of this course, we usually end up predicting the future. Interestingly, in this section we haven’t done that yet, and that’s very intentional. This is actually one of the challenges I want to leave you with: predicting the future using everything we’ve learned so far.
+
+Once you start thinking about it, you’ll realize that there are a few non-trivial steps involved. The first one is that you need to create a future data frame. This alone can already be a bit tricky, because you’re no longer working with observed data—you’re working with assumptions and best guesses.
+
+If we look at our existing data frame, we have variables such as Open, Promo, StateHoliday, and SchoolHoliday. Since this is Germany, you’ll need to go online and figure out whether there are state holidays or school holidays in the future period you want to forecast. You can assume that the store is located in Berlin (which is also a state), and then determine whether, for the next 30 days, there are any state holidays or school holidays. That’s challenge number one.
+
+The Open variable is challenge number two. It’s related to holidays, but not only to state or school holidays. You also need to consider national holidays, Sundays, and similar effects. The store being open or closed directly affects sales, so getting this right—or at least making a reasonable assumption—is crucial.
+
+The Promo variable is by far the most challenging one. Here, you essentially have two main options. One option is to simply set everything to zero. Personally, though, that’s not what I would do. Since you’re predicting the future, these inputs should represent your best possible guess. What I would do instead is look at the previous one or two years, focus specifically on the same period (for example, August), and see whether promotions were typically running during that time. If they were, I would replicate or copy that behavior into the future data frame. That would be my preferred approach.
+
+So that’s challenge number one: predict the future by carefully constructing realistic future covariates.
+
+Challenge number two is to use a MAX model with statsmodels, including proper parameter tuning. The goal here is very clear: can you beat the RMSE of 792 that we achieved earlier? Is that a good result? Is it acceptable? Or can you do better with a tuned model? If parameter tuning turns out to give you better performance, then that’s the approach you should go with.
+
+These are the two main challenges I want to leave you with.
+
+And finally, a promise from me. Doing the challenge should already be rewarding on its own, because you’re applying relevant concepts to a realistic forecasting problem. But beyond that, I promise that if you complete these challenges and post your results—whether in the Q&A section, on LinkedIn, or somewhere else—I will personally go through them and give you individual feedback. No AI, no automation—just me reviewing your work and sharing my thoughts.
+
+For those of you who go the extra mile and do this challenge, that’s my commitment.
+
+# **XIII) Section 13: Mid-Course Feedback**
+
+# **A) Will you help me?**
+
+You’ve been absolutely crushing it so far. From nailing the fundamentals to tackling real challenges, you’ve been showing the kind of curiosity and drive that turns learning into real skill. But we’re not slowing down yet — there’s a lot more power ahead.
+
+Now, I need a small favor from you. Just a couple of minutes of your time, but it can make a huge difference.
+
+In the next lecture, you’ll find a feedback form. I’d really appreciate it if you could fill it out. Tell me what’s working well, what’s getting you excited, and what you feel could be improved or is missing. Be honest — that’s exactly what helps me make this course better for you and everyone else.
+
+Please do this as a personal favor to me. Your feedback directly shapes how this course evolves.
+
+So go ahead: click the link, drop in your thoughts, and help me level this up.
+
+Thanks for stepping up and making your voice heard. Let’s keep this momentum strong and blast through the second half of the course with even more focus, clarity, and firepower
+
+# **XIV) Section 14: PART 3 - DEEP LEARNING FOR TIME SERIES FORECASTING**
+
+# **A) Deep Learning for Time Series Forecasting Overview**
+
+This is a deep learning world, and we’re just living in it.
+
+If you’ve ever felt like you’re driving a horse and buggy in a world full of Teslas, it’s time to upgrade. In this section, we’re diving deep into neural networks that will make your data work for you like never before. So buckle up, because we’re turning this up to an eleven.
+
+But why deep learning?
+
+Because this is the state of the art. And that’s exactly why you’re here.
+
+We start with LSTMs — Long Short-Term Memory networks — but not just a surface-level introduction. We get technical. We fine-tune LSTM parameters, experiment with activation functions, and squeeze out every possible drop of accuracy. We apply cross-validation to make sure your models aren’t just good, but truly exceptional. Think of it as turning every dial to maximize performance.
+
+Next up: multiple time series forecasting.
+
+This has been one of the most requested topics in the entire course, and it’s finally here. You’ll learn multiple ways to handle and forecast multiple time series, with practical, real-world approaches that actually scale.
+
+Then we take things to the next level with Temporal Fusion Transformers.
+
+This advanced architecture combines temporal patterns with covariates to deliver next-level forecasts. You’ll learn the key concepts, understand the model architecture, and implement everything step by step in Python. TFTs are like LSTMs on steroids — built to handle complex, multivariate time series data with confidence and precision.
+
+And we’re not stopping there.
+
+We’ll also explore — and beat — another groundbreaking deep learning model: N-BEATS. Known for its outstanding performance in forecasting competitions, N-BEATS is a powerhouse. You’ll see how to set it up, train it properly, and tune it for maximum accuracy. This model alone can take your forecasting skills to a whole new tier.
+
+By the time we’re done, you won’t just understand deep learning — you’ll dominate it.
+
+Armed with LSTMs, TFTs, N-BEATS, and every other acronym that matters, you’ll forecast like a pro.
+
+# **XV) Section 15: RNN - LSTM**
+
+# **A) Game Plan for LSTM**
+
+Let’s kick off this journey into LSTMs, a core part of deep learning and neural networks.
+
+Neural networks may sound like the fanciest technique out there, but the idea itself is actually one of the oldest concepts we’ll cover in this course, dating all the way back to the 1940s. The name — which, by the way, is incredibly memorable for humans — comes from the similarity between how these models work and how synapses function in our brains.
+
+At a high level, neural networks receive inputs, transform them, and then produce outputs. That transformation step is where the real magic happens. One of the most important aspects of neural networks — and a key reason they fit so well with time series forecasting — is their ability to learn. Much like our own brains, neural networks adjust what they “know” based on new information. They can forget, discard, or update what they once considered facts when fresh data comes in, and they can arrive at different conclusions depending on the circumstances.
+
+There is also an element of randomness involved. Every neural network has stochastic components, which means you may get slightly different results than mine — and that’s completely normal.
+
+Now let’s talk about the specific model we’ll be working with.
+
+Recurrent Neural Networks, or RNNs, are an advanced and specialized form of neural networks designed to handle sequential data. We’ll start with simple neural networks, move into recurrent neural networks, and finally arrive at LSTMs — Long Short-Term Memory networks. LSTMs are a specialized form of RNNs built specifically to overcome one of the major flaws of standard RNN architectures: their difficulty in learning long-term dependencies.
+
+From a practical perspective, we’ll work with two datasets.
+
+The first dataset is one you already know. We’ll use it to fully understand how LSTMs work from start to finish, breaking down complex concepts and applying them immediately. This dataset will also help us clearly understand how the Darts library operates under the hood.
+
+The second dataset comes from the M4 competition — a well-known benchmark in time series forecasting. Here, our goal shifts to predicting multiple time series at once. This means we’re not just learning deep learning anymore; we’re tackling an entirely new forecasting challenge: multi-series forecasting.
+
+And don’t worry — we’ll cover every concept step by step.
+
+# **B) Simple Neural Network**
+
+The mathematics behind neural networks can be pretty complex, but I do feel that the overall process can be quite intuitive. To illustrate the mechanics, I will start by explaining how multilinear regression works from a purely architectural or framework perspective.
+
+Let’s visualize this first. You have an input layer and an output layer. The inputs represent the variables, and for each observation, you generate an output. In a nutshell, all input variables are combined to produce an outcome. This setup can actually be seen as a very simple neural network.
+
+The process in neural networks is similar, but with a very specific added complexity. As before, we start with inputs and an output. However, now there is a hidden layer in the middle. What happens is that the inputs are transformed in this hidden layer by elements called nodes.
+
+This hidden layer is absolutely fantastic for two main reasons. First, it enables non-linearity by transforming the inputs in whichever way the model finds best. Second, it combines the inputs and generates new dynamics that the original inputs do not explicitly have. For me, this is really the secret sauce that makes neural networks so powerful—the transformation of variables into better versions of themselves.
+
+In the end, the hidden layer then feeds into the output layer. So how does this actually work? Let me briefly go through the mathematics behind it.
+
+First, you need to know that the index j refers to the neurons in the hidden layer, and the index i refers to the inputs. Feel free to pause here and take a moment to look at everything before continuing.
+
+Now, let’s talk about z. This is the value, or output, of the hidden layer neuron j. It is a combination of two things. The first is the bias parameter b of neuron j. The second is the sum of the inputs multiplied by their corresponding weights. Both the weights w and the bias b are learned during the training of the model.
+
+The inputs themselves are represented by x. Each arrow in the network represents a weight, connecting an input to a node in the hidden layer. Each of these arrows corresponds to a weight 
+𝑤
+𝑖
+𝑗
+w
+i
+j
+	​
+
+, and together with the inputs 
+𝑥
+𝑖
+x
+i
+	​
+
+, they form the weighted sum for each neuron.
+
+If you think about it, this is not very different from a multilinear regression equation. You have coefficients, inputs, and a constant term. The process is conceptually similar.
+
+The next step is to transform the outputs of the hidden layer into the final output. This is a crucial step and is done using an activation function. The activation function helps prevent overfitting and enables the network to model complex relationships. We will cover activation functions in more detail later in the section, so there’s no need to worry about that for now.
+
+So far, we have covered the one-sided process, where we go from the inputs all the way to the outputs. But there is more to it. While it is conceptually simple, the full process is slightly more complex.
+
+Neural networks also have a backward process. Each time the model runs forward once, this is called an epoch. After each epoch, the model runs backward. During this backward pass, all the arrows—what we call the weights—are updated through a process known as backpropagation.
+
+This back-and-forth process is where the learning happens. The model continuously learns and adapts by adjusting its weights based on the error. When building a model, one of the key parameters we choose is the number of epochs. This could be five, ten, twenty, or more, depending on what works best, and we determine this through experimentation.
+
+Finally, so far we have visualized a simple neural network. But neural networks can be more complex. For example, we may have more than one hidden layer. The more hidden layers we add, the more complex the network becomes.
+
+Additionally, we may have more than one output. This is particularly useful in cases like multivariate time series forecasting, where we want to predict multiple series at the same time.
+
+To sum it all up, neural networks use hidden layers to transform inputs into neurons that better represent the problem. These representations are then converted into outputs, usually through activation functions.
+
+# **C) Recurrent Neural Networks (RNN)**
+
+In this video, we are going to go one level deeper into deep learning, and the main focus will be on recurrent neural networks, or RNNs. However, before we get to RNNs, I need to simplify the visualization we have been using so far.
+
+The input layer will now be represented as one blue ball. Similarly, the hidden layer will be shown as one green ball, and the output layer will be shown as purple. What you need to keep in mind is that, for future visualizations, each of these layers can actually have multiple nodes. This simplification is only for visualization purposes. As we move forward into more complex architectures, we will visualize networks with many more neural components.
+
+We still have an input layer, at least one hidden layer, and an output layer. However, it is not just one network anymore—we now have multiple networks. So we add another one. This raises an important question: how are these networks connected?
+
+The connection happens through the outputs of the hidden layers. Each network corresponds to one unit in the sequence. Let’s imagine time steps n and n-1. The output at time n is influenced by the inputs at time n as well as the outputs from time n-1. Similarly, the output at time n-1 is influenced by its own inputs and by the outputs from the previous step.
+
+This process continues forward in time. The output at time n was influenced by the inputs at time n and the outputs at time n-1. Using the same logic, the output at time n+2 is influenced by its own inputs and by the output at time n+1. This creates a chain of dependency across time steps.
+
+This is where the term recurrent neural network comes from. We have this recurring or feedback effect, where past outputs influence future outputs. At the same time, this should feel oddly familiar. In time series forecasting, we use past information to predict the future.
+
+Similarly, when we use regressors, we rely on input variables to help explain the independent variable. So even though recurrent neural networks are very different from the models we have seen so far, from a purely mathematical and intuitive perspective, the underlying logic is actually the same.
+
+The last thing I want to cover is that RNNs are particularly well suited for sequence data. Time series is one type of sequence data, but there are many others—such as music, books, text, and language translation. All of these involve sequences where order and context matter.
+
+Finally, there is one important flaw in recurrent neural networks that we need to discuss. But I won’t spoil that just yet—we’ll cover it in the next video.
+
+# **D) LSTM**
+
+Now that we understand the architecture of recurrent neural networks (RNNs), we also need to understand that they have a flaw. And spoiler alert—the solution to this flaw is the LSTM framework. But before jumping to the solution, let’s first understand what actually goes wrong when an RNN is trained.
+
+We are already familiar with this type of chart: the model processes data as a sequence of data points. The most recent point always has more influence than the one before it, which in turn has more influence than the one before that. This behavior is exactly what we would expect from a regular time series. It makes sense intuitively, and we have seen this logic before, for example when working with exponential smoothing, where recent observations receive higher weights.
+
+So far, there is no problem. This behavior is perfectly reasonable and expected. The real issue appears during backpropagation.
+
+When we update the weights in a neural network, especially the weights connecting the input layer to the hidden layer, the model gains the ability to “unlearn” information. This is a very useful mechanism, because it allows the model to discard patterns that were once true but are no longer relevant. For most neural networks, this works well. However, for RNNs, this becomes problematic because of the sequential nature of the data.
+
+What happens is that for each node update, the model loses a fraction of what it has learned. This loss is not a big issue for the most recent time steps, but as we move further back in time, the impact becomes severe. By the time the training process reaches the very first point in the sequence, the updates are extremely small. In other words, the earliest parts of the sequence barely get trained at all.
+
+This is a serious issue. Why does it matter? Because we train the RNN from the past toward the future, but during backpropagation, the weight updates mainly affect the most recent time steps. This phenomenon is known as the vanishing gradient problem. As a result, a large part of the network—specifically the earlier time steps—remains undertrained.
+
+Another way to look at this is to say that a standard RNN only has a very short-term memory. Only the recent past is effectively learned, while long-term dependencies are largely ignored. Clearly, this is something we need to overcome.
+
+You might think, “Why not just remove the dropout or the learning mechanism altogether?” But that would severely limit the model’s ability to improve. Imagine if humans were unable to forget anything they had learned. That wouldn’t work—we would still believe that the Earth is flat or that the Earth is the center of the universe. Forgetting, or unlearning, is essential for improvement.
+
+So what is the solution?
+
+The LSTM introduces a free-flowing memory channel that exists alongside the usual RNN structure. This memory channel is not affected by the same dropout and gradient decay issues that affect standard RNNs. It is updated using the inputs and outputs at each time step and preserves this information for future reference.
+
+This memory channel represents the long-term memory that is missing in standard RNNs. It is also updated with each training epoch, meaning that the memory itself improves over time as the model learns. This allows the network to retain important information from far back in the sequence.
+
+In summary, recurrent neural networks are good at modeling short-term dependencies. However, in time series forecasting, events that happened one or even two years ago can still be highly relevant. If the model cannot remember them, that becomes a major limitation. This is why long-term memory is essential.
+
+Of course, there is more to LSTM than this explanation, but from an intuition and practical application perspective, this is the core idea.
+
+I’ll leave you with a link to the original LSTM paper. It’s not completely unreadable, but it is definitely challenging. You can find the paper in the course materials if you’d like to dive deeper.
+
+I hope you enjoyed this explanation and that it’s clear how we arrived at LSTM—from simple neural networks, to sequence data, to recurrent neural networks, and finally to understanding their flaws and why LSTM is the solution.
+
+Now, let’s stop with the theory and start applying these concepts in practice.
+
+# **E) Python - LSTM Setup**
+
+Now it’s time to put LSTM into practice. Inside the deep learning folder, you’ll find the section where we work with LSTMs. We’ll start with a single time series, just to kick things off properly. Later on, we’ll move to multiple series, but for now, focusing on one series will help us understand everything clearly. In that folder, you’ll also find a starter file that we’ll use as our base.
+
+Since this is deep learning, it’s really important to have your GPU enabled. I personally use Colab Pro, but even with regular Google Colab, you’ll still be able to access a GPU that you can rent temporarily. If you don’t have Pro, the L4 GPU works fine—it’s slightly slower, but it will still work 100% for this tutorial. For me, time is valuable, so I pay the €10–€11 per month (roughly $12–$13) whenever I need to work on time series forecasting or anything that requires GPU acceleration.
+
+In this session, I’m going to use the A100 GPU, which is one of the high-end GPUs from NVIDIA. It’s expensive, but it’s extremely fast and I highly recommend it if you have access. That said, the free GPU options will still be perfectly fine for this tutorial. After that, we’ll mount the drive. I already have the starter file ready here. Most of the steps should feel familiar—we install the required libraries and prepare the environment.
+
+At this point, I’m going to pause for about a minute, because installing the libraries usually takes around one to one and a half minutes.
+
+Alright, the installation is now complete and we’re importing the libraries. Usually, the RNN-related libraries take the longest to load. The dataset we’re going to use is one that I absolutely love—it’s about shelter demand in New York City. This is a dataset I originally found and then enriched myself. For example, I added real New York temperature data, and marketing-related variables as well.
+
+Next, we preview the dataset. This step helps us check for null values, object types, or anything unexpected. The data is daily, so we explicitly set the frequency to daily. The demand variable is our target, and we rename it to Y.
+
+Now let’s plot the data to see what’s going on. We can clearly observe a growing trend over time. As we approach 2020, the demand starts to decline, which aligns with what we might expect for shelter demand during that period.
+
+Next, we look at the seasonality. There’s a very clear seasonal pattern: demand drops during the warmer months, reaching its lowest point around August, and then increases again with a peak in December. This makes perfect sense given that we’re modeling shelter demand.
+
+When we look at quarterly seasonality, it also aligns with our expectations. Q1 and Q4 have the highest seasonal peaks, while Q3 shows the lowest demand. This fits well with colder versus warmer periods of the year.
+
+At this point, we get a runtime warning indicating that the GPU is not being used. That’s fine for now. If I activate the GPU midway, it would require rerunning everything from the beginning, so I’ll leave it as is for the moment.
+
+Moving on to decomposition, we start with a seasonal period of 365 days. This gives us a very interesting seasonal curve, which clearly confirms what we saw in the earlier plots. The trend increases and then declines over time. We can also try a seasonal period of 7 days, but that introduces too much noise in the visualization. Still, when we look at the seasonal component, the values are centered around one.
+
+This is expected because we’re using multiplicative decomposition. The multiplicative formula is
+Y = Trend × Seasonal × Residual.
+Because of this, we expect both the seasonal and residual components to be centered around one. The trend component represents the baseline behavior of the series.
+
+Next, we examine the autocorrelation plot. We see very clear and strong patterns, with spikes occurring every seven days. This indicates strong weekly seasonality. It also suggests that the data is non-stationary, which we already know due to the presence of a trend.
+
+When we look at the partial autocorrelation (PACF), we can see that there’s a lot of information in the most recent seven days. We also see recurring information at lags of 14, 21, and so on. This confirms that the seasonal component plays a major role in the series.
+
+Finally, we preview the full data frame. We have Y, Easter, Thanksgiving, Christmas, temperature, and marketing variables. The main series is the Y column, and the covariates include everything from Easter through marketing. We log-transform where needed, run the final checks, and at this point, everything is ready.
+
+We’re now fully set up and ready to start modeling.
+
+In the next video, we’ll focus on modeling the seasonality using LSTM.
+
+# **F) Python - Time Variables**
+
+Now let’s create the time variables. In our previous models, we had seasonality components that we could explicitly activate. With deep learning, things are a bit different. These models are more focused on sequence data, which means they can understand seasonality, but we need to explicitly help them by providing the right inputs. In other words, we need to spoon-feed the seasonality information.
+
+There are multiple ways of doing this, and throughout the course I’ll show you several approaches. This is just one of them. In the end, it really comes down to which approach you find the easiest or most intuitive. Conceptually, they all achieve the same goal. There are many ways to solve the same problem—potato, potato—so it’s more about design preference than correctness.
+
+Let’s start by creating the time variables. We begin with the year variable. As soon as we try this, we get a helpful suggestion from the environment. Let’s see if it works—and yes, it does. We immediately start getting useful outputs, which is exactly what we want.
+
+To understand this better, let’s briefly explore the API reference and documentation. We’re using datetime attribute series, which returns a new time series indexed by time, with one or more dimensions that can be one-hot encoded. In this case, we want to extract the year, and this works perfectly for our needs.
+
+Including the year variable helps us capture the trend in the data, which is very important. It also helps the model connect to seasonal patterns that may not be perfectly recurring year after year. Sometimes seasonality evolves over time, and having the year as an input allows the model to account for that change.
+
+Next, we add the month variable, which further helps the model understand seasonal effects. After that, I always like to include the day of the week. This is especially useful for daily data, where weekday effects often play a major role.
+
+We can implement this using the weekday option, which is what I have in my notes. Once we include it, we see values ranging from 1 through 7, covering the full weekly cycle from start to finish. We can also inspect the output to confirm that everything looks correct.
+
+And that’s actually it for this video. This is how you include time-based variables for deep learning models. In the next step, we’ll bring everything together—scaling the data and merging these time variables with our existing covariates, which will also be scaled.
+
+# **G) Python - Scaling**
+
+The next step is to scale our data, which is a very important part of working with deep learning models. We’re going to start by preparing our scalers. It’s important to note that we are not using any shortcuts here. We will use two separate scalers: one for the target series and one for the covariates.
+
+So first, we create a scaler for the target variable, which we’ll call scaler_y. Then we create another scaler for the covariates. This separation is important because the target and the explanatory variables serve different purposes and should be handled independently.
+
+Next, we apply the scaler to the target series. We use fit_transform on the series and store the result as the scaled version. If we preview the output, we can clearly see that the values are now scaled between 0 and 1. This confirms that the scaling step worked correctly, and at this point the target series is ready.
+
+Before moving on, it’s important to recall what our data looks like. Earlier, we confirmed that the time variables—year, month, and weekday—are not one-hot encoded. Instead, they appear as numeric values such as 1, 3, 4, 5, and so on. Because of this, we now need to stack these time variables together with our existing covariates.
+
+This is exactly what we do next. We take the original covariates—Easter, Thanksgiving, Christmas, temperature, and marketing—and stack them together with the year, month, and weekday variables. When we inspect the result, we can see that all components are now combined into a single covariates structure. This confirms that the stacking step worked as expected.
+
+Once all covariates are combined, we apply the second scaler. We use fit_transform on the full covariates dataset, producing scaled covariates that are ready for modeling. At this point, all variables—both the target and the covariates—are properly scaled.
+
+And that means we’re absolutely good to go.
+
+We are now fully prepared to build our LSTM model. To get started, we look for the RNN-based model, specifically the one labeled RNNModel. This is the model we’ll be working with, and we’ll keep the documentation open alongside it as we explore its parameters and configuration.
+
+# **H) LSTM parameters**
+
+We are almost there and ready to build our LSTM model.
+
+But before we actually do that, I want to briefly walk you through the key parameters that we will be setting and tuning throughout this section. Understanding these will make the modeling choices much clearer as we move forward.
+
+We’ll start with dropout, which is a mechanism designed to prevent overfitting. Dropout represents the share of neurons that will be randomly excluded during each epoch. To quickly recap, an epoch is one complete pass through the training dataset. If you remember the feature sampling mechanism we used in gradient boosting—where we only look at a subset of features at a time—this follows the same idea. Each epoch uses a random subset of neurons, which helps the model generalize better.
+
+Next, we have the number of hidden layers. This parameter controls how deep the network is. The more hidden layers you add, the more complex the model becomes. However, increased complexity also means a higher risk of overfitting and longer training times.
+
+Closely related to that is the hidden dimension parameter. This specifies how many feature maps or units each hidden layer contains. Again, higher values increase model complexity and expressive power, but they also increase the risk of overfitting if not handled carefully.
+
+The fourth parameter is the number of epochs. This simply defines how many complete iterations the model will make over the training data. You can think of this as how many times the network gets the opportunity to learn and refine its weights.
+
+Following that, we have the learning rate, which controls how fast the model learns. A higher learning rate means the model updates its weights more aggressively, while a lower learning rate results in slower, more cautious learning. In practice, lower learning rates are often preferable because they help prevent overfitting and unstable training.
+
+Parameter number six is the training length. This defines how much historical data is used for training in each iteration of the model. It’s important to note that this value must be larger than the seventh parameter, which is the input chunk length.
+
+The input chunk length specifies the number of past time steps that are fed into the model at once. This parameter is particularly important for time series forecasting, as it determines how much historical context the model can use to make predictions.
+
+From my perspective, most of these parameters are simply technical levers. They don’t really have a direct business interpretation. The main exceptions are the input chunk length and the training length, as these are closely connected to the forecasting horizon. In our case, since we’re working with a 31-day testing and forecasting horizon, we’ll set these values in a way that makes sense for that time frame.
+
+And that’s really it.
+
+In the next video, we’ll see how all of this comes together in practice and how we actually configure and train the model. I also want to reinforce one last point from the slide I forgot to show earlier: these parameters are just cogs in the machine. They’re tools we use to improve results, nothing more.
+
+What really matters is that we stay outcome-driven and focus on performance.
+
+# **I) Activation Functions**
+
+In this video, I’m going to cover activation functions.
+
+Activation functions are one of the core foundations of neural networks, as they determine how neurons process inputs and transmit information forward through the network. We’ll take a closer look at three key activation functions: sigmoid, hyperbolic tangent (tanh), and the rectified linear unit (ReLU). The goal here is to understand their individual characteristics and the specific roles they play within neural network architectures.
+
+Let’s start with the sigmoid activation function.
+
+The sigmoid function is defined by the formula:
+one divided by one plus e raised to the power of minus t.
+What this function does is map any input value into a range between 0 and 1. This “squashing” effect makes sigmoid especially useful when outputs resemble probabilities.
+
+The sigmoid has a distinctive S-shaped curve, and because of this shape, it can lead to the vanishing gradient problem, particularly when input values are very large—either very positive or very negative. In those regions, the gradients become extremely small, which can significantly slow down training or even cause it to stall altogether.
+
+If you visualize the sigmoid function, you’ll notice that all outputs remain between 0 and 1. Extreme input values barely change the output, which limits the impact that individual variables can have. This behavior is partially intentional, as it helps prevent overfitting by ensuring that no single variable dominates the model excessively.
+
+Next, we move on to the hyperbolic tangent function, commonly referred to as tanh.
+
+The tanh function has a very similar mathematical structure to the sigmoid, but with one important difference: its output range spans from -1 to 1. This gives it a broader range and, crucially, makes it zero-centered, which is often desirable in neural networks.
+
+Like sigmoid, tanh also has an S-shaped curve and can suffer from the vanishing gradient problem. However, because it is centered around zero, it is generally preferred over sigmoid for hidden layers, as it allows gradients to flow more symmetrically during training.
+
+If you look at the tanh curve, you’ll again see that values are capped—this time at -1 and 1. This means that while variables can influence the output, their impact is still bounded, preventing extreme values from overwhelming the network.
+
+Finally, we have the rectified linear unit, or ReLU.
+
+The ReLU function is defined as the maximum between zero and the input value x. Its output range therefore goes from 0 to positive infinity. From a computational efficiency perspective, ReLU is extremely fast and simple because it is a piecewise linear function. This simplicity often results in faster training compared to sigmoid or tanh.
+
+ReLU also helps mitigate the vanishing gradient problem, but it introduces a different issue known as dead neurons. This happens when neurons consistently receive inputs less than zero, causing them to output zero every time. Once a neuron becomes “dead,” it no longer contributes to learning and effectively becomes useless.
+
+If you visualize ReLU, you’ll see that all negative inputs collapse to zero—these are the dead neurons. On the positive side, the function grows linearly and, in theory, extends to infinity. While that may seem odd at first—why would infinite values make sense?—in practice, ReLU performs extremely well from an empirical standpoint.
+
+In fact, it’s often surprising how frequently ReLU turns out to be the best choice during parameter tuning. Despite its simplicity and quirks, it consistently delivers strong results in real-world deep learning models.
+
+That wraps up our deep dive into activation functions.
+
+While this might not be the most exciting topic on the surface, activation functions are a fundamental part of neural networks and deep learning. Understanding them is essential if you want to truly grasp how these models work and how to tune them effectively.
+
+# **J) Python - LSTM Model**
+
+We’re now getting into Recurrent Neural Networks. RNNs come in three main variants: vanilla RNN, LSTM, and GRU. In this course, we’re going to use LSTM, which is generally considered the better and more robust option for most time series problems. Because of that, we’ll stick with LSTM throughout.
+
+Now, we’re going to leave this cell here because we’ll be using it later, but let’s go ahead and build the LSTM model. We define the model using the RNN module and specify that we want an LSTM architecture. Let me organize everything so it’s clear and readable. Once that’s done, the model definition is good to go.
+
+Next, let’s talk about input chunk length.
+This represents the number of past time steps that are fed into the forecasting module at prediction time. Before defining it, we’ll set up some configurations. We define the forecasting horizon, which in this case corresponds to our future CSV ranging from January 1st to January 31st, so that’s 31 days.
+
+Now, the input chunk length must be greater than the forecasting horizon. You can tune this value, but the general rule is that input chunk length should always be larger than the forecast horizon. Another way to think about it is this: it’s the number of past time steps we use to predict the future. If we want to predict the next 31 days, we should be looking at more than 31 days in the past.
+
+If we only look at, say, 30 days to predict the next 31 days, that’s not very strong—especially because time series data is sequential. Today influences tomorrow, tomorrow influences the next day, and so on. When we’re predicting the 31st day, we still want the model to be influenced by today and the days before it. That’s why we should avoid using too few past observations.
+
+This is technically a soft rule, but I strongly encourage treating it as a hard rule. For now, we’ll use an input chunk length of 46. This is a tunable parameter, and we’ll explore it further later. There’s also another parameter called training length, which we’ll get to shortly.
+
+With that, we define input_chunk_length using the value we just discussed and move forward.
+
+Now let’s talk about the hidden dimension.
+The hidden dimension refers to the number of units inside each RNN layer. There’s a recommended default value of 25, and that’s perfectly fine to stick with. You’ll notice that most parameters have sensible defaults, except for input chunk length, which we must define explicitly.
+
+Next is the number of RNN layers. This controls how many stacked LSTM layers we use in the network. Using just one layer is usually too shallow, so we’ll go with two layers. There’s also an important detail here: if you only use one RNN layer, dropout is automatically set to zero. Personally, that feels a bit odd because dropout is one of the learning and regularization mechanisms. Since we want dropout, we’ll stick with two layers.
+
+We set dropout to 0.1, which is a reasonable and commonly used value.
+
+Now let’s move to training length.
+Training length defines the length of both the input and output series used during training. This value must be larger than the input chunk length; otherwise, the RNN is never run for enough iterations to learn properly. Since both input and output are involved, the standard approach is:
+
+training length = input chunk length + forecasting horizon
+
+That’s exactly what we’ll use here.
+
+Next, we define the number of epochs. There’s no strict recommended value, but 10 epochs is usually a fair starting point, so we’ll go with that.
+
+We also set a random state. This doesn’t have a huge impact on performance, but it ensures that the initial weights are more or less the same across runs, which helps with reproducibility.
+
+Now let’s look at optimizer parameters.
+We can pass arguments directly from PyTorch, such as the learning rate. Personally, I like to specify this explicitly. The recommended learning rate here is around 1e-3, which is 0.003, so that’s what we’ll use.
+
+Finally, we configure the PL trainer arguments.
+This is where we specify that we want to use the GPU. If you’re using a CPU, I strongly recommend switching to a GPU—even if your machine is slow and you’re not on Colab. LSTM training can take quite a bit of time on a CPU. We set the accelerator to "gpu" and specify the device index as an integer, which in this case is 0.
+
+With all of that in place, we run the cell.
+If you see an error related to hidden dimensions, it’s usually just a spelling mistake—once corrected, everything works as expected.
+
+Now we fit the model to the data.
+We train it using the scaled series and scaled future covariates. I’m not entirely sure whether the verbose flag is supported here, but we’ll find out as it runs.
+
+And there we go—the model is training.
+You can see that the A100 GPU just breezes through this. It runs incredibly fast, and everything works smoothly.
+
+Just to wrap up this video, I originally had a really nice video here showing why GPUs are so much better than CPUs. It featured the CEO of NVIDIA demonstrating the difference using a painting analogy. Unfortunately, that video is no longer available, so I’ll have to remove it from the materials. That’s a shame, because it was very relevant.
+
+If I do find a good replacement, I’ll be sure to share it with you. It’s absolutely worth watching.
+
+# **K) Python - Cross-Validation**
+
+Let’s move on to cross-validation. I’m going to search for it first—it should be somewhere around here. As usual, we’ll be working with historical forecasts, and you’ll notice that the process stays very similar as we do more and more deep learning in this framework.
+
+I’ll still take this step by step for now. Of course, in later sections I’ll move a bit faster so we don’t become overly repetitive. But for now, let’s do this carefully and properly.
+
+So, let’s set up cross-validation.
+The way this works is that we define our cross-validation parameters, then we pass our trained model into the historical forecast function. This is where the actual rolling evaluation happens.
+
+We start by specifying the series, which in our case is the scaled series. For past covariates, we pass None, and for future covariates, we provide the scaled covariates.
+
+Before proceeding, let me double-check something important. If we go back to the documentation homepage, there’s a very nice overview of how LSTM—and actually all models—work with covariates. What we’re interested in here is the RNN model.
+
+From the documentation, we can see that this model uses future covariates, not past covariates and not static covariates. This is very similar to what we saw earlier with models like SARIMA and Prophet. You’ll notice that Prophet appears in the same category, and Auto-ARIMA does as well.
+
+What this means conceptually is simple but important:
+If we use covariates to explain the past, we must also provide those covariates for the future. We cannot have one without the other. That’s why we pass future covariates during both training and forecasting.
+
+Later on, we’ll also learn about models that only rely on past values and don’t require future covariates, as well as models that support static covariates. Those are extremely useful in certain scenarios.
+
+For now, we proceed with scaled future covariates.
+
+Next, we define our cross-validation configuration.
+We need to specify a start point. One way I like to do this is by looking at the total length of the dataset—for example using the dataframe shape—and then choosing a point six months or twelve months before the end as the starting position for cross-validation.
+
+Now let’s talk about the stride.
+The stride defines the number of time steps between two consecutive forecasts. Another way to think about it is how frequently we generate new predictions.
+
+If we followed the documentation recommendation exactly, the number of forecasts would be massive. Conceptually, it would mean predicting the next 31 days today, then again tomorrow, then again the day after, and so on. From a practical perspective, that’s not very realistic.
+
+An alternative approach is to forecast at a lower frequency. For example, if we’re forecasting 31 days ahead, we could generate forecasts every week—day 7, day 14, day 21, and so on.
+
+To keep things simple here, we’ll divide the forecasting horizon by two. That gives us 15.5, but if we check the documentation, the stride must be an integer. So 15.5 won’t work. We round it down to 15, which works perfectly for our case.
+
+Now we include all the remaining parameters.
+
+We set start to the value we defined earlier.
+We set stride to 15.
+We set retrain=True, which means the model is retrained at each step. From my perspective, this makes total sense, because we want the model to adapt as new data becomes available.
+
+There’s another parameter called last_points_only.
+By default, this is set to True, which means that for each forecast window, we only keep the last predicted value. Personally, I find this a bit strange. In practice, I’ve never been in a situation where I only cared about the very last point of a forecast.
+
+Typically, I want to look at the entire forecast window—or at least a meaningful subset of it—especially when evaluating model performance. So we explicitly set last_points_only=False.
+
+Next, we make sure we include the forecast horizon parameter. Note that the correct parameter name is forecast_horizon, not forecasting_horizon. Once that’s corrected, everything lines up properly.
+
+We remove any unnecessary parameters like verbose, fix the parentheses, and run the cell.
+
+At this point, cross-validation starts running.
+In the next video, I’ll come back and show you how long this actually took, and we’ll also look at the results and interpretation.
+
+# **L) Python - Cross-Validation Performance**
+
+The cross-validation took roughly one minute, which is great for us and very reasonable given the complexity of the model.
+
+Now that it’s finished, the next step is to retrieve and evaluate the results. For evaluation, we are going to compute the RMSE (Root Mean Squared Error). This is the metric I personally prefer for time series cross-validation because it penalizes larger errors more strongly and is easy to interpret in the original scale of the data.
+
+We start by initializing an empty list that will store the RMSE values from each cross-validation fold. So we create something like rmse_cv = [].
+
+If we inspect the output of our cross-validation object, we see that it contains multiple elements, and each of these elements represents a prediction window. Each prediction corresponds to one fold, and each fold contains 31 predicted days, which matches our forecasting horizon.
+
+Now, an important thing to keep in mind is that these predictions are still scaled. Because of that, we cannot directly compute meaningful errors yet. To properly evaluate the model, we need to inverse-transform the predictions back to their original scale.
+
+To do this, we use the scaler that was applied to the target series. In our case, this is scaler_y. So we call scaler_y.inverse_transform() on the cross-validation predictions. Once we do this, we obtain the actual predicted values, which is exactly what we need.
+
+To simplify manipulation and comparison, we convert the predictions into a time series format and then into a structure that is easy to work with using pandas. This allows us to align predictions with actual values based on their timestamps.
+
+At this point, we have our predictions, but we still need the actual observed values for the same time range. To do that, we extract the start and end timestamps from the prediction index. Using those timestamps, we slice the original dataset and retrieve the corresponding actual values from the target column.
+
+So now we have two aligned series:
+
+the predicted values, and
+
+the actual values for the same dates.
+
+With both of these in hand, we can compute the error. We use Root Mean Squared Error, either by taking the square root of the mean squared error or by directly using a dedicated RMSE function. Conceptually, both approaches are equivalent—it’s really a potato–potahto situation.
+
+We first compute the RMSE for the first fold to make sure everything works correctly. Once we confirm that, we generalize the process by building a loop.
+
+Inside the loop, for each cross-validation fold:
+
+we inverse-transform the predictions,
+
+extract the corresponding actual values,
+
+compute the RMSE,
+
+append the result to the rmse_cv list, and
+
+print the RMSE value using an f-string so we can track progress.
+
+After iterating through all folds, we compute the mean RMSE across all folds using numpy.mean. We format the output to two decimal places, which makes the result cleaner and easier to read.
+
+In our case, the final RMSE comes out to approximately 62.21, which looks reasonable given the scale of the data.
+
+And that’s it.
+This is how we compute cross-validation performance for an LSTM-based time series model—fairly straightforward once everything is aligned correctly.
+
+Now that we have a baseline evaluation, we’re ready to move on to the next stage: parameter tuning. I’ll show you one parameter tuning technique first. This approach is particularly useful when you have many parameters and each model run takes a significant amount of time.
+
+This will be parameter tuning – round one.
+
+# **M) Python - Parameter Grid**
+
+Welcome to parameter tuning – round one.
+
+We’re going to start by defining the parameter tuning grid. The first thing we do is create our parameter grid as a dictionary. The values that we include here are all coming from the parameters we discussed earlier — these are essentially our baseline or initial values.
+
+Now, an important thing to understand is that we are not going to include all possible parameters and combinations. If we did that, the number of combinations would grow exponentially, which quickly becomes impractical for deep learning models.
+
+In total, there are about seven tunable parameters, but instead of tuning all of them at once, we’re going to narrow this down. What we’ll do is select four parameters, each with two possible values. One of the parameters — the number of epochs — will appear across multiple combinations.
+
+The parameters we include in this first round are:
+
+Number of RNN layers
+
+Hidden dimension
+
+Dropout
+
+Learning rate
+
+Number of epochs
+
+Training length
+
+Input chunk length
+
+For dropout, we’ll test values of 0.05 and 0.1.
+
+For the optimizer, we focus only on the learning rate (LR). While multiple values are possible, for now we’ll keep it simple and include 0.003 as the primary value.
+
+For the number of epochs, we include 5 and 10. I have a strong preference, especially at the beginning of any parameter tuning process, to always start simple. The goal is to see whether a simpler model can perform just as well as a more complex one. From a modeling and framework perspective, if we can achieve similar results with fewer epochs and fewer parameters, that’s usually better. Simpler models tend to generalize better to unseen data.
+
+Next, we define the training length. In our case, the training length is the sum of:
+
+input chunk length (46), and
+
+forecasting horizon (31).
+
+That gives us a total training length of 77.
+
+Finally, the input chunk length itself is set to 46, which is consistent with what we used earlier.
+
+Once all these values are defined, we generate the parameter combinations from the grid. We then compute the length of the resulting grid, which gives us the total number of combinations.
+
+In this setup, we end up with 16 parameter combinations.
+
+Now, this is where the exponential nature of grid search becomes very clear. If we were to add just two more values to one parameter, or add another parameter with two values, the number of combinations would jump rapidly — from 16 to 32, then to 64, then to 128, and so on. This is why parameter tuning for deep learning models must be done carefully and strategically.
+
+This approach is one viable option for tuning deep learning models, and in future sections, I’ll also show you alternative tuning strategies that scale better when models become more complex or training time increases.
+
+And that’s it for this video.
+We’ve now completed the parameter grid setup.
+
+In the next video, we’ll actually run the parameter tuning. Since we have 16 combinations and each cross-validation run took about one minute, we should expect the tuning process to take roughly 10 to 20 minutes.
+
+# **N) Python - Parameter Tuning Round 1**
+
+We start by initializing our RMSE list. This list will store the final evaluation score for each parameter combination. At the beginning, the list is empty, because we haven’t evaluated anything yet.
+
+Everything we’re about to do now is something we’ve already seen before. Conceptually, nothing here is new. What we’re doing is simply putting all the pieces together. We iterate through the parameter grid, build a model for each parameter combination, perform cross-validation, retrieve the predictions, calculate the error, and finally store the results. In a sense, this entire section has been preparing us for this exact moment.
+
+We begin by looping through the grid.
+For each set of parameters in the grid, we create a new LSTM-based RNN model. The model configuration is built dynamically using the current parameter values. This includes setting the input chunk length, the number of RNN layers, the hidden dimension, the dropout, the random state, and the learning rate, which comes from the optimizer parameters. We also include the trainer configuration to ensure the model runs on the GPU.
+
+Once the model is created, we perform cross-validation. We reuse the same configuration we defined earlier: the start point, the stride, retraining enabled, last points only set to false, and the forecasting horizon set to our predefined horizon. This ensures consistency across all parameter combinations, which is crucial for a fair comparison.
+
+After cross-validation completes, we move on to retrieving and saving the results. For each fold in the cross-validation output, we extract the predictions. Since these predictions are still in the scaled space, we inverse-transform them using the Y scaler so that they are back in the original units.
+
+Next, we retrieve the corresponding actual values for the same time window. With both predictions and actuals aligned, we calculate the RMSE for that fold. Each fold’s RMSE is appended to a temporary list that holds the errors for the current parameter combination.
+
+Once all folds are processed, we compute the mean RMSE across folds. This average RMSE represents the overall performance of the model for that specific parameter configuration. We then append this mean RMSE value to our main RMSE list, which tracks performance across all parameter combinations.
+
+At this point, the loop continues until every parameter set in the grid has been evaluated.
+
+Now we execute the cell.
+This will kick off the full parameter tuning process.
+
+I’d recommend coming back in the next video so you can see how long the process actually took. That’s usually helpful for building intuition around training time. Of course, you don’t need to sit and watch it — you can simply let it run. Based on earlier timings, this should take somewhere between 10 and 20 minutes, depending on the hardware and load.
+
+In the next video, we’ll take a close look at the results and identify which parameter combination performed best.
+
+# **O) Python - Parameter Tuning Round 1 Part 2**
+
+It took 14 minutes, so that’s definitely within expectations. And now, let’s continue.
+
+So we’re going to create a DataFrame and see the best outcomes. And it’s going to be like this, right? We create a DataFrame from our grid, we add the RMSE there, and we actually don’t need to sort the values. I mean, we can—but we don’t have to. So let’s have a go.
+
+Personally, I like these tables. I just like to click on stuff, basically. And when we look at this, we can see that it’s actually very similar to our initial result. I think what we had before was around 0.125462. So we definitely improved slightly.
+
+At the same time, you can see that overall it actually went worse. Which tells us that we already had a pretty good outcome. And that outcome came from, let’s say, more complex models—so more RNN layers and a bit of a lower dropout. And that’s exactly what we’re going to keep building on.
+
+Now personally, this is one step that I would recommend. We’re going to export the best parameters here. So here we go.
+
+First, we identify them. We go to the tuning results—what was the name? It was just called results. And when the results are messy, we look for the minimum value, right? These are the best parameters.
+
+Then what we do is we extract them. So we have this part here, and if we just do this—what we’re going to do is .iloc[0, :]. Here we go. This makes it easier for us to extract later on.
+
+And then we do to_csv, and we call it something like best_params_round_1. And that’s it.
+
+So now we’re absolutely ready to do parameter tuning round two. Our first round was already very quick because we only had 16 options. At the same time, the coding was also very quick because Gemini already had a lot of input from us.
+
+So this next one should be even quicker. I’m definitely very excited to do this with you.
+
+# **P) Python - Parameter Tuning Round 2**
+
+It can happen that what you’re doing now is something you come back to a few hours later. And that’s exactly why I like to store our best parameters. So what we’re going to do now is load the best parameters from round one.
+
+Let’s do this step by step. We start with a Pandas read_csv on best_params_round_1. I’m not going to include the index column right away, because I like to look at it first. We can see here that we have two columns. What we then do is set the index column to zero, and then we can clearly see the values.
+
+Now, one issue here is that we know some values need to be integers, and some do not. So let’s get this into a variable first. We define params_round_1 equal to this, and we also display it so that we always see what we’re working with.
+
+Here we go. We are going to isolate the best parameters from round one—just the ones that we have already used. Let me show this to you.
+
+Now, we run this, and immediately we get an error. Let me check the number of RNN layers. Okay, regardless, this wasn’t quite right, so I’m going to try using .values. Here we go.
+
+If I do .values, it returns 1.0. Wait—does it return 1.0? Let me double-check. The number of RNN layers should be two or three. So we have three here… but wait, it went to one. That was unexpected.
+
+Let me triple-check this. best_params_round_1. Let me triple-check. This can happen because I run a lot of experiments before showing this to you, so it’s possible that these values came from a previous experiment. But definitely, an unexpected number of RNN layers being one would be incorrect.
+
+Okay, now it’s three here, and it’s three here as well. So this must be an integer. Here we go. We now have the number of RNN layers set correctly.
+
+Now, as input to Gemini, we’re going to add the hidden dimensions and the dropout. Dropout is indeed a float, hidden dimension is an integer, and the number of epochs is something we are going to repeat as well.
+
+Here we go.
+
+Now let’s define the parameter grid. The number of RNN layers is set to the number of RNN layers. I honestly have no clue where that earlier suggestion came from Gemini. The hidden dimension is the hidden dimension, and the dropout is the dropout. So we start there.
+
+Then we move on to the number of epochs—five and ten. Learning rate is set to 0.01 and 0.03. Training length, I’m going to include 77 and 100.
+
+By the way, this is a very fair question that you might have. Including these specific values doesn’t mean it has to be exactly this. Of course, we can include more training length. Personally, I think this is a fair starting point: we include what we’re predicting plus some value that’s larger than the forecasting horizon. But it doesn’t need to be this exact setup.
+
+The hard rule is simply that the training length must be bigger than the input chunk length.
+
+So let’s continue. We put 77 and 100. Input chunk lengths are 46 and 60. Then we generate the parameter combinations. The grid is the parameter grid, and once more, we end up with 16 combinations.
+
+Now, I guess we still have time, right? So I’m just going to let this run.
+
+We perform parameter tuning. We initialize our list, and now we iterate through everything: input chunk length, dropout, training length, number of epochs, random state, optimizer, and the PyTorch Lightning trainer kwargs.
+
+Then we perform cross-validation using historical forecasts. The series is the scaled series, future covariates, the start, the stride, retrain, last points only, and the forecast horizon.
+
+Next, we calculate the cross-validation results. We create a list just for the cross-validation output. For each iteration in the cross-validation, we transform the predictions back using the scaler, get the start, get the end, get the actuals, calculate the root mean squared error, and append it.
+
+Finally, we compute the mean RMSE.
+
+And that’s it. This is insanely quick once you already have everything set up. Once you have something like this, you’re really just breezing through. This is quite good.
+
+Let me do Ctrl + Enter. This appears to be running, which is great.
+
+So I’m going to stop here for this video. In the next one, we’ll come back to look at the results and start predicting the future.
+
+# **Q) Python - Parameter Tuning Final Results**
+
+We could have easily doubled the number of options from 16 to 32 and it would still have been okay. Even more than that, for a lot of cases, we could simply leave things running. For example, just renting out a GPU is often totally reasonable. It doesn’t cost that much per hour—maybe around 2 or 3 euros per hour. Especially if you’re in an enterprise setup, you can really just go for it and push performance as far as possible.
+
+Now let’s check the performance.
+
+We’re doing the same thing as before. Let’s come here and inspect the results. We can already see that we did improve a tiny bit by increasing the input chunk length. At the same time, you can clearly see some trends emerging.
+
+For instance, the learning rate is clearly leaning toward 0.003, and the number of epochs is clearly ten. There are some parameters here that show a very clear trend. If we were to continue tuning, we might try something like a learning rate of 0.005, or increase the number of epochs to 15, and explore values around those ranges.
+
+If you look a bit deeper, you can also spot other trends. Epochs are consistently at ten. The number of RNN layers shows consistency. Dropout is more geared toward 0.05, and there are some tendencies in the hidden dimension as well. Overall, the strongest signals are coming from the number of epochs and the dropout values.
+
+Now, what are we going to do next?
+
+Of course, we are going to export the best parameters. We start by identifying them from the results and exporting the best ones from this round. Here we go. Shift + Enter. Now that’s done.
+
+At this point, everything is about predicting the future.
+
+I’m going to approach this as if we were retrieving the best parameters from disk. In practice, we wouldn’t do this parameter tuning every single week. We would do it from time to time, more like a refresher for the model. Most of the time, we would simply build on top of the results from the last tuning run.
+
+So we load the best parameters from round two. We can quickly preview them, and then isolate the relevant values. These include the number of RNN layers, the hidden dimension, the dropout, and the learning rate, which is a float. The training length is an integer, the input chunk length is also an integer, and we’re missing the number of epochs, which again should be an integer.
+
+Here we go. Now we have all the parameters we need.
+
+Next, we need the data.
+
+We load the future CSV file and call it future_df. We can quickly preview it to see how it looks. Of course, the demand values are not known yet, but we do have features like Easter, Thanksgiving, Christmas, temperature, and marketing.
+
+What we’re going to do next is extract the X values from the future data frame. For simplicity, I’m going to call this x_train. We take all rows and start from index position one. We can preview both the original future data frame and x_train side by side to confirm everything looks correct.
+
+This gives us the five covariate columns, from index one to the end.
+
+Then we repeat the same process for the future features. We concatenate x_train and x_future. This allows us to properly build and explore our covariates across both historical and future periods.
+
+Here we go. Let me just fix that small syntax issue. Parentheses in place—and now we’re good to go.
+
+Next, we create the time series covariates. Our covariates are built from the combined X data frame.
+
+Now we add the time variables. We create features for the year, the month, and the weekday. With this, we’re definitely good to go and can continue.
+
+The next thing we do is import the scaler classes. Just to clarify, the scalers might already exist earlier in the notebook, but here I’m working as if we were starting from scratch.
+
+We transform the target time series to get series_scaled. Then we stack the covariates—year, month, and weekday—and scale them as well using fit_transform.
+
+Let me run this. Shift + Enter. I accidentally hit Caps Lock, but that’s fine.
+
+And that’s it for this part.
+
+In the next video, we are going to actually build our LSTM model using these best parameters, and then truly start predicting the future.
+
+# **R) Python - Tuned LSTM Model and Predicting the Future**
+
+Let’s build the tuned LSTM model.
+
+We start by defining our tuned model using the RNN LSTM architecture. We pass in the input chunk length, the hidden dimension, the number of RNN layers, and the dropout value. The dropout parameter is taken directly from the tuned results.
+
+Next, we configure the optimizer settings. We specify the learning rate, which again comes from our tuned parameters. We also include the training length, which controls how much historical data the model uses during training.
+
+At this point, we check if anything is missing. We still need to include the random state, which we set to 1502, and the PyTorch Lightning trainer kwargs, where we enable GPU usage. We also realize that the number of epochs is missing, so we add that as well. Finally, we confirm that input chunk length, hidden dimension, number of RNN layers, dropout, learning rate, training length, and number of epochs are all correctly defined.
+
+There was a small syntax issue caused by a stray character, but once that is removed, everything is good to go.
+
+Now we fit the model to the data.
+
+We train the tuned LSTM model using the scaled target series along with the scaled future covariates. Once the model is trained, we generate predictions. We specify n as the forecasting horizon, which in our case is 31 days. We also pass the scaled covariates to ensure the model has access to the future information it needs.
+
+Next, we inspect the predictions. As expected, the output is still in the scaled space. To make the predictions interpretable, we convert them back to the original scale by transforming them using the inverse transformation of the target scaler.
+
+Now we can see the actual predicted values. If we want, we can also rename the prediction series—for example, calling it “LSTM”—to make plotting and comparison easier later on.
+
+At this point, the core prediction step is complete.
+
+A good practice is always to visualize the results. We plot both the historical training data and the predicted values on the same chart. We start by creating a figure with a size of 10 by 6. Then we plot the original demand series and label it as the training data. We overlay the predictions on the same plot and add a legend for clarity.
+
+We also add a title to the chart, such as “Demand Forecast.” After fixing a small missing parenthesis, the plot renders correctly.
+
+Initially, the visualization looks a bit crowded, so instead of plotting the full history, we focus on a more recent window. We zoom in on data from 2020 onward, which makes the forecast much easier to interpret. If desired, we can narrow this down even further—such as looking only from December onward—to closely inspect the short-term forecast behavior.
+
+And that’s it for the LSTM model.
+
+I hope you enjoyed this walkthrough. If you have any questions, feel free to ask—I’m here to help. Let’s keep building, and I’ll see you in the next video
+
+# **S) LSTM Pros and Cons**
+
+Okay, so this video is going to be about the pros and cons of LSTM.
+
+But first—congratulations on getting here. This was an extremely long section, and we faced a lot of hurdles along the way. We really had to work to make LSTM function in a way that was simple, manageable, and practical. There were ups and downs, moments where things broke, and times when we had to step back and fix what wasn’t working. That’s completely normal.
+
+What makes this even more impressive is that you tackled two very different challenges at the same time. On one hand, you were learning deep learning concepts—specifically LSTMs—and on the other hand, you were leveling up to working with multiple time series. That combination is not trivial at all. So genuinely, congratulations on making it this far.
+
+Now let’s talk about why LSTM is great.
+
+First and foremost, LSTMs are robust to outliers. Those sudden spikes we often see in time series data are generally handled quite well. If you recall the activation functions we discussed earlier, they play a key role here by limiting the impact of extreme values.
+
+Another positive is usability. Once we built the first model, moving from a single time series to multiple time series wasn’t that difficult. At least from my perspective, the transition felt fairly smooth, which is a big win when scaling models.
+
+Additionally, LSTMs—and deep learning models in general—are excellent at handling non-linearity. They allow regressors to capture complex patterns that traditional models often struggle with, making them very powerful in many real-world scenarios.
+
+Now let’s look at the downsides.
+
+One major drawback is the lack of interpretability. We don’t get much insight into why the model makes certain predictions. This lack of explanatory power becomes a real issue if you rely solely on neural networks. In practice, this often means you need to combine LSTMs with other models that provide better explanations.
+
+Another big challenge is tuning. This was probably the hardest part of the entire section. You almost absolutely need a GPU unless you don’t care about time at all. Without one, training and tuning quickly become impractical. This is also why I pushed so hard to make everything work efficiently—we needed to manage computation realistically, and in the end, I think we did.
+
+Putting an LSTM model into production also requires effort. There’s training time, tuning time, and experimentation time. Even though we only had 16 parameter combinations per round—which really isn’t a lot—it still took time and compute resources. So this is something you always need to factor in.
+
+Finally, here’s an important watch-out.
+
+LSTMs—and neural networks in general—are not particularly good at dealing with strong trends. They handle sequence data well, but when a time series has a powerful upward or downward trend—especially explosive growth or sharp declines—performance can suffer. If your data exhibits strong trends, you need to be very careful. Make sure the model is well trained, thoroughly tested, and validated before relying on it.
+
+And that’s it for LSTMs.
